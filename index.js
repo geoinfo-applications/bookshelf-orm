@@ -7,7 +7,6 @@ module.exports = {
     BookshelfRepository: require("./orm/BookshelfRepository"),
     DBMappingRegistry: require("./orm/DBMappingRegistry"),
     EntityRepository: require("./orm/EntityRepository"),
-    mappingRegistry: require("./orm/mappingRegistry"),
     MappingRelationsIterator: require("./orm/MappingRelationsIterator"),
     ModelFactory: require("./orm/ModelFactory")
 };

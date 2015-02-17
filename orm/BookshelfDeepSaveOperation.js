@@ -2,7 +2,6 @@
 
 var Q = require("q");
 var _ = require("underscore");
-var logger = require("../logging/LoggerFactory").getInstance();
 
 
 function BookshelfDeepSaveOperation(relations) {
@@ -47,7 +46,6 @@ BookshelfDeepSaveOperation.prototype = {
         return Q.all(this.relationsWhereKeyIsOnRelated.map(function (relation) {
             if (!relation.references.cascade) {
                 // TODO: implement
-                logger.info("Cascade on 1:n relations have no effect, since key must be saved potentially");
             }
 
             return this.handleRelated(item, relation, this.saveWithKeyOnRelated);
