@@ -1,3 +1,5 @@
+"use strict";
+
 module.exports = {
     BookshelfDeepRemoveOperation: require("./orm/BookshelfDeepRemoveOperation"),
     BookshelfDeepSaveOperation: require("./orm/BookshelfDeepSaveOperation"),

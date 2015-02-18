@@ -48,11 +48,9 @@ ModelFactory.prototype = {
 
 };
 
-ModelFactory.context = {};
-
-ModelFactory.registerContext = function (name, context) {
-    ModelFactory.context[name] = new ModelFactory(context);
+module.exports = {
+    context: {},
+    registerContext: function (name, context) {
+        this.context[name] = new ModelFactory(context);
+    }
 };
-
-
-module.exports = ModelFactory;
