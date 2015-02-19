@@ -30,6 +30,11 @@ function EngineRepository() {
 }
 EngineRepository.prototype = Object.create(EntityRepository.prototype);
 
+function WheelRepository() {
+    EntityRepository.call(this, Engine, registry.compile("WheelDBMapping"));
+}
+WheelRepository.prototype = Object.create(EntityRepository.prototype);
+
 
 module.exports = {
     Car: Car,
@@ -40,5 +45,6 @@ module.exports = {
     CarRepository: CarRepository,
     PartRepository: PartRepository,
     EngineRepository: EngineRepository,
-    VeyronEngineRepository: VeyronEngineRepository
+    VeyronEngineRepository: VeyronEngineRepository,
+    WheelRepository: WheelRepository
 };

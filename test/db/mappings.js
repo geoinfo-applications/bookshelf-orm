@@ -38,7 +38,8 @@ registry.register("PartDBMapping", "test", {
             type: "belongsTo",
             references: {
                 type: Engine,
-                mapping: "EngineDBMapping"
+                mapping: "EngineDBMapping",
+                cascade: true
             }
         }
     ]
