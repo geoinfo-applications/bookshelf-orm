@@ -4,7 +4,7 @@ describe("Model Factory Test", function () {
 
     var expect = require("chai").expect;
     var ModelFactory = require("../orm/ModelFactory");
-    var connection = require("./connection");
+    var connection = require("./db/connection");
 
     this.timeout(1000);
 
@@ -25,7 +25,7 @@ describe("Model Factory Test", function () {
         var factory;
 
         beforeEach(function () {
-            ModelFactory.registerContext("testContext", connection);
+            ModelFactory.registerContext("testContext", connection.bookshelf);
             factory = ModelFactory.context.testContext;
         });
 
