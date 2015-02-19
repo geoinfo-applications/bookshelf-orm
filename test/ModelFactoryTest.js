@@ -25,7 +25,8 @@ describe("Model Factory Test", function () {
         var factory;
 
         beforeEach(function () {
-            factory = new ModelFactory(connection);
+            ModelFactory.registerContext("testContext", connection);
+            factory = ModelFactory.context.testContext;
         });
 
         it("should return Model", function () {

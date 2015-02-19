@@ -1,11 +1,10 @@
 "use strict";
 
-var ModelFactory = require("./ModelFactory");
 
-
-function DBMappingRegistry() {
+function DBMappingRegistry(ModelFactory) {
     this.mappings = {};
     this.compiled = {};
+    this.ModelFactory = ModelFactory;
 }
 
 DBMappingRegistry.prototype = {
@@ -34,7 +33,7 @@ DBMappingRegistry.prototype = {
             throw new Error(name + " is not a registered mapping");
         }
 
-        var factory = ModelFactory.context[this.mappings[name].dbContextName];
+        var factory = this.ModelFactory.context[this.mappings[name].dbContextName];
         var mapping = Object.create(this.get(name));
 
         if (mapping.relations) {

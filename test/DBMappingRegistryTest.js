@@ -9,7 +9,7 @@ describe("DB-Mapping Registry Test", function () {
     var registry;
 
     beforeEach(function () {
-        registry = new DBMappingRegistry();
+        registry = new DBMappingRegistry(ModelFactory);
     });
 
     it("should hold registered Mapping", function () {
