@@ -51,5 +51,11 @@ registry.register("WheelDBMapping", "test", {
 
 registry.register("EngineDBMapping", "test", {
     tableName: "datadictionary.engine",
-    columns: ["id", "serial_number"]
+    columns: ["id", "serial_number", "ps"]
+});
+
+registry.register("VeyronEngineDBMapping", "test", {
+    tableName: "datadictionary.engine",
+    columns: ["id", "serial_number", "ps"],
+    discriminator: { ps: 1000 }
 });

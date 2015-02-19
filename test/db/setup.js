@@ -27,6 +27,7 @@ module.exports = function () {
     var engine = knex.schema.createTable("datadictionary.engine", function (table) {
         table.increments();
         table.string("serial_number");
+        table.integer("ps");
     });
 
     return Q.all([car, part, wheel, engine]);

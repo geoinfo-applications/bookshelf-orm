@@ -3,6 +3,7 @@
 describe("Bookshelf Model Wrapper Test", function () {
     /*jshint maxstatements:false*/
 
+    var Q = require("q");
     var chai = require("chai");
     var expect = chai.expect;
     var sinon = require("sinon");
@@ -301,16 +302,15 @@ describe("Bookshelf Model Wrapper Test", function () {
                 expect(item.relations.relation_engine).to.be.eql(null);
             });
 
-            it("should throw error if relation type is not supported", function (done) {
+            it("should throw error if relation type is not supported", function () {
                 try {
                     carWrapper.Mapping.relations.push({ type: "unsupported", references: {}, name: "unsupportedRelation" });
                     createCar();
                     carWrapper.Mapping.relations.pop();
-                    fail(done)();
+                    return Q.reject();
                 } catch (error) {
                     expect(error.message).to.be.eql("Relation of type 'unsupported' not implemented");
                     carWrapper.Mapping.relations.pop();
-                    done();
                 }
             });
 

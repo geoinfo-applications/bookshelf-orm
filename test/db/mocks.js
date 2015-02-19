@@ -6,6 +6,7 @@ var EntityRepository = require("../../orm/EntityRepository");
 function Car() {}
 function Part() {}
 function Engine() {}
+function VeyronEngine() {}
 
 
 function CarRepository() {
@@ -19,11 +20,25 @@ function PartRepository() {
 }
 PartRepository.prototype = Object.create(EntityRepository.prototype);
 
+function VeyronEngineRepository() {
+    EntityRepository.call(this, VeyronEngine, registry.compile("VeyronEngineDBMapping"));
+}
+VeyronEngineRepository.prototype = Object.create(EntityRepository.prototype);
+
+function EngineRepository() {
+    EntityRepository.call(this, Engine, registry.compile("EngineDBMapping"));
+}
+EngineRepository.prototype = Object.create(EntityRepository.prototype);
+
 
 module.exports = {
     Car: Car,
     Part: Part,
     Engine: Engine,
+    VeyronEngine: VeyronEngine,
+
     CarRepository: CarRepository,
-    PartRepository: PartRepository
+    PartRepository: PartRepository,
+    EngineRepository: EngineRepository,
+    VeyronEngineRepository: VeyronEngineRepository
 };
