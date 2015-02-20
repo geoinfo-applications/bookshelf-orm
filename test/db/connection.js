@@ -2,7 +2,6 @@
 
 var knex = require("knex")({
     client: "pg",
-    debug: true,
     connection: {
         host: process.env.TESTSERVER_HOST || "localhost",
         port: 5433,

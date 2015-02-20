@@ -6,6 +6,7 @@ module.exports = function (grunt) {
 
     var jsFiles = [
         "orm/**/*.js",
+        "test/**/*.js",
         "index.js",
         "gruntfile.js"
     ];
@@ -32,7 +33,7 @@ module.exports = function (grunt) {
             reports: {
                 options: {
                     jshint: false,
-                    exclude: /^(node_modules|coverage|reports|client\/(vendor|js|dist))\//
+                    exclude: /^(node_modules|coverage|reports)\//
                 },
                 files: {
                     reports: ["**/*.js"]
@@ -54,21 +55,19 @@ module.exports = function (grunt) {
 
         mochaTest: {
             options: {
-                reporter: "spec",
-                require: "server/test/test-server.js"
+                reporter: "spec"
             },
-            src: ["server/test/**/*.js"]
+            src: ["./test/**/*.js"]
         },
 
         mocha_istanbul: {
             coverage: {
-                src: "./server/test/**",
+                src: "./test/**",
                 options: {
                     reporter: "mocha-multi",
                     reportFormats: ["lcov", "clover"],
                     recursive: true,
-                    coverageFolder: "./coverage/server",
-                    require: ["./server/test/test-server.js"]
+                    coverageFolder: "./coverage"
                 }
             }
         },

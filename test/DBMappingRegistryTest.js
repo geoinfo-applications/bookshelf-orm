@@ -1,11 +1,11 @@
 "use strict";
 
+var expect = require("chai").expect;
+var ModelFactory = require("../orm/ModelFactory");
+var DBMappingRegistry = require("../orm/DBMappingRegistry");
+
+
 describe("DB-Mapping Registry Test", function () {
-
-    var expect = require("chai").expect;
-    var ModelFactory = require("../orm/ModelFactory");
-    var DBMappingRegistry = require("../orm/DBMappingRegistry");
-
     var registry;
 
     beforeEach(function () {

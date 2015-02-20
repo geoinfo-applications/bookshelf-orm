@@ -1,30 +1,29 @@
 "use strict";
 
+var Q = require("q");
+var chai = require("chai");
+var expect = chai.expect;
+var sinon = require("sinon");
+var sinonChai = require("sinon-chai");
+chai.use(sinonChai);
+
+var BookshelfModelWrapper = require("../orm/BookshelfModelWrapper");
+
+var Car = require("./db/mocks").Car;
+var Part = require("./db/mocks").Part;
+var Engine = require("./db/mocks").Engine;
+var CarRepository = require("./db/mocks").CarRepository;
+var PartRepository = require("./db/mocks").PartRepository;
+
+require("./db/connection");
+var registry = require("./db/registry");
+require("./db/mappings");
+
+var CarDBMapping = registry.compile("CarDBMapping");
+var PartDBMapping = registry.compile("PartDBMapping");
+
+
 describe("Bookshelf Model Wrapper Test", function () {
-    /*jshint maxstatements:false*/
-
-    var Q = require("q");
-    var chai = require("chai");
-    var expect = chai.expect;
-    var sinon = require("sinon");
-    var sinonChai = require("sinon-chai");
-    chai.use(sinonChai);
-
-    var BookshelfModelWrapper = require("../orm/BookshelfModelWrapper");
-
-    var Car = require("./db/mocks").Car;
-    var Part = require("./db/mocks").Part;
-    var Engine = require("./db/mocks").Engine;
-    var CarRepository = require("./db/mocks").CarRepository;
-    var PartRepository = require("./db/mocks").PartRepository;
-
-    var knex = require("./db/connection").knex;
-    var registry = require("./db/registry");
-    var mappings = require("./db/mappings");
-
-    var CarDBMapping = registry.compile("CarDBMapping");
-    var PartDBMapping = registry.compile("PartDBMapping");
-
     var carRepository, carWrapper, partRepository, partWrapper;
     this.timeout(1000);
 

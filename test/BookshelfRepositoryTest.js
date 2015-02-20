@@ -1,20 +1,19 @@
 "use strict";
 
+var expect = require("chai").expect;
+var CarRepository = require("./db/mocks").CarRepository;
+var EngineRepository = require("./db/mocks").EngineRepository;
+var VeyronEngineRepository = require("./db/mocks").VeyronEngineRepository;
+
+require("./db/connection");
+var registry = require("./db/registry");
+require("./db/mappings");
+
+var CarDBMapping = registry.compile("CarDBMapping");
+var PartDBMapping = registry.compile("PartDBMapping");
+
+
 describe("Bookshelf Repository Test", function () {
-    /*jshint maxstatements:false*/
-
-    var expect = require("chai").expect;
-    var CarRepository = require("./db/mocks").CarRepository;
-    var EngineRepository = require("./db/mocks").EngineRepository;
-    var VeyronEngineRepository = require("./db/mocks").VeyronEngineRepository;
-
-    var knex = require("./db/connection").knex;
-    var registry = require("./db/registry");
-    var mappings = require("./db/mappings");
-
-    var CarDBMapping = registry.compile("CarDBMapping");
-    var PartDBMapping = registry.compile("PartDBMapping");
-
     this.timeout(1000);
     var carRepository;
 
@@ -60,7 +59,7 @@ describe("Bookshelf Repository Test", function () {
             return createCar().then(function (model1) {
                 return PartDBMapping.Model.forge({
                     car_id: model1.id,
-                    name: "",
+                    name: ""
                 }).save().then(function (attribute1) {
                     createCar().then(function (model2) {
                         return PartDBMapping.Model.forge({

@@ -1,10 +1,11 @@
 "use strict";
 
-describe("Bookshelf Relations Test", function () {
+var expect = require("chai").expect;
+var BookshelfRelations = require("../orm/BookshelfRelations");
+var mapping, subMapping, relations;
 
-    var expect = require("chai").expect;
-    var BookshelfRelations = require("../orm/BookshelfRelations");
-    var mapping, subMapping, relations;
+
+describe("Bookshelf Relations Test", function () {
 
     beforeEach(function () {
         subMapping = { relations: [{ name: "subRelatedThing", references: { mapping: {} } }] };

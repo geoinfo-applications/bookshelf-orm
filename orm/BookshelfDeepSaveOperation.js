@@ -44,9 +44,8 @@ BookshelfDeepSaveOperation.prototype = {
 
     saveWhereKeyIsOnRelated: function (item) {
         return Q.all(this.relationsWhereKeyIsOnRelated.map(function (relation) {
-            if (!relation.references.cascade) {
-                // TODO: implement
-            }
+            // TODO: implement: only key has to be saved
+            // if (!relation.references.cascade)
 
             return this.handleRelated(item, relation, this.saveWithKeyOnRelated);
         }.bind(this)));

@@ -26,7 +26,7 @@ registry.register("CarDBMapping", "test", {
             type: "belongsTo",
             references: {
                 type: Owner,
-                mapping: "OwnerDBMapping",
+                mapping: "OwnerDBMapping"
             }
         }
     ]

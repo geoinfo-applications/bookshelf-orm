@@ -1,20 +1,18 @@
 "use strict";
 
+var expect = require("chai").expect;
+
+var Car = require("./db/mocks").Car;
+var CarRepository = require("./db/mocks").CarRepository;
+
+require("./db/connection");
+var registry = require("./db/registry");
+require("./db/mappings");
+
+var CarDBMapping = registry.compile("CarDBMapping");
+
+
 describe("Entity Repository Test", function () {
-    /*jshint maxstatements:false*/
-
-    var Q = require("q");
-    var expect = require("chai").expect;
-
-    var Car = require("./db/mocks").Car;
-    var CarRepository = require("./db/mocks").CarRepository;
-
-    var knex = require("./db/connection").knex;
-    var registry = require("./db/registry");
-    var mappings = require("./db/mappings");
-
-    var CarDBMapping = registry.compile("CarDBMapping");
-
     this.timeout(1000);
     var carRepository;
 

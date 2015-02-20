@@ -1,11 +1,11 @@
 "use strict";
 
+var expect = require("chai").expect;
+var ModelFactory = require("../orm/ModelFactory");
+var connection = require("./db/connection");
+
+
 describe("Model Factory Test", function () {
-
-    var expect = require("chai").expect;
-    var ModelFactory = require("../orm/ModelFactory");
-    var connection = require("./db/connection");
-
     this.timeout(1000);
 
     describe("Context Registration", function () {

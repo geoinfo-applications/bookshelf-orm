@@ -1,24 +1,21 @@
 "use strict";
 
+var expect = require("chai").expect;
+
+var CarRepository = require("./db/mocks").CarRepository;
+var EngineRepository = require("./db/mocks").EngineRepository;
+var PartRepository = require("./db/mocks").PartRepository;
+
+require("./db/connection");
+var registry = require("./db/registry");
+require("./db/mappings");
+
+var CarDBMapping = registry.compile("CarDBMapping");
+var PartDBMapping = registry.compile("PartDBMapping");
+var WheelDBMapping = registry.compile("WheelDBMapping");
+
+
 describe("Bookshelf Repository Save Test", function () {
-    /*jshint maxstatements:false*/
-
-    var Q = require("q");
-    var expect = require("chai").expect;
-
-    var CarRepository = require("./db/mocks").CarRepository;
-    var EngineRepository = require("./db/mocks").EngineRepository;
-    var WheelRepository = require("./db/mocks").WheelRepository;
-    var PartRepository = require("./db/mocks").PartRepository;
-
-    var knex = require("./db/connection").knex;
-    var registry = require("./db/registry");
-    var mappings = require("./db/mappings");
-
-    var CarDBMapping = registry.compile("CarDBMapping");
-    var PartDBMapping = registry.compile("PartDBMapping");
-    var WheelDBMapping = registry.compile("WheelDBMapping");
-
     this.timeout(1000);
     var carRepository, engineRepository;
 
