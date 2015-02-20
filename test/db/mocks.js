@@ -3,48 +3,45 @@
 var registry = require("./registry");
 var EntityRepository = require("../../orm/EntityRepository");
 
+function createRepository(Entity, name) {
+    var constructor = function () {
+        EntityRepository.call(this, Entity, registry.compile(name + "DBMapping"));
+    };
+
+    constructor.name = name + "Repository";
+    constructor.prototype = Object.create(EntityRepository.prototype);
+
+    return constructor;
+}
+
+
 function Car() {}
 function Part() {}
 function Engine() {}
 function VeyronEngine() {}
+function Wheel() {}
+function Owner() {}
 
 
-function CarRepository() {
-    EntityRepository.call(this, Car, registry.compile("CarDBMapping"));
-}
-CarRepository.prototype = Object.create(EntityRepository.prototype);
-
-
-function PartRepository() {
-    EntityRepository.call(this, Part, registry.compile("PartDBMapping"));
-}
-PartRepository.prototype = Object.create(EntityRepository.prototype);
-
-function VeyronEngineRepository() {
-    EntityRepository.call(this, VeyronEngine, registry.compile("VeyronEngineDBMapping"));
-}
-VeyronEngineRepository.prototype = Object.create(EntityRepository.prototype);
-
-function EngineRepository() {
-    EntityRepository.call(this, Engine, registry.compile("EngineDBMapping"));
-}
-EngineRepository.prototype = Object.create(EntityRepository.prototype);
-
-function WheelRepository() {
-    EntityRepository.call(this, Engine, registry.compile("WheelDBMapping"));
-}
-WheelRepository.prototype = Object.create(EntityRepository.prototype);
-
+var CarRepository = createRepository(Car, "Car");
+var PartRepository = createRepository(Part, "Part");
+var VeyronEngineRepository = createRepository(VeyronEngine, "VeyronEngine");
+var EngineRepository = createRepository(Engine, "Engine");
+var WheelRepository = createRepository(Wheel, "Wheel");
+var OwnerRepository = createRepository(Owner, "Owner");
 
 module.exports = {
     Car: Car,
     Part: Part,
     Engine: Engine,
     VeyronEngine: VeyronEngine,
+    Wheel: Wheel,
+    Owner: Owner,
 
     CarRepository: CarRepository,
     PartRepository: PartRepository,
     EngineRepository: EngineRepository,
     VeyronEngineRepository: VeyronEngineRepository,
-    WheelRepository: WheelRepository
+    WheelRepository: WheelRepository,
+    OwnerRepository: OwnerRepository
 };

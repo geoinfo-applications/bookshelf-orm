@@ -28,9 +28,26 @@ module.exports = function () {
         table.increments();
         table.string("serial_number");
         table.integer("ps");
+        table.integer("injection_id");
     });
 
-    return Q.all([car, part, wheel, engine]);
+    var owner = knex.schema.createTable("datadictionary.owner", function (table) {
+        table.increments();
+        table.string("name");
+    });
+
+    var outlet = knex.schema.createTable("datadictionary.outlet", function (table) {
+        table.increments();
+        table.integer("engine_id");
+        table.string("name");
+    });
+
+    var injection = knex.schema.createTable("datadictionary.injection", function (table) {
+        table.increments();
+        table.string("name");
+    });
+
+    return Q.all([car, part, wheel, engine, owner, outlet, injection]);
 };
 
 
