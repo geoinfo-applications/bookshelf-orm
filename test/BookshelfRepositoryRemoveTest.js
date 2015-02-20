@@ -16,7 +16,7 @@ var PartDBMapping = registry.compile("PartDBMapping");
 
 
 describe("Bookshelf Repository Remove Test", function () {
-    this.timeout(100);
+    this.timeout(1000);
     var carRepository;
 
     beforeEach(function () {

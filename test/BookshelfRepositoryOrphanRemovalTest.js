@@ -19,7 +19,7 @@ var InjectionDBMapping = registry.compile("InjectionDBMapping");
 
 
 describe("Bookshelf Repository Orphan Removal Test", function () {
-    this.timeout(100);
+    this.timeout(1000);
     var carRepository;
 
     beforeEach(function () {

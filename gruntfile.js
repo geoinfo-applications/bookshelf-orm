@@ -93,7 +93,7 @@ module.exports = function (grunt) {
             }
         },
 
-        clean: ["./mocha.json", "./coverage/server/clover.xml"],
+        clean: ["./mocha.json", "./coverage/clover.xml"],
 
         release: {
             options: {
