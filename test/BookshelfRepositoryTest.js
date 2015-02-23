@@ -28,28 +28,34 @@ describe("Bookshelf Repository Test", function () {
     describe("findAll", function () {
 
         it("should return Collection of Cars", function () {
-            return carRepository.findAll().then(function (tables) {
-                expect(tables).to.be.instanceof(CarDBMapping.Collection);
+            return carRepository.findAll().then(function (cars) {
+                expect(cars).to.be.instanceof(CarDBMapping.Collection);
             });
         });
 
         it("should return Collection of Cars with specified ids", function () {
             return createCar().then(function (model) {
-                return carRepository.findAll([model.id]).then(function (tables) {
-                    expect(tables.length).to.be.eql(1);
-                    expect(tables.at(0).id).to.be.eql(model.id);
-                    model.destroy();
+                return carRepository.findAll([model.id]).then(function (cars) {
+                    expect(cars.length).to.be.eql(1);
+                    expect(cars.at(0).id).to.be.eql(model.id);
                 });
+            });
+        });
+
+        it("should return empty Collection of Car if ids is an empty array", function () {
+            return carRepository.findAll([]).then(function (cars) {
+                expect(cars).to.be.instanceof(CarDBMapping.Collection);
+                expect(cars.length).to.be.eql(0);
             });
         });
 
         it("should return all Cars", function () {
             return createCar().then(function (model1) {
                 return createCar().then(function (model2) {
-                    return carRepository.findAll().then(function (tables) {
-                        expect(tables.length).to.be.eql(2);
-                        expect(tables.at(0).id).to.be.eql(model1.id);
-                        expect(tables.at(1).id).to.be.eql(model2.id);
+                    return carRepository.findAll().then(function (cars) {
+                        expect(cars.length).to.be.eql(2);
+                        expect(cars.at(0).id).to.be.eql(model1.id);
+                        expect(cars.at(1).id).to.be.eql(model2.id);
                     });
                 });
             });
@@ -79,17 +85,17 @@ describe("Bookshelf Repository Test", function () {
             });
         });
 
-        it("should return empty list if no importtables exist", function () {
-            return carRepository.findAll().then(function (tables) {
-                expect(tables.length).to.be.eql(0);
+        it("should return empty list if no importcars exist", function () {
+            return carRepository.findAll().then(function (cars) {
+                expect(cars.length).to.be.eql(0);
             });
         });
 
-        it("should return empty list if no importtables with given ids exist", function () {
+        it("should return empty list if no importcars with given ids exist", function () {
             return createCar().then(function () {
                 return createCar().then(function () {
-                    return carRepository.findAll([-1, -2, -3]).then(function (tables) {
-                        expect(tables.length).to.be.eql(0);
+                    return carRepository.findAll([-1, -2, -3]).then(function (cars) {
+                        expect(cars.length).to.be.eql(0);
                     });
                 });
             });
