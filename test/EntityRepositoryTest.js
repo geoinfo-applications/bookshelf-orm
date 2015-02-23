@@ -324,6 +324,117 @@ describe("Entity Repository Test", function () {
 
     });
 
+    describe("findAllWhere", function () {
+
+        it("should fetch entities matched by query", function () {
+            var car1 = carRepository.newEntity({ name: "abc" });
+            var car2 = carRepository.newEntity({ name: "efg" });
+            var promise = carRepository.save([car1, car2]);
+
+            promise = promise.then(function () {
+                return carRepository.findAllWhere(function (q) {
+                    q.where("name", "abc");
+                });
+            });
+
+            return promise.then(function (cars) {
+                expect(cars.length).to.be.eql(1);
+                expect(cars[0].name).to.be.eql("abc");
+            });
+        });
+
+        it("should wrap entity", function () {
+            var car1 = carRepository.newEntity({ name: "abc" });
+            var promise = carRepository.save(car1);
+
+            promise = promise.then(function () {
+                return carRepository.findAllWhere(function (q) {
+                    q.where("name", "abc");
+                });
+            });
+
+            return promise.then(function (cars) {
+                expect(cars[0]).to.be.an.instanceof(Car);
+            });
+        });
+
+        it("should return an empty array if no item was found", function () {
+
+            var promise = carRepository.findAllWhere(function (q) {
+                q.where("name", "abc");
+            });
+
+            return promise.then(function (cars) {
+                expect(cars).to.be.an("array");
+                expect(cars.length).to.be.eql(0);
+            });
+        });
+
+    });
+
+    describe("findWhere", function () {
+
+        it("should fetch entities matched by query", function () {
+            var car1 = carRepository.newEntity({ name: "abc" });
+            var car2 = carRepository.newEntity({ name: "efg" });
+            var promise = carRepository.save([car1, car2]);
+
+            promise = promise.then(function () {
+                return carRepository.findWhere(function (q) {
+                    q.where("name", "abc");
+                });
+            });
+
+            return promise.then(function (car) {
+                expect(car.name).to.be.eql("abc");
+            });
+        });
+
+        it("should wrap entity", function () {
+            var car1 = carRepository.newEntity({ name: "abc" });
+            var promise = carRepository.save(car1);
+
+            promise = promise.then(function () {
+                return carRepository.findWhere(function (q) {
+                    q.where("name", "abc");
+                });
+            });
+
+            return promise.then(function (car) {
+                expect(car).to.be.an.instanceof(Car);
+            });
+        });
+
+        it("should return null if no item was found", function () {
+
+            var promise = carRepository.findWhere(function (q) {
+                q.where("name", "abc");
+            });
+
+            return promise.then(function (car) {
+                expect(car).to.be.eql(null);
+            });
+        });
+
+        it("should return last match if multiple items were found", function () {
+            var car1 = carRepository.newEntity({ name: "abc" });
+            var car2 = carRepository.newEntity({ name: "efg" });
+            var promise = carRepository.save([car1, car2]);
+
+            promise = promise.then(function () {
+                return carRepository.findWhere(function (q) {
+                    q.whereNotNull("name");
+                    q.orderBy("name");
+                });
+            });
+
+            return promise.then(function (car) {
+                expect(car.name).to.be.eql("efg");
+            });
+        });
+
+    });
+
     var tableIndex = 0;
 
     function createCar() {
