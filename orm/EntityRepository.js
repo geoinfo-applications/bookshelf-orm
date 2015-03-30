@@ -22,14 +22,14 @@ EntityRepository.prototype = {
         return this.repository.findAll(ids, options).then(this.wrap.bind(this));
     },
 
-    findAllWhere: function (q) {
-        return this.repository.findWhere(q).then(function (items) {
+    findAllWhere: function (q, options) {
+        return this.repository.findWhere(q, options).then(function (items) {
             return items.length ? this.wrap(items) : [];
         }.bind(this));
     },
 
-    findWhere: function (q) {
-        return this.repository.findWhere(q).then(function (items) {
+    findWhere: function (q, options) {
+        return this.repository.findWhere(q, options).then(function (items) {
             if (items.length) {
                 return this.wrap(items.pop());
             } else {

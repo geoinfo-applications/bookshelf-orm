@@ -370,6 +370,23 @@ describe("Entity Repository Test", function () {
             });
         });
 
+        it("should not include excluded relations", function () {
+            var options = { exclude: ["parts"] };
+            var car = carRepository.newEntity({ name: "name", label: "abc" });
+            car.addParts(car.newParts({ name: "", label: "" }));
+            var promise = carRepository.save(car);
+
+            promise = promise.then(function () {
+                return carRepository.findAllWhere(function (q) {
+                    q.where("name", "name");
+                }, options);
+            });
+
+            return promise.then(function (cars) {
+                expect(cars[0].parts.length).to.be.eql(0);
+            });
+        });
+
     });
 
     describe("findWhere", function () {
@@ -430,6 +447,23 @@ describe("Entity Repository Test", function () {
 
             return promise.then(function (car) {
                 expect(car.name).to.be.eql("efg");
+            });
+        });
+
+        it("should not include excluded relations", function () {
+            var options = { exclude: ["parts"] };
+            var car = carRepository.newEntity({ name: "name", label: "abc" });
+            car.addParts(car.newParts({ name: "", label: "" }));
+            var promise = carRepository.save(car);
+
+            promise = promise.then(function () {
+                return carRepository.findWhere(function (q) {
+                    q.where("name", "name");
+                }, options);
+            });
+
+            return promise.then(function (cars) {
+                expect(cars.parts.length).to.be.eql(0);
             });
         });
 
