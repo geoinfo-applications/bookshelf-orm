@@ -14,8 +14,8 @@
   "license": "ISC",
   "private": "true",
   "engines": {
-    "node": ">=0.10.26 <0.12",
-    "npm": "^1.4.*"
+    "node": ">=0.12.2 <0.13",
+    "npm": ">2.7.0"
   },
   "engineStrict": true,
   "dependencies": {
