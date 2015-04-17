@@ -122,6 +122,23 @@ describe("Bookshelf Repository Remove Test", function () {
         });
     });
 
+    it("should cascade drop nodes in graph", function () {
+        carRepository = new CarRepository();
+        var engineRepository = new EngineRepository();
+        var serialNumber = "SN" + Date.now();
+        var car = carRepository.newEntity({ parts: [{ wheels: [{ index: 1 }], engine: { serialNumber: serialNumber } }] });
+
+        return carRepository.save(car).then(function (car) {
+            car.removeParts(car.parts);
+
+            return carRepository.remove(car).then(function () {
+                return engineRepository.findAll().then(function (engines) {
+                    expect(engines.length).to.be.eql(0);
+                });
+            });
+        });
+    });
+
     it("should not drop non-cascaded entities", function () {
         var ownerRepository = new OwnerRepository();
         var owner = ownerRepository.newEntity();

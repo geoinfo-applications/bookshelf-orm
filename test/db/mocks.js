@@ -8,7 +8,6 @@ function createRepository(Entity, name) {
         EntityRepository.call(this, Entity, registry.compile(name + "DBMapping"));
     };
 
-    constructor.name = name + "Repository";
     constructor.prototype = Object.create(EntityRepository.prototype);
 
     return constructor;
