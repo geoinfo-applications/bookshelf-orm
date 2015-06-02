@@ -7,12 +7,12 @@ var knex = require("knex")({
         port: 5433,
         user: "ngp_admin",
         password: "admin_1",
-        database: "test_prod_ngp_organisation",
+        database: "unit_test_ngp_organisation",
         charset: "utf8"
     }
 });
 
-var bookshelf = require("bookshelf").initialize(knex);
+var bookshelf = require("bookshelf")(knex);
 
 require("../../orm/ModelFactory").registerContext("test", bookshelf);
 
