@@ -93,23 +93,23 @@ BookshelfRepository.prototype = {
         return new MappingRelationsIterator(preOrder, postOrder).traverse(this.Mapping, item);
     },
 
-    save: function (item) {
+    save: function (item, options) {
         if (this.isCollectionType(item)) {
-            return this.invokeOnCollection(item, this.save);
+            return this.invokeOnCollection(item, this.save, options);
         }
 
         this.stringifyJson(item);
-        var saveOperation = new SaveOperation(this.Mapping.relations);
+        var saveOperation = new SaveOperation(this.Mapping.relations, options);
         return saveOperation.save(item);
     },
 
-    remove: function (item) {
+    remove: function (item, options) {
         if (this.isCollectionType(item)) {
-            return this.invokeOnCollection(item, this.remove);
+            return this.invokeOnCollection(item, this.remove, options);
         }
 
         var id = item instanceof this.Mapping.Model ? item[this.idColumnName] : item;
-        var operation = new RemoveOperation(this.Mapping.relations);
+        var operation = new RemoveOperation(this.Mapping.relations, options);
 
         return this.findOne(id).then(operation.remove.bind(operation));
     },
@@ -118,16 +118,13 @@ BookshelfRepository.prototype = {
         return Array.isArray(item) || item instanceof this.Mapping.Collection;
     },
 
-    invokeOnCollection: function (collection, fn) {
-        if (Array.isArray(collection)) {
-            return Q.all(collection.map(fn, this));
-        } else {
-            return collection.mapThen(fn, this);
-        }
+    invokeOnCollection: function (collection, fn, options) {
+        var iterator = _.partial(fn, _, options).bind(this);
+        return _.isArray(collection) ? Q.all(collection.map(iterator)) :  collection.mapThen(iterator);
     },
 
-    updateRaw: function (values, where) {
-        return this.Mapping.Collection.forge().query().where(where).update(values);
+    updateRaw: function (values, where, options) {
+        return this.Mapping.Collection.forge().query().where(where).update(values, options);
     },
 
     get idColumnName() {

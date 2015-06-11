@@ -4,8 +4,9 @@ var Q = require("q");
 var _ = require("underscore");
 
 
-function BookshelfDeepSaveOperation(relations) {
+function BookshelfDeepSaveOperation(relations, options) {
     this.relations = relations;
+    this.options = options;
 }
 
 BookshelfDeepSaveOperation.prototype = {
@@ -20,8 +21,8 @@ BookshelfDeepSaveOperation.prototype = {
 
     save: function (item) {
         return this.saveWhereKeyIsOnItem(item).then(function () {
-            return item.save();
-        }).then(function (item) {
+            return item.save(this.options);
+        }.bind(this)).then(function (item) {
             return this.saveWhereKeyIsOnRelated(item).then(function () {
                 return item;
             });
@@ -60,7 +61,7 @@ BookshelfDeepSaveOperation.prototype = {
         var relationName = "relation_" + relation.name;
         var value = item.relations[relationName];
         var keyName = relation.references.mappedBy;
-        var operation = new BookshelfDeepSaveOperation(relation.references.mapping.relations);
+        var operation = new BookshelfDeepSaveOperation(relation.references.mapping.relations, this.options);
         var curriedSaveFunction = saveFunction.bind(this, item, keyName, operation);
 
         return Q.when(value && this.saveRelatedValue(value, curriedSaveFunction)).then(function () {
@@ -100,18 +101,18 @@ BookshelfDeepSaveOperation.prototype = {
                 q.where(keyName, item.id);
             }
             q.orWhereNull(keyName);
-        }).del();
+        }).del(this.options);
     },
 
     removeManyToOneOrphans: function (item, relation) {
         var fkColumn = relation.references.mappedBy;
 
         return item.get(fkColumn) || query().select(fkColumn).spread(function (result) {
-            return result && result[fkColumn] && query().update(fkColumn, null).then(function () {
+            return result && result[fkColumn] && query().update(fkColumn, null, this.options).then(function () {
                 var BookshelfRepository = require("./BookshelfRepository");
-                return new BookshelfRepository(relation.references.mapping).remove(result[fkColumn]);
-            });
-        });
+                return new BookshelfRepository(relation.references.mapping).remove(result[fkColumn], this.options);
+            }.bind(this));
+        }.bind(this));
 
         function query() {
             return item.Collection.forge().query().table(item.tableName).where(item.idAttribute, item[item.idAttribute]);

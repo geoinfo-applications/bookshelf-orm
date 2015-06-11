@@ -3,8 +3,10 @@
 var Q = require("q");
 var _ = require("underscore");
 
-function BookshelfDeepRemoveOperation(relations) {
+
+function BookshelfDeepRemoveOperation(relations, options) {
     this.relations = relations;
+    this.options = options;
 }
 
 BookshelfDeepRemoveOperation.prototype = {
@@ -25,8 +27,8 @@ BookshelfDeepRemoveOperation.prototype = {
 
     remove: function (item) {
         return this.dropRelations(this.relationsWhereKeyIsOnRelated, item).then(function () {
-            return item.destroy();
-        }).then(function (item) {
+            return item.destroy(this.options);
+        }.bind(this)).then(function (item) {
             return this.dropRelations(this.relationsWhereKeyIsOnItem, item).then(function () {
                 return item;
             });
@@ -50,7 +52,7 @@ BookshelfDeepRemoveOperation.prototype = {
     },
 
     cascadeDrop: function (related, relations) {
-        var operation = new BookshelfDeepRemoveOperation(relations);
+        var operation = new BookshelfDeepRemoveOperation(relations, this.options);
 
         if (_.isFunction(related.destroy)) {
             return operation.remove(related);

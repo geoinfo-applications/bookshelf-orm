@@ -1,14 +1,15 @@
 "use strict";
 
 var Q = require("q");
+var _ = require("underscore");
 var BookshelfRepository = require("./BookshelfRepository");
 var BookshelfModelWrapper = require("./BookshelfModelWrapper");
 
 
 function EntityRepository(Entity, Mapping) {
-    this.wrapper = new BookshelfModelWrapper(Mapping, Entity);
-    this.Mapping = Mapping;
     this.Entity = Entity;
+    this.Mapping = Mapping;
+    this.wrapper = new BookshelfModelWrapper(Mapping, Entity);
     this.repository = new BookshelfRepository(Mapping);
 }
 
@@ -42,22 +43,22 @@ EntityRepository.prototype = {
         return this.repository.findOne(id, options).then(this.wrap.bind(this));
     },
 
-    save: function (entity) {
+    save: function (entity, options) {
         if (Array.isArray(entity)) {
-            return Q.all(entity.map(this.save, this));
+            return Q.all(entity.map(_.partial(this.save, _, options), this));
         }
 
-        return this.repository.save(this.unwrap(entity)).then(this.wrap.bind(this));
+        return this.repository.save(this.unwrap(entity), options).then(this.wrap.bind(this));
     },
 
-    remove: function (entity) {
+    remove: function (entity, options) {
         if (Array.isArray(entity)) {
-            return Q.all(entity.map(this.remove, this));
+            return Q.all(entity.map(_.partial(this.remove, _, options), this));
         } else if (entity instanceof this.Entity) {
             entity = this.unwrap(entity);
         }
 
-        return this.repository.remove(entity);
+        return this.repository.remove(entity, options);
     },
 
     wrap: function (item, entityConstructorArguments) {
