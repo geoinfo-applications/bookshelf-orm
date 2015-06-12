@@ -29,7 +29,8 @@ ModelFactory.prototype = {
             relations: config.relations,
             columns: config.columns,
             discriminator: config.discriminator,
-            identifiedBy: identifiedBy
+            identifiedBy: identifiedBy,
+            startTransaction: this.dbContext.transaction.bind(this.dbContext)
         };
 
     },

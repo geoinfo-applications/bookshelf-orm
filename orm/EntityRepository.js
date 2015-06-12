@@ -48,7 +48,9 @@ EntityRepository.prototype = {
             return Q.all(entity.map(_.partial(this.save, _, options), this));
         }
 
-        return this.repository.save(this.unwrap(entity), options).then(this.wrap.bind(this));
+        return this.executeTransactional(function () {
+            return this.repository.save(this.unwrap(entity), options).then(this.wrap.bind(this));
+        }.bind(this), options);
     },
 
     remove: function (entity, options) {
@@ -58,7 +60,20 @@ EntityRepository.prototype = {
             entity = this.unwrap(entity);
         }
 
-        return this.repository.remove(entity, options);
+        return this.executeTransactional(function () {
+            return this.repository.remove(entity, options);
+        }.bind(this), options);
+    },
+
+    executeTransactional: function (operation, options) {
+        if (options && options.transactional && !options.transacting) {
+            return this.Mapping.startTransaction(function (t) {
+                options.transacting = t;
+                return operation();
+            });
+        } else {
+            return operation();
+        }
     },
 
     wrap: function (item, entityConstructorArguments) {
