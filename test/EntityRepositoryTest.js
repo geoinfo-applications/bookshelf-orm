@@ -469,6 +469,20 @@ describe("Entity Repository Test", function () {
 
     });
 
+    describe("transactions", function () {
+
+        it("should save in transaction");
+
+        it("should remove in transaction");
+
+        it("should not start new transaction if transaction object is provided");
+
+        it("should rollback if transaction failed");
+
+        it("should commit transaction operation passed");
+
+    });
+
     var tableIndex = 0;
 
     function createCar() {
