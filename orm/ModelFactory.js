@@ -36,7 +36,8 @@ ModelFactory.prototype = {
     },
 
     addRelation: function (prototype, relation) {
-        var fkName = relation.references.mappedBy = relation.references.mappedBy || relation.name + "_id";
+        var relationName = this.toUnderscoreSpace(relation.name);
+        var fkName = relation.references.mappedBy = relation.references.mappedBy || relationName + "_id";
 
         prototype["relation_" + relation.name] = function () {
             if (!(relation.type in this)) {
@@ -45,6 +46,10 @@ ModelFactory.prototype = {
 
             return this[relation.type](relation.references.mapping.Model, fkName);
         };
+    },
+
+    toUnderscoreSpace: function (string) {
+        return string.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase();
     }
 
 };
