@@ -21,7 +21,7 @@ BookshelfDeepSaveOperation.prototype = {
 
     save: function (item) {
         return this.saveWhereKeyIsOnItem(item).then(function () {
-            return item.save(this.options);
+            return item.save(null, this.options);
         }.bind(this)).then(function (item) {
             return this.saveWhereKeyIsOnRelated(item).then(function () {
                 return item;
