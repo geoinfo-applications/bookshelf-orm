@@ -1,6 +1,11 @@
 "use strict";
 
-var expect = require("chai").expect;
+var Q = require("q");
+var chai = require("chai");
+var expect = chai.expect;
+var sinon = require("sinon");
+var sinonChai = require("sinon-chai");
+chai.use(sinonChai);
 
 var Car = require("./db/mocks").Car;
 var CarRepository = require("./db/mocks").CarRepository;
@@ -471,15 +476,234 @@ describe("Entity Repository Test", function () {
 
     describe("transactions", function () {
 
-        it("should save in transaction");
+        beforeEach(function () {
+            sinon.spy(CarDBMapping, "startTransaction");
+            sinon.spy(carRepository.repository, "save");
+            sinon.spy(carRepository.repository, "remove");
+        });
 
-        it("should remove in transaction");
+        afterEach(function () {
+            CarDBMapping.startTransaction.restore();
+        });
 
-        it("should not start new transaction if transaction object is provided");
+        it("should save in transaction", function () {
+            var car = carRepository.newEntity();
+            var options = { transactional: true };
 
-        it("should rollback if transaction failed");
+            var promise = carRepository.save(car, options);
 
-        it("should commit transaction operation passed");
+            return promise.then(function () {
+                expect("transacting" in options).to.be.eql(true);
+                expect(options.transacting).to.be.a("function");
+                expect(carRepository.repository.save).to.have.been.calledWithExactly(car.item, options);
+            });
+        });
+
+        it("should save in given transaction", function () {
+            var car = carRepository.newEntity();
+
+            return CarDBMapping.startTransaction(function (transaction) {
+                var options = { transacting: transaction };
+
+                var promise = carRepository.save(car, options);
+
+                return promise.then(function () {
+                    expect(options.transacting).to.be.equal(transaction);
+                    expect(carRepository.repository.save).to.have.been.calledWithExactly(car.item, options);
+                });
+            });
+        });
+
+        it("should remove in transaction", function () {
+            var car = carRepository.newEntity();
+            var promise = carRepository.save(car);
+            var options = { transactional: true };
+
+            promise = promise.then(function () {
+                return carRepository.remove(car, options);
+            });
+
+            return promise.then(function () {
+                expect("transacting" in options).to.be.eql(true);
+                expect(options.transacting).to.be.a("function");
+                expect(carRepository.repository.remove).to.have.been.calledWithExactly(car.item, options);
+            });
+        });
+
+        it("should remove in given transaction", function () {
+            var car = carRepository.newEntity();
+
+            return carRepository.save(car).then(function () {
+                return CarDBMapping.startTransaction(function (transaction) {
+                    var options = { transactional: transaction };
+
+                    var promise = carRepository.remove(car, options);
+
+                    return promise.then(function () {
+                        expect("transacting" in options).to.be.eql(true);
+                        expect(options.transacting).to.be.a("function");
+                        expect(carRepository.repository.remove).to.have.been.calledWithExactly(car.item, options);
+                    });
+                });
+            });
+        });
+
+        it("should not start new transaction if transaction object is provided", function () {
+            var car = carRepository.newEntity();
+
+            return CarDBMapping.startTransaction(function (transaction) {
+                var options = { transacting: transaction };
+
+                var promise = carRepository.save(car, options);
+
+                return promise.then(function () {
+                    expect(CarDBMapping.startTransaction).to.have.callCount(1);
+                    expect(CarDBMapping.startTransaction).to.have.been.calledBefore(carRepository.repository.save);
+                });
+            });
+        });
+
+        it("should not commit transaction if transaction object is provided", function () {
+            var car = carRepository.newEntity();
+
+            return CarDBMapping.startTransaction(function (transaction) {
+                sinon.spy(transaction, "commit");
+                var options = { transacting: transaction };
+
+                var promise = carRepository.save(car, options);
+
+                return promise.then(function () {
+                    expect(transaction.commit).to.not.have.been.callCount(1);
+                });
+            });
+        });
+
+        it("should rollback if save failed", function () {
+            var transaction;
+            var car = carRepository.newEntity();
+
+            var promise = CarDBMapping.startTransaction(function (t) {
+                transaction = t;
+                sinon.spy(transaction, "commit");
+                sinon.spy(transaction, "rollback");
+                var options = { transactional: transaction };
+                carRepository.repository.save = sinon.stub().returns(Q.reject(new Error()));
+
+                return carRepository.save(car, options);
+            });
+
+            return promise.then(function () {
+                expect(promise.isRejected()).to.be.eql(true);
+            }).catch(function () {
+                expect(transaction.commit).to.have.callCount(0);
+                expect(transaction.rollback).to.have.callCount(1);
+            });
+        });
+
+        it("should rollback if remove failed", function () {
+            var transaction;
+            var car = carRepository.newEntity();
+
+            var promise = CarDBMapping.startTransaction(function (t) {
+                transaction = t;
+                sinon.spy(transaction, "commit");
+                sinon.spy(transaction, "rollback");
+                var options = { transactional: transaction };
+                carRepository.repository.remove = sinon.stub().returns(Q.reject(new Error()));
+
+                return carRepository.remove(car, options);
+            });
+
+            return promise.then(function () {
+                expect(promise.isRejected()).to.be.eql(true);
+            }).catch(function () {
+                expect(transaction.commit).to.have.callCount(0);
+                expect(transaction.rollback).to.have.callCount(1);
+            });
+        });
+
+        it("should not rollback if save failed and transaction was passed in", function () {
+            var transaction;
+            var car = carRepository.newEntity();
+
+            return CarDBMapping.startTransaction(function (t) {
+                transaction = t;
+                sinon.spy(transaction, "commit");
+                sinon.spy(transaction, "rollback");
+                var options = { transactional: transaction };
+                carRepository.repository.save = sinon.stub().returns(Q.reject(new Error()));
+
+                var promise = carRepository.save(car, options);
+
+                return promise.then(function () {
+                    expect(promise.isRejected()).to.be.eql(true);
+                }).catch(function () {
+                    expect(transaction.commit).to.have.callCount(0);
+                    expect(transaction.rollback).to.have.callCount(0);
+                });
+            });
+        });
+
+        it("should not rollback if remove failed and transaction was passed in", function () {
+            var transaction;
+            var car = carRepository.newEntity();
+
+            return CarDBMapping.startTransaction(function (t) {
+                transaction = t;
+                sinon.spy(transaction, "commit");
+                sinon.spy(transaction, "rollback");
+                var options = { transactional: transaction };
+                carRepository.repository.remove = sinon.stub().returns(Q.reject(new Error()));
+
+                var promise = carRepository.remove(car, options);
+
+                return promise.then(function () {
+                    expect(promise.isRejected()).to.be.eql(true);
+                }).catch(function () {
+                    expect(transaction.commit).to.have.callCount(0);
+                    expect(transaction.rollback).to.have.callCount(0);
+                });
+            });
+
+        });
+
+        it("should commit transaction when save succeeded", function () {
+            var transaction;
+            var car = carRepository.newEntity();
+
+            return CarDBMapping.startTransaction(function (t) {
+                transaction = t;
+                sinon.spy(transaction, "commit");
+                var options = { transacting: transaction };
+
+                return carRepository.save(car, options);
+            }).then(function () {
+                expect(transaction.commit).to.have.been.callCount(1);
+            });
+        });
+
+        it("should commit transaction when remove succeeded", function () {
+            var transaction;
+            var car = carRepository.newEntity();
+
+            return carRepository.save(car).then(function () {
+                return CarDBMapping.startTransaction(function (t) {
+                    transaction = t;
+                    sinon.spy(transaction, "commit");
+                    var options = { transactional: transaction };
+
+                    var promise = carRepository.remove(car, options);
+
+                    return promise.then(function () {
+                        expect("transacting" in options).to.be.eql(true);
+                        expect(options.transacting).to.be.a("function");
+                        expect(carRepository.repository.remove).to.have.been.calledWithExactly(car.item, options);
+                    });
+                });
+            }).then(function () {
+                expect(transaction.commit).to.have.callCount(1);
+            });
+        });
 
     });
 
