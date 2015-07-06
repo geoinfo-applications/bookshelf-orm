@@ -23,9 +23,7 @@ BookshelfDeepSaveOperation.prototype = {
         return this.saveWhereKeyIsOnItem(item).then(function () {
             return item.save(null, this.options);
         }.bind(this)).then(function (item) {
-            return this.saveWhereKeyIsOnRelated(item).then(function () {
-                return item;
-            });
+            return this.saveWhereKeyIsOnRelated(item).then(_.constant(item));
         }.bind(this));
     },
 
@@ -93,7 +91,7 @@ BookshelfDeepSaveOperation.prototype = {
         var ids = value && _.pluck(value.models, idColumn);
         var keyName = relation.references.mappedBy;
 
-        return relation.references.mapping.Collection.forge().query().where(function (q) {
+        var query = relation.references.mapping.Collection.forge().query().where(function (q) {
             if (ids && ids.length) {
                 q.whereNotIn("id", ids);
                 q.andWhere(keyName, item.id);
@@ -101,7 +99,13 @@ BookshelfDeepSaveOperation.prototype = {
                 q.where(keyName, item.id);
             }
             q.orWhereNull(keyName);
-        }).del(this.options);
+        });
+
+        if (this.options && this.options.transacting) {
+            query.transacting(this.options.transacting);
+        }
+
+        return query.del();
     },
 
     removeManyToOneOrphans: function (item, relation) {
