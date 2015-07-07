@@ -123,7 +123,7 @@ BookshelfModelWrapper.prototype = {
         var item = this.Mapping.Model.forge();
         var wrapped = this.wrap(item, Array.prototype.slice.call(arguments));
 
-        _.extend(wrapped, model);
+        _.extend(wrapped, _.pick(model, _.pluck(this.columnMappings, "name").map(this.toCamelCase.bind(this))));
 
         if (flatModel && relationNames) {
             relationNames.forEach(function (relationName) {
