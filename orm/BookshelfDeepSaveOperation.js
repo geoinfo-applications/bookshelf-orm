@@ -101,26 +101,31 @@ BookshelfDeepSaveOperation.prototype = {
             q.orWhereNull(keyName);
         });
 
-        if (this.options && this.options.transacting) {
-            query.transacting(this.options.transacting);
-        }
-
-        return query.del();
+        return this.addTransactionToQuery(query).del();
     },
 
     removeManyToOneOrphans: function (item, relation) {
         var fkColumn = relation.references.mappedBy;
 
+        var query = function () {
+            var query = item.Collection.forge().query().table(item.tableName).where(item.idAttribute, item[item.idAttribute]);
+            return this.addTransactionToQuery(query);
+        }.bind(this);
+
         return item.get(fkColumn) || query().select(fkColumn).spread(function (result) {
-            return result && result[fkColumn] && query().update(fkColumn, null, this.options).then(function () {
+            return result && result[fkColumn] && query().update(fkColumn, null).then(function () {
                 var BookshelfRepository = require("./BookshelfRepository");
                 return new BookshelfRepository(relation.references.mapping).remove(result[fkColumn], this.options);
             }.bind(this));
         }.bind(this));
+    },
 
-        function query() {
-            return item.Collection.forge().query().table(item.tableName).where(item.idAttribute, item[item.idAttribute]);
+    addTransactionToQuery: function (query) {
+        if (this.options && this.options.transacting) {
+            query.transacting(this.options.transacting);
         }
+
+        return query;
     }
 
 };
