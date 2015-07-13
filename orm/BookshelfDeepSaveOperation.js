@@ -12,7 +12,7 @@ function BookshelfDeepSaveOperation(relations, options) {
 BookshelfDeepSaveOperation.prototype = {
 
     get relationsWhereKeyIsOnRelated() {
-        return _.where(this.relations, { type: "hasMany" });
+        return _.union(_.where(this.relations, { type: "hasMany" }), _.where(this.relations, { type: "hasOne" }));
     },
 
     get relationsWhereKeyIsOnItem() {

@@ -34,6 +34,13 @@ BookshelfModelRelation.prototype = {
         });
     },
 
+    hasOne: function () {
+        this.defineProperty({
+            get: this.oneToOneGetter.bind(this),
+            set: this.addRelated.bind(this)
+        });
+    },
+
     defineProperty: function (propertyDescriptor) {
         propertyDescriptor.enumerable = true;
         Object.defineProperty(this.wrapped, this.relation.name, propertyDescriptor);
