@@ -12,8 +12,13 @@ function BookshelfDeepSaveOperation(relations, options) {
 BookshelfDeepSaveOperation.prototype = {
 
     get relationsWhereKeyIsOnRelated() {
-        return _.union(_.where(this.relations, { type: "hasMany" }), _.where(this.relations, { type: "hasOne" }));
+        return _.filter(this.relations, this.isRelationWithKeyIsOnRelated);
     },
+
+    isRelationWithKeyIsOnRelated: function (relation) {
+        return relation.type === "hasMany" || relation.type === "hasOne";
+    },
+
 
     get relationsWhereKeyIsOnItem() {
         return _.where(this.relations, { type: "belongsTo" });
@@ -82,7 +87,7 @@ BookshelfDeepSaveOperation.prototype = {
     removeOrphans: function (item, relation, value) {
         var idColumn = relation.references.identifiedBy || "id";
 
-        return relation.type === "hasMany" ?
+        return this.isRelationWithKeyIsOnRelated(relation) ?
             this.removeOneToManyOrphans(item, relation, value, idColumn) :
             this.removeManyToOneOrphans(item, relation);
     },

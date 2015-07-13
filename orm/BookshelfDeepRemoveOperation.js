@@ -18,7 +18,11 @@ BookshelfDeepRemoveOperation.prototype = {
     },
 
     get relationsWhereKeyIsOnRelated() {
-        return _.union(_.where(this.relations, { type: "hasMany" }), _.where(this.relations, { type: "hasOne" }));
+        return _.filter(this.relations, this.isRelationWithKeyIsOnRelated);
+    },
+
+    isRelationWithKeyIsOnRelated: function (relation) {
+        return relation.type === "hasMany" || relation.type === "hasOne";
     },
 
     get relationsWhereKeyIsOnItem() {
