@@ -37,7 +37,7 @@ BookshelfModelRelation.prototype = {
     hasOne: function () {
         this.defineProperty({
             get: this.oneToOneGetter.bind(this),
-            set: this.addRelated.bind(this)
+            set: this.oneToManySetter.bind(this)
         });
     },
 
@@ -65,6 +65,12 @@ BookshelfModelRelation.prototype = {
         }
 
         this.item.set(this.relation.references.mappedBy, id);
+        this.item.relations[this.relationName] = unwrapped;
+    },
+
+    oneToManySetter: function oneToManySetter(entity) {
+        var unwrapped = this.wrapper.unwrap(entity);
+        unwrapped.set(this.relation.references.mappedBy, this.item.id);
         this.item.relations[this.relationName] = unwrapped;
     },
 
