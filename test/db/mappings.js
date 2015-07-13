@@ -3,6 +3,7 @@
 var Engine = require("./mocks").Engine;
 var Part = require("./mocks").Part;
 var Owner = require("./mocks").Owner;
+var ParkingSpace = require("./mocks").ParkingSpace;
 var registry = require("./registry");
 
 
@@ -27,6 +28,14 @@ registry.register("CarDBMapping", "test", {
             references: {
                 type: Owner,
                 mapping: "OwnerDBMapping"
+            }
+        }, {
+            name: "parkingSpace",
+            type: "hasOne",
+            references: {
+                type: ParkingSpace,
+                mapping: "ParkingSpaceDBMapping",
+                mappedBy: "car_id"
             }
         }
     ]
@@ -98,6 +107,11 @@ registry.register("VeyronEngineDBMapping", "test", {
 
 registry.register("OwnerDBMapping", "test", {
     tableName: "datadictionary.owner",
+    columns: ["id", "name"]
+});
+
+registry.register("ParkingSpaceDBMapping", "test", {
+    tableName: "datadictionary.parking_space",
     columns: ["id", "name"]
 });
 

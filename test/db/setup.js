@@ -36,6 +36,12 @@ module.exports = function () {
         table.string("name");
     });
 
+    var parkingSpace = knex.schema.createTable("datadictionary.parking_space", function (table) {
+        table.increments();
+        table.string("name");
+        table.integer("car_id");
+    });
+
     var outlet = knex.schema.createTable("datadictionary.outlet", function (table) {
         table.increments();
         table.integer("engine_id");
@@ -47,7 +53,7 @@ module.exports = function () {
         table.string("name");
     });
 
-    return Q.all([car, part, wheel, engine, owner, outlet, injection]);
+    return Q.all([car, part, wheel, engine, owner, outlet, injection, parkingSpace]);
 };
 
 

@@ -4,16 +4,18 @@ var Q = require("q");
 var knex = require("./connection").knex;
 
 module.exports = function () {
+    var tables = [
+        "datadictionary.car",
+        "datadictionary.part",
+        "datadictionary.wheel",
+        "datadictionary.engine",
+        "datadictionary.owner",
+        "datadictionary.parking_space",
+        "datadictionary.outlet",
+        "datadictionary.injection"
+    ];
 
-    var car = knex.schema.dropTable("datadictionary.car");
-    var part = knex.schema.dropTable("datadictionary.part");
-    var wheel = knex.schema.dropTable("datadictionary.wheel");
-    var engine = knex.schema.dropTable("datadictionary.engine");
-    var owner = knex.schema.dropTable("datadictionary.owner");
-    var outlet = knex.schema.dropTable("datadictionary.outlet");
-    var injection = knex.schema.dropTable("datadictionary.injection");
-
-    return Q.all([car, part, wheel, engine, owner, outlet, injection]);
+    return Q.all(tables.map(knex.schema.dropTable.bind(knex.schema)));
 };
 
 

@@ -20,6 +20,7 @@ function Engine() {}
 function VeyronEngine() {}
 function Wheel() {}
 function Owner() {}
+function ParkingSpace() {}
 
 
 var CarRepository = createRepository(Car, "Car");
@@ -28,6 +29,7 @@ var VeyronEngineRepository = createRepository(VeyronEngine, "VeyronEngine");
 var EngineRepository = createRepository(Engine, "Engine");
 var WheelRepository = createRepository(Wheel, "Wheel");
 var OwnerRepository = createRepository(Owner, "Owner");
+var ParkingSpaceRepository = createRepository(ParkingSpace, "ParkingSpace");
 
 module.exports = {
     Car: Car,
@@ -36,11 +38,13 @@ module.exports = {
     VeyronEngine: VeyronEngine,
     Wheel: Wheel,
     Owner: Owner,
+    ParkingSpace: ParkingSpace,
 
     CarRepository: CarRepository,
     PartRepository: PartRepository,
     EngineRepository: EngineRepository,
     VeyronEngineRepository: VeyronEngineRepository,
     WheelRepository: WheelRepository,
-    OwnerRepository: OwnerRepository
+    OwnerRepository: OwnerRepository,
+    ParkingSpaceRepository: ParkingSpaceRepository
 };

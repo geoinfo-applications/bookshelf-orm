@@ -12,6 +12,7 @@ require("./db/mappings");
 
 var CarDBMapping = registry.compile("CarDBMapping");
 var PartDBMapping = registry.compile("PartDBMapping");
+var ParkingSpaceDBMapping = registry.compile("ParkingSpaceDBMapping");
 var WheelDBMapping = registry.compile("WheelDBMapping");
 
 
@@ -72,6 +73,24 @@ describe("Bookshelf Repository Save Test", function () {
                     expect(parts.length).to.be.eql(1);
                     expect(parts.at(0).get("car_id")).to.be.eql(item.id);
                     expect(parts.at(0).get("name")).to.be.eql(part.get("name"));
+                });
+            });
+        });
+    });
+
+    it("should persist related hasOne items", function () {
+        return createCar().then(function (item) {
+            var parkingSpace = ParkingSpaceDBMapping.Model.forge({
+                car_id: item.id,
+                name: "name" + Date.now()
+            });
+            item.relations.relation_parkingSpace = parkingSpace;
+
+            return carRepository.save(item).then(function (item) {
+                return ParkingSpaceDBMapping.Collection.forge().fetch().then(function (parkingSpaces) {
+                    expect(parkingSpaces.length).to.be.eql(1);
+                    expect(parkingSpaces.at(0).get("car_id")).to.be.eql(item.id);
+                    expect(parkingSpaces.at(0).get("name")).to.be.eql(parkingSpace.get("name"));
                 });
             });
         });

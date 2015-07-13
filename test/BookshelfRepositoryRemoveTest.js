@@ -13,6 +13,7 @@ require("./db/mappings");
 
 var CarDBMapping = registry.compile("CarDBMapping");
 var PartDBMapping = registry.compile("PartDBMapping");
+var ParkingSpaceDBMapping = registry.compile("ParkingSpaceDBMapping");
 
 
 describe("Bookshelf Repository Remove Test", function () {
@@ -97,6 +98,24 @@ describe("Bookshelf Repository Remove Test", function () {
                         return PartDBMapping.Collection.forge().fetch().then(function (attrs) {
                             expect(attrs.length).to.be.eql(0);
                         });
+                    });
+                });
+            });
+        });
+    });
+
+    it("should drop related hasOne items", function () {
+        return createCar().then(function (item) {
+            var parkingSpace = ParkingSpaceDBMapping.Model.forge({
+                car_id: item.id,
+                name: "name" + Date.now()
+            });
+            item.relations.relation_parkingSpace = parkingSpace;
+
+            return carRepository.save(item).then(function (item) {
+                return carRepository.remove(item).then(function () {
+                    return ParkingSpaceDBMapping.Collection.forge().fetch().then(function (parkingSpaces) {
+                        expect(parkingSpaces.length).to.be.eql(0);
                     });
                 });
             });
