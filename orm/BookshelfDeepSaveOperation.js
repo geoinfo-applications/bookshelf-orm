@@ -93,20 +93,28 @@ BookshelfDeepSaveOperation.prototype = {
     },
 
     removeOneToManyOrphans: function (item, relation, value, idColumn) {
-        var ids = value && _.pluck(value.models, idColumn);
+        var ids = value && (Array.isArray(value.models) ? _.pluck(value.models, idColumn) : [value[idColumn]]);
         var keyName = relation.references.mappedBy;
 
-        var query = relation.references.mapping.Collection.forge().query().where(function (q) {
-            if (ids && ids.length) {
-                q.whereNotIn("id", ids);
-                q.andWhere(keyName, item.id);
-            } else {
-                q.where(keyName, item.id);
-            }
-            q.orWhereNull(keyName);
-        });
+        function query() {
+            return relation.references.mapping.Collection.forge().query().where(function (q) {
+                if (ids && ids.length) {
+                    q.whereNotIn("id", ids);
+                    q.andWhere(keyName, item.id);
+                } else {
+                    q.where(keyName, item.id);
+                }
+                q.orWhereNull(keyName);
+            });
+        }
 
-        return this.addTransactionToQuery(query).del();
+        return this.addTransactionToQuery(query()).select(idColumn).spread(function (result) {
+            console.log(result);
+            if (result && result[idColumn]) {
+                var BookshelfRepository = require("./BookshelfRepository");
+                return new BookshelfRepository(relation.references.mapping).remove(result[idColumn], this.options);
+            }
+        }.bind(this));
     },
 
     removeManyToOneOrphans: function (item, relation) {
