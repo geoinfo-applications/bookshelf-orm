@@ -109,7 +109,6 @@ BookshelfDeepSaveOperation.prototype = {
         }
 
         return this.addTransactionToQuery(query()).select(idColumn).spread(function (result) {
-            console.log(result);
             if (result && result[idColumn]) {
                 var BookshelfRepository = require("./BookshelfRepository");
                 return new BookshelfRepository(relation.references.mapping).remove(result[idColumn], this.options);
