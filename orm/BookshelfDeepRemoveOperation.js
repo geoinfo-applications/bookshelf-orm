@@ -46,17 +46,21 @@ BookshelfDeepRemoveOperation.prototype = {
     dropRelated: function (item, relation) {
         var relationName = "relation_" + relation.name;
         var related = item.relations[relationName];
-        var relations = relation.references.mapping.relations;
 
-        if (related && relation.references.cascade) {
-            return this.cascadeDrop(related, relations || []);
-        } else if (related && this.isRelationWithKeyIsOnRelated(relation)) {
-            if (_.isArray(related.models)) {
-                return Q.all(related.models.map(this.removeForeignKey.bind(this, item, relation)));
-            } else {
-                return this.removeForeignKey(item, relation, related);
-            }
+        return related && this.handleRelated(item, relation, related);
+    },
+
+    handleRelated: function (item, relation, related) {
+        if (relation.references.cascade) {
+            return this.cascadeDropRelations(relation, related);
+        } else if (this.isRelationWithKeyIsOnRelated(relation)) {
+            return this.cascadeForeignKeys(item, relation, related);
         }
+    },
+
+    cascadeDropRelations: function (relation, related) {
+        var relations = relation.references.mapping.relations || [];
+        return this.cascadeDrop(related, relations);
     },
 
     cascadeDrop: function (related, relations) {
@@ -68,6 +72,14 @@ BookshelfDeepRemoveOperation.prototype = {
             return Q.all(related.models.map(operation.remove, operation));
         } else {
             throw new Error("Related value of type '" + typeof related + "' can not be removed");
+        }
+    },
+
+    cascadeForeignKeys: function (item, relation, related) {
+        if (_.isArray(related.models)) {
+            return Q.all(related.models.map(this.removeForeignKey.bind(this, item, relation)));
+        } else {
+            return this.removeForeignKey(item, relation, related);
         }
     },
 
