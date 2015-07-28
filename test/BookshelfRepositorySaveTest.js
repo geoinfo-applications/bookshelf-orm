@@ -112,8 +112,9 @@ describe("Bookshelf Repository Save Test", function () {
         });
     });
 
-    // TODO: Related Objects do not have to be saved, but key does
-    it("should not persist related items if cascade is false in 1:n relation");
+    it.skip("should not persist related items if cascade is false in 1:n relation", function () {
+        // TODO: Related Objects do not have to be saved, but key does
+    });
 
     it("should persist related items where root is new", function () {
         var item = CarDBMapping.Model.forge({

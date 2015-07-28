@@ -48,10 +48,7 @@ BookshelfDeepSaveOperation.prototype = {
 
     saveWhereKeyIsOnRelated: function (item) {
         return Q.all(this.relationsWhereKeyIsOnRelated.map(function (relation) {
-            // TODO: implement: only key has to be saved
-            // if (!relation.references.cascade)
-
-            return this.handleRelated(item, relation, this.saveWithKeyOnRelated);
+            return this.handleRelated(item, relation, relation.references.cascade ? this.saveWithKeyOnRelated : this.saveRelatedKey);
         }.bind(this)));
     },
 
@@ -138,6 +135,14 @@ BookshelfDeepSaveOperation.prototype = {
         }
 
         return query;
+    },
+
+    saveRelatedKey: function (item, fkColumn, operation, related) {
+        var entityId = item.id;
+        related.set(fkColumn, entityId);
+        var query = related.Collection.forge().query().table(related.tableName).where(related.idAttribute, related[related.idAttribute]);
+        this.addTransactionToQuery(query);
+        return query.update(fkColumn, entityId);
     }
 
 };

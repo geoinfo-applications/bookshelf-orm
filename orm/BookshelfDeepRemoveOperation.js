@@ -33,9 +33,7 @@ BookshelfDeepRemoveOperation.prototype = {
         return this.dropRelations(this.relationsWhereKeyIsOnRelated, item).then(function () {
             return item.destroy(this.options);
         }.bind(this)).then(function (item) {
-            return this.dropRelations(this.relationsWhereKeyIsOnItem, item).then(function () {
-                return item;
-            });
+            return this.dropRelations(this.relationsWhereKeyIsOnItem, item).then(_.constant(item));
         }.bind(this));
     },
 
@@ -50,8 +48,14 @@ BookshelfDeepRemoveOperation.prototype = {
         var related = item.relations[relationName];
         var relations = relation.references.mapping.relations;
 
-        if (related) {
+        if (related && relation.references.cascade) {
             return this.cascadeDrop(related, relations || []);
+        } else if (related && this.isRelationWithKeyIsOnRelated(relation)) {
+            if (_.isArray(related.models)) {
+                return Q.all(related.models.map(this.removeForeignKey.bind(this, item, relation)));
+            } else {
+                return this.removeForeignKey(item, relation, related);
+            }
         }
     },
 
@@ -65,6 +69,17 @@ BookshelfDeepRemoveOperation.prototype = {
         } else {
             throw new Error("Related value of type '" + typeof related + "' can not be removed");
         }
+    },
+
+    removeForeignKey: function (item, relation, related) {
+        var fkColumn = relation.references.mappedBy;
+        var query = related.Collection.forge().query().table(related.tableName).where(related.idAttribute, related[related.idAttribute]);
+
+        if (this.options && this.options.transacting) {
+            query.transacting(this.options.transacting);
+        }
+
+        return query.update(fkColumn, null);
     }
 
 };

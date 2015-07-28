@@ -35,7 +35,8 @@ registry.register("CarDBMapping", "test", {
             references: {
                 type: ParkingSpace,
                 mapping: "ParkingSpaceDBMapping",
-                mappedBy: "car_id"
+                mappedBy: "car_id",
+                cascade: true
             }
         }
     ]
