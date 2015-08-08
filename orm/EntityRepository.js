@@ -50,7 +50,16 @@ EntityRepository.prototype = {
 
         return this.executeTransactional(function () {
             return this.repository.save(this.unwrap(entity), options).then(this.wrap.bind(this));
-        }.bind(this), options);
+        }.bind(this), options).tap(function (entity) {
+            this.afterSave(entity[this.Mapping.identifiedBy]);
+        }.bind(this));
+    },
+
+    /**
+     * Hook, is called once after every successful save operation
+     * @param Number id of saved entity
+     */
+    afterSave: function () {
     },
 
     remove: function (entity, options) {
@@ -62,7 +71,16 @@ EntityRepository.prototype = {
 
         return this.executeTransactional(function () {
             return this.repository.remove(entity, options);
-        }.bind(this), options);
+        }.bind(this), options).tap(function () {
+            this.afterRemove(_.isNumber(entity) ? entity : entity[this.Mapping.identifiedBy]);
+        }.bind(this));
+    },
+
+    /**
+     * Hook, is called once after every successful remove operation
+     * @param Number id of removed entity
+     */
+    afterRemove: function () {
     },
 
     executeTransactional: function (operation, options) {

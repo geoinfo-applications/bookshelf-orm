@@ -191,6 +191,97 @@ describe("Entity Repository Test", function () {
 
     });
 
+    describe("hooks", function () {
+
+        it("should call afterSave, with saved entity id", function () {
+            var car = carRepository.newEntity();
+            carRepository.afterSave = sinon.stub();
+
+            var promise = carRepository.save(car);
+
+            return promise.then(function () {
+                expect(carRepository.afterSave).to.have.been.calledWith(car.id);
+            });
+        });
+
+        it("should call afterSave, with saved array of entity id", function () {
+            var car1 = carRepository.newEntity();
+            var car2 = carRepository.newEntity();
+            carRepository.afterSave = sinon.stub();
+
+            var promise = carRepository.save([car1, car2]);
+
+            return promise.then(function () {
+                expect(carRepository.afterSave).to.have.callCount(2);
+                expect(carRepository.afterSave).to.have.been.calledWith(car1.id);
+                expect(carRepository.afterSave).to.have.been.calledWith(car2.id);
+            });
+        });
+
+        it("should call afterRemove, with removed entity id", function () {
+            var car = carRepository.newEntity();
+            carRepository.afterRemove = sinon.stub();
+            var promise = carRepository.save(car);
+
+            promise = promise.then(function (car) {
+                return carRepository.remove(car);
+            });
+
+            return promise.then(function () {
+                expect(carRepository.afterRemove).to.have.been.calledWith(car.id);
+            });
+        });
+
+        it("should call afterRemove, with removed id", function () {
+            var car = carRepository.newEntity();
+            carRepository.afterRemove = sinon.stub();
+            var promise = carRepository.save(car);
+
+            promise = promise.then(function (car) {
+                return carRepository.remove(car.id);
+            });
+
+            return promise.then(function () {
+                expect(carRepository.afterRemove).to.have.been.calledWith(car.id);
+            });
+        });
+
+        it("should call afterRemove, with removed array of id", function () {
+            var car1 = carRepository.newEntity();
+            var car2 = carRepository.newEntity();
+            carRepository.afterRemove = sinon.stub();
+            var promise = carRepository.save([car1, car2]);
+
+            promise = promise.then(function () {
+                return carRepository.remove([car1.id, car2.id]);
+            });
+
+            return promise.then(function () {
+                expect(carRepository.afterRemove).to.have.callCount(2);
+                expect(carRepository.afterRemove).to.have.been.calledWith(car1.id);
+                expect(carRepository.afterRemove).to.have.been.calledWith(car2.id);
+            });
+        });
+
+        it("should call afterRemove, with removed array of entity", function () {
+            var car1 = carRepository.newEntity();
+            var car2 = carRepository.newEntity();
+            carRepository.afterRemove = sinon.stub();
+            var promise = carRepository.save([car1, car2]);
+
+            promise = promise.then(function () {
+                return carRepository.remove([car1, car2]);
+            });
+
+            return promise.then(function () {
+                expect(carRepository.afterRemove).to.have.callCount(2);
+                expect(carRepository.afterRemove).to.have.been.calledWith(car1.id);
+                expect(carRepository.afterRemove).to.have.been.calledWith(car2.id);
+            });
+        });
+
+    });
+
     describe("remove", function () {
 
         it("should drop item", function () {
