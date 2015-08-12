@@ -69,8 +69,13 @@ BookshelfModelRelation.prototype = {
     },
 
     oneToManySetter: function oneToManySetter(entity) {
-        var unwrapped = this.wrapper.unwrap(entity);
-        unwrapped.set(this.relation.references.mappedBy, this.item.id);
+        var unwrapped = null;
+
+        if (entity) {
+            unwrapped = this.wrapper.unwrap(entity);
+            unwrapped.set(this.relation.references.mappedBy, this.item.id);
+        }
+
         this.item.relations[this.relationName] = unwrapped;
     },
 
