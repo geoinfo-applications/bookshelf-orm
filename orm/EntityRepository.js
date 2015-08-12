@@ -72,7 +72,7 @@ EntityRepository.prototype = {
         return this.executeTransactional(function () {
             return this.repository.remove(entity, options);
         }.bind(this), options).tap(function () {
-            this.afterRemove(_.isNumber(entity) ? entity : entity[this.Mapping.identifiedBy]);
+            this.afterRemove(_.isObject(entity) ? entity[this.Mapping.identifiedBy] : +entity);
         }.bind(this));
     },
 
