@@ -121,11 +121,13 @@ BookshelfDeepSaveOperation.prototype = {
             return this.addTransactionToQuery(query);
         }.bind(this);
 
-        return item.get(fkColumn) || query().select(fkColumn).spread(function (result) {
-            return result && result[fkColumn] && query().update(fkColumn, null).then(function () {
-                var BookshelfRepository = require("./BookshelfRepository");
-                return new BookshelfRepository(relation.references.mapping).remove(result[fkColumn], this.options);
-            }.bind(this));
+        return item.get(fkColumn) || query().select(fkColumn).then(function (results) {
+            return Q.all(_.map(results, function (result) {
+                return result && result[fkColumn] && query().update(fkColumn, null).then(function () {
+                    var BookshelfRepository = require("./BookshelfRepository");
+                    return new BookshelfRepository(relation.references.mapping).remove(result[fkColumn], this.options);
+                }.bind(this));
+            }.bind(this)));
         }.bind(this));
     },
 
