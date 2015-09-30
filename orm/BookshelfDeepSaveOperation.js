@@ -105,11 +105,13 @@ BookshelfDeepSaveOperation.prototype = {
             });
         }
 
-        return this.addTransactionToQuery(query()).select(idColumn).spread(function (result) {
-            if (result && result[idColumn]) {
-                var BookshelfRepository = require("./BookshelfRepository");
-                return new BookshelfRepository(relation.references.mapping).remove(result[idColumn], this.options);
-            }
+        return this.addTransactionToQuery(query()).select(idColumn).then(function (results) {
+            return Q.all(_.map(results, function (result) {
+                if (result && result[idColumn]) {
+                    var BookshelfRepository = require("./BookshelfRepository");
+                    return new BookshelfRepository(relation.references.mapping).remove(result[idColumn], this.options);
+                }
+            }.bind(this)));
         }.bind(this));
     },
 
