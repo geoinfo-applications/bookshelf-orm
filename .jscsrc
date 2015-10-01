@@ -1,4 +1,5 @@
 {
+    "esnext": true,
     "requireCurlyBraces": [
         "if", "else", "for", "while", "do", "try", "catch"
     ],
@@ -19,7 +20,6 @@
     "disallowSpacesInsideParentheses": true,
     "requireSpacesInsideObjectBrackets": "all",
     "disallowQuotedKeysInObjects": true,
-    "disallowDanglingUnderscores": true,
     "disallowSpaceAfterObjectKeys": true,
     "requireSpaceBeforeObjectValues": true,
     "requireCommaBeforeLineBreak": true,

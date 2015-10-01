@@ -17,6 +17,9 @@
     "strict"        : true,       // Require `use strict` pragma  in every file.
     "globalstrict"  : true,       // Allow global "use strict" (also enables 'strict').
 
+    // ECMAScript 6
+    "esnext"        : true,       // Enable ES6 / Harmony features
+
     // The Good Parts.
     "asi"           : false,      // Tolerate Automatic Semicolon Insertion (no semicolons).
     "laxbreak"      : false,      // Tolerate unsafe line breaks e.g. `return [\n] x` without semicolons.
