@@ -9,6 +9,7 @@ module.exports = function () {
         table.increments();
         table.string("name");
         table.string("model_name");
+        table.string("serial_number");
     });
 
     var part = knex.schema.createTable("datadictionary.part", function (table) {

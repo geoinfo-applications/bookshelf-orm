@@ -9,7 +9,16 @@ var registry = require("./registry");
 
 registry.register("CarDBMapping", "test", {
     tableName: "datadictionary.car",
-    columns: ["id", "name", "model_name"],
+    columns: ["id", "name", "model_name", {
+        name: "description",
+        type: "sql",
+        get: "lower(coalesce(name, '') || '::' || coalesce(model_name))"
+    }, {
+        name: "serial_number",
+        type: "sql",
+        get: () => "upper(serial_number)",
+        set: v => "lower('" + v + "')"
+    }],
 
     relations: [
         {
