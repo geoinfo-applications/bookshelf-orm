@@ -31,7 +31,7 @@ describe("Bookshelf Repository Raw Fields Test", function () {
 
             return promise.then(function (cars) {
                 expect(cars.length).to.be.eql(1);
-                expect(cars.at(0).get("description")).to.be.eql(name + "::" + modelName);
+                expect(cars.at(0).get("description")).to.be.eql((name + "::" + modelName).toLowerCase());
             });
         });
 

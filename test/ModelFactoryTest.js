@@ -42,7 +42,7 @@ describe("Model Factory Test", function () {
         });
 
         it("should return columns", function () {
-            var columns = {};
+            var columns = [];
 
             var mapping = factory.createModel({ columns: columns });
 
