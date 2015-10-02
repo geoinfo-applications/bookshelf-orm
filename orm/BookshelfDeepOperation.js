@@ -1,8 +1,5 @@
 "use strict";
 
-var _ = require("underscore");
-
-
 class BookshelfDeepOperation {
 
     constructor(mapping, options) {

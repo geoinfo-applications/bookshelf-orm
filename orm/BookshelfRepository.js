@@ -60,7 +60,9 @@ class BookshelfRepository {
     }
 
     fetchWithOptions(model, options) {
-        return model.fetch(this.relations.getFetchOptions(options)).then(this.stripEmptyRelations.bind(this));
+        return model.fetch(this.relations.getFetchOptions(options))
+            .then(this.stripEmptyRelations.bind(this))
+            .then(this.fetchSqlColumns.bind(this, options));
     }
 
     stripEmptyRelations(item) {
@@ -71,6 +73,27 @@ class BookshelfRepository {
         }
 
         return this.mappingRelationsIterator(item, null, stripRelationIfEmpty);
+    }
+
+    fetchSqlColumns(options, item) {
+        var fetchOperations = [];
+
+        this.mappingRelationsIterator(item, (mapping, item) => {
+            if (mapping.readableSqlColumns.length) {
+                var query = mapping.createQuery(item, options);
+
+                var promise = query.select(mapping.readableSqlColumns.map(column => {
+                    var getter = _.isFunction(column.get) ? column.get() : column.get;
+                    return mapping.dbContext.knex.raw(getter + " as " + column.name);
+                })).then(result => {
+                    mapping.readableSqlColumns.forEach(column => item.set(column.name, result[0][column.name]));
+                });
+
+                fetchOperations.push(promise);
+            }
+        });
+
+        return Q.all(fetchOperations).then(() => item);
     }
 
     stringifyJson(item) {
