@@ -4,6 +4,7 @@ var Q = require("q");
 var _ = require("underscore");
 var SaveOperation = require("./BookshelfDeepSaveOperation");
 var RemoveOperation = require("./BookshelfDeepRemoveOperation");
+var FetchOperation = require("./BookshelfDeepFetchOperation");
 var BookshelfRelations = require("./BookshelfRelations");
 var MappingRelationsIterator = require("./MappingRelationsIterator");
 
@@ -13,6 +14,10 @@ class BookshelfRepository {
     constructor(Mapping) {
         this.Mapping = Mapping;
         this.relations = new BookshelfRelations(this.Mapping);
+    }
+
+    get idColumnName() {
+        return this.Mapping.identifiedBy;
     }
 
     findAll(ids, options) {
@@ -60,40 +65,17 @@ class BookshelfRepository {
     }
 
     fetchWithOptions(model, options) {
-        return model.fetch(this.relations.getFetchOptions(options))
-            .then(this.stripEmptyRelations.bind(this))
-            .then(this.fetchSqlColumns.bind(this, options));
+        return new FetchOperation(this.Mapping, options).fetch(model, this.relations.getFetchOptions(options));
     }
 
-    stripEmptyRelations(item) {
-        function stripRelationIfEmpty(relatedNode, node, key) {
-            if (Object.keys(relatedNode.attributes).length === 0) {
-                delete node.relations[key];
-            }
+    save(item, options) {
+        if (this.isCollectionType(item)) {
+            return this.invokeOnCollection(item, this.save, options);
         }
 
-        return this.mappingRelationsIterator(item, null, stripRelationIfEmpty);
-    }
-
-    fetchSqlColumns(options, item) {
-        var fetchOperations = [];
-
-        this.mappingRelationsIterator(item, (mapping, item) => {
-            if (mapping.readableSqlColumns.length) {
-                var query = mapping.createQuery(item, options);
-
-                var promise = query.select(mapping.readableSqlColumns.map(column => {
-                    var getter = _.isFunction(column.get) ? column.get() : column.get;
-                    return mapping.dbContext.knex.raw(getter + " as " + column.name);
-                })).then(result => {
-                    mapping.readableSqlColumns.forEach(column => item.set(column.name, result[0][column.name]));
-                });
-
-                fetchOperations.push(promise);
-            }
-        });
-
-        return Q.all(fetchOperations).then(() => item);
+        this.stringifyJson(item);
+        var saveOperation = new SaveOperation(this.Mapping, options);
+        return saveOperation.save(item);
     }
 
     stringifyJson(item) {
@@ -109,21 +91,7 @@ class BookshelfRepository {
             }
         }
 
-        return this.mappingRelationsIterator(item, stringifyJsonFields);
-    }
-
-    mappingRelationsIterator(item, preOrder, postOrder) {
-        return new MappingRelationsIterator(preOrder, postOrder).traverse(this.Mapping, item);
-    }
-
-    save(item, options) {
-        if (this.isCollectionType(item)) {
-            return this.invokeOnCollection(item, this.save, options);
-        }
-
-        this.stringifyJson(item);
-        var saveOperation = new SaveOperation(this.Mapping, options);
-        return saveOperation.save(item);
+        return new MappingRelationsIterator(stringifyJsonFields).traverse(this.Mapping, item);
     }
 
     remove(item, options) {
@@ -148,10 +116,6 @@ class BookshelfRepository {
 
     updateRaw(values, where, options) {
         return this.Mapping.Collection.forge().query().where(where).update(values, options);
-    }
-
-    get idColumnName() {
-        return this.Mapping.identifiedBy;
     }
 
     createIdQuery(id) {
