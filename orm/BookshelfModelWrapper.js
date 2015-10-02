@@ -4,31 +4,31 @@ var _ = require("underscore");
 var BookshelfModelRelation = require("./BookshelfModelRelation");
 
 
-function BookshelfModelWrapper(Mapping, Entity) {
-    this.Mapping = Mapping;
-    this.Entity = Entity || Object;
-}
+class BookshelfModelWrapper {
 
-BookshelfModelWrapper.prototype = {
+    constructor(Mapping, Entity) {
+        this.Mapping = Mapping;
+        this.Entity = Entity || Object;
+    }
 
-    wrap: function (item, entityConstructorArguments) {
+    wrap(item, entityConstructorArguments) {
         return item && (this.wrapCollectionTypes(item) || this.createWrappedInstance(item, entityConstructorArguments));
-    },
+    }
 
-    wrapCollectionTypes: function (item) {
+    wrapCollectionTypes(item) {
         if (Array.isArray(item)) {
             return item.map(this.wrap, this);
         } else if (item instanceof this.Mapping.Collection) {
             return this.wrap(item.models);
         }
-    },
+    }
 
-    createWrappedInstance: function (item, entityConstructorArguments) {
+    createWrappedInstance(item, entityConstructorArguments) {
         var wrapped = Object.create(this.Entity.prototype);
 
         Object.defineProperty(wrapped, "item", {
 
-            get: function () {
+            get() {
                 return item;
             }
 
@@ -38,29 +38,27 @@ BookshelfModelWrapper.prototype = {
         this.Entity.apply(wrapped, [].concat(entityConstructorArguments));
 
         return wrapped;
-    },
+    }
 
-    defineProperties: function (wrapped, item) {
+    defineProperties(wrapped, item) {
         this.defineColumnProperties(wrapped, item);
         this.defineRelationalProperties(wrapped, item);
-    },
+    }
 
     get columnMappings() {
-        return _.map(this.Mapping.columns, function (column) {
-            return _.isObject(column) ? column : { name: column };
-        });
-    },
+        return _.map(this.Mapping.columns, column => _.isObject(column) ? column : { name: column });
+    }
 
-    defineColumnProperties: function (wrapped, item) {
-        this.columnMappings.forEach(function (property) {
+    defineColumnProperties(wrapped, item) {
+        this.columnMappings.forEach(property => {
             Object.defineProperty(wrapped, this.toCamelCase(property.name), {
 
-                get: function () {
+                get() {
                     var value = item.get(property.name);
                     return (property.type === "json" && _.isString(value)) ? JSON.parse(value) : value;
                 },
 
-                set: function (value) {
+                set(value) {
                     if (property.type === "json") {
                         value = JSON.stringify(value);
                     }
@@ -71,27 +69,23 @@ BookshelfModelWrapper.prototype = {
                 enumerable: true
 
             });
-        }, this);
-    },
+        });
+    }
 
-    toCamelCase: function (str) {
-        return str.split("_").map(function (token, index) {
-            return index === 0 ? token : this.firstLetterUp(token);
-        }, this).join("");
-    },
+    toCamelCase(str) {
+        return str.split("_").map((token, index) => (index === 0 ? token : this.firstLetterUp(token))).join("");
+    }
 
-    firstLetterUp: function (str) {
+    firstLetterUp(str) {
         return str[0].toUpperCase() + str.substr(1);
-    },
+    }
 
-    defineRelationalProperties: function (wrapped, item) {
-        _.each(this.Mapping.relations, function (relation) {
+    defineRelationalProperties(wrapped, item) {
+        _.each(this.Mapping.relations, relation => {
             var wrapper = new BookshelfModelWrapper(relation.references.mapping, relation.references.type);
             var bookshelfModelRelation = new BookshelfModelRelation(wrapped, item, wrapper, relation);
 
-            wrapped["new" + this.firstLetterUp(relation.name)] = function (model) {
-                return wrapper.createNew(model);
-            };
+            wrapped["new" + this.firstLetterUp(relation.name)] = (model) => wrapper.createNew(model);
 
             if (relation.type in bookshelfModelRelation) {
                 bookshelfModelRelation[relation.type]();
@@ -99,50 +93,45 @@ BookshelfModelWrapper.prototype = {
                 throw new Error("Relation of type '" + relation.type + "' not implemented");
             }
 
-        }, this);
-    },
+        });
+    }
 
-    unwrap: function (entity) {
+    unwrap(entity) {
         if (Array.isArray(entity)) {
             return entity.map(this.unwrap, this);
         }
 
-        this.columnMappings.filter(function (property) {
-            return property.type === "json";
-        }).forEach(function (property) {
-            entity[property.name] = entity[property.name];
-        }, this);
+        this.columnMappings.filter(property => property.type === "json").forEach(property => entity[property.name] = entity[property.name]);
 
         return entity.item;
-    },
+    }
 
-    createNew: function (flatModel) {
+    createNew(flatModel) {
         var relationNames = _.intersection(_.pluck(this.Mapping.relations, "name"), _.keys(flatModel));
         var model = flatModel ? _.omit(flatModel, relationNames) : flatModel;
 
         var item = this.Mapping.Model.forge();
         var wrapped = this.wrap(item, Array.prototype.slice.call(arguments));
 
-        _.extend(wrapped, _.pick(model, _.pluck(this.columnMappings, "name").map(this.toCamelCase.bind(this))));
+        _.extend(wrapped, _.pick(model, _.map(this.columnMappings, m => m.name).map(this.toCamelCase.bind(this))));
 
         if (flatModel && relationNames) {
-            relationNames.forEach(function (relationName) {
-
+            relationNames.forEach(relationName => {
                 var relatedData = flatModel[relationName];
 
                 if (Array.isArray(relatedData)) {
-                    wrapped["add" + this.firstLetterUp(relationName)](relatedData.map(function (data) {
+                    wrapped["add" + this.firstLetterUp(relationName)](relatedData.map(data => {
                         return wrapped["new" + this.firstLetterUp(relationName)](data);
-                    }, this));
+                    }));
                 } else if (relatedData) {
                     wrapped[relationName] = wrapped["new" + this.firstLetterUp(relationName)](relatedData);
                 }
-            }, this);
+            });
         }
 
         return wrapped;
     }
 
-};
+}
 
 module.exports = BookshelfModelWrapper;

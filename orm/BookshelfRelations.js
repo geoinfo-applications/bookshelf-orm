@@ -3,13 +3,13 @@
 var _ = require("underscore");
 
 
-function BookshelfRelations(Mapping) {
-    this.Mapping = Mapping;
-}
+class BookshelfRelations {
 
-BookshelfRelations.prototype = {
+    constructor(Mapping) {
+        this.Mapping = Mapping;
+    }
 
-    getFetchOptions: function (options) {
+    getFetchOptions(options) {
         var fetchProperties = this.fetchProperties;
 
         if (options && options.exclude) {
@@ -17,19 +17,17 @@ BookshelfRelations.prototype = {
         }
 
         return fetchProperties;
-    },
+    }
 
-    applyExcludesToFetchProperties: function (fetchProperties, exclude) {
+    applyExcludesToFetchProperties(fetchProperties, exclude) {
         var excludes = exclude.map(this.renameRelationProperty, this);
 
-        fetchProperties.withRelated = fetchProperties.withRelated.filter(function (property) {
-            return !excludes.some(function (exclude) {
-                return property.indexOf(exclude) === 0;
-            });
+        fetchProperties.withRelated = fetchProperties.withRelated.filter(property => {
+            return !excludes.some(exclude => property.indexOf(exclude) === 0);
         });
-    },
+    }
 
-    renameRelationProperty: function (propertyName) {
+    renameRelationProperty(propertyName) {
         var isRelationName = _.contains(this.relationNamesDeep, propertyName);
 
         if (isRelationName) {
@@ -39,11 +37,11 @@ BookshelfRelations.prototype = {
         }
 
         return propertyName;
-    },
+    }
 
     get relationNames() {
-        return _.pluck(this.Mapping.relations, "name");
-    },
+        return _.map(this.Mapping.relations, relation => relation.name);
+    }
 
     get relationNamesDeep() {
         function extractName(parent, relation) {
@@ -52,7 +50,7 @@ BookshelfRelations.prototype = {
         }
 
         return _.flatten(_.map(this.Mapping.relations, _.partial(extractName, "")));
-    },
+    }
 
     get relationNamesDeepWithPrefixes() {
         return this.relationNamesDeep.map(function (relationName) {
@@ -60,12 +58,12 @@ BookshelfRelations.prototype = {
                 return "relation_" + name;
             }).join(".");
         });
-    },
+    }
 
     get fetchProperties() {
         return { withRelated: this.relationNamesDeepWithPrefixes };
     }
 
-};
+}
 
 module.exports = BookshelfRelations;

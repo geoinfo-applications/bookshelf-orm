@@ -2,69 +2,47 @@
 
 var Q = require("q");
 var _ = require("underscore");
+var BookshelfDeepOperation = require("./BookshelfDeepOperation");
 
 
-function BookshelfDeepRemoveOperation(relations, options) {
-    this.relations = relations;
-    this.options = options;
-}
+class BookshelfDeepRemoveOperation extends BookshelfDeepOperation {
 
-BookshelfDeepRemoveOperation.prototype = {
+    constructor(mapping, options) {
+        super(mapping, options);
+    }
 
-    get cascadeRelations() {
-        return this.relations ? this.relations.filter(function (relation) {
-            return relation.references.cascade;
-        }) : [];
-    },
+    remove(item) {
+        return this.dropRelations(this.relationsWhereKeyIsOnRelated, item)
+            .then(() => item.destroy(this.options))
+            .then(item => this.dropRelations(this.relationsWhereKeyIsOnItem, item).then(() => item));
+    }
 
-    get relationsWhereKeyIsOnRelated() {
-        return _.filter(this.relations, this.isRelationWithKeyIsOnRelated);
-    },
+    dropRelations(collection, item) {
+        return Q.all(collection.map(relation => this.dropRelated(item, relation)));
+    }
 
-    isRelationWithKeyIsOnRelated: function (relation) {
-        return relation.type === "hasMany" || relation.type === "hasOne";
-    },
-
-    get relationsWhereKeyIsOnItem() {
-        return _.where(this.cascadeRelations, { type: "belongsTo" });
-    },
-
-    remove: function (item) {
-        return this.dropRelations(this.relationsWhereKeyIsOnRelated, item).then(function () {
-            return item.destroy(this.options);
-        }.bind(this)).then(function (item) {
-            return this.dropRelations(this.relationsWhereKeyIsOnItem, item).then(_.constant(item));
-        }.bind(this));
-    },
-
-    dropRelations: function (collection, item) {
-        return Q.all(collection.map(function (relation) {
-            return this.dropRelated(item, relation);
-        }, this));
-    },
-
-    dropRelated: function (item, relation) {
+    dropRelated(item, relation) {
         var relationName = "relation_" + relation.name;
         var related = item.relations[relationName];
 
         return related && this.handleRelated(item, relation, related);
-    },
+    }
 
-    handleRelated: function (item, relation, related) {
+    handleRelated(item, relation, related) {
         if (relation.references.cascade) {
             return this.cascadeDropRelations(relation, related);
         } else if (this.isRelationWithKeyIsOnRelated(relation)) {
             return this.cascadeForeignKeys(item, relation, related);
         }
-    },
+    }
 
-    cascadeDropRelations: function (relation, related) {
-        var relations = relation.references.mapping.relations || [];
-        return this.cascadeDrop(related, relations);
-    },
+    cascadeDropRelations(relation, related) {
+        var mapping = relation.references.mapping;
+        return this.cascadeDrop(related, mapping);
+    }
 
-    cascadeDrop: function (related, relations) {
-        var operation = new BookshelfDeepRemoveOperation(relations, this.options);
+    cascadeDrop(related, mapping) {
+        var operation = new BookshelfDeepRemoveOperation(mapping, this.options);
 
         if (_.isFunction(related.destroy)) {
             return operation.remove(related);
@@ -73,27 +51,24 @@ BookshelfDeepRemoveOperation.prototype = {
         } else {
             throw new Error("Related value of type '" + typeof related + "' can not be removed");
         }
-    },
+    }
 
-    cascadeForeignKeys: function (item, relation, related) {
+    cascadeForeignKeys(item, relation, related) {
         if (_.isArray(related.models)) {
             return Q.all(related.models.map(this.removeForeignKey.bind(this, item, relation)));
         } else {
             return this.removeForeignKey(item, relation, related);
         }
-    },
+    }
 
-    removeForeignKey: function (item, relation, related) {
+    removeForeignKey(item, relation, related) {
         var fkColumn = relation.references.mappedBy;
         var query = related.Collection.forge().query().table(related.tableName).where(related.idAttribute, related[related.idAttribute]);
-
-        if (this.options && this.options.transacting) {
-            query.transacting(this.options.transacting);
-        }
+        this.addTransactionToQuery(query);
 
         return query.update(fkColumn, null);
     }
 
-};
+}
 
 module.exports = BookshelfDeepRemoveOperation;

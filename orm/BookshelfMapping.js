@@ -1,13 +1,13 @@
 "use strict";
 
-class BookshelfModel {
+class BookshelfMapping {
 
     constructor(dbContext, config) {
         this.dbContext = dbContext;
         this.tableName = config.tableName;
-        this.identifiedBy = BookshelfModel.getOptionOrDefault(config.identifiedBy, "id");
-        this.relations = BookshelfModel.getOptionOrDefault(config.relations, []);
-        this.columns = BookshelfModel.getOptionOrDefault(config.columns, []);
+        this.identifiedBy = BookshelfMapping.getOptionOrDefault(config.identifiedBy, "id");
+        this.relations = BookshelfMapping.getOptionOrDefault(config.relations, []);
+        this.columns = BookshelfMapping.getOptionOrDefault(config.columns, []);
         this.discriminator = config.discriminator;
         this.Model = this.createModel();
         this.Collection = this.createCollection();
@@ -22,6 +22,14 @@ class BookshelfModel {
         return this.columns.filter(c => c.type === "sql");
     }
 
+    get writeableSqlColumns() {
+        return this.sqlColumns.filter(c => c.set);
+    }
+
+    get regularColumns() {
+        return this.columns.filter(c => c.type !== "sql");
+    }
+
     createModel() {
         var self = this;
 
@@ -32,7 +40,6 @@ class BookshelfModel {
             constructor: function () {
                 self.dbContext.Model.apply(this, arguments);
                 this.on("fetched", (item, attributes, options) => self.fetchSqlColumns(self.sqlColumns, item, options));
-                this.on("saved", (item, attributes, options) => self.saveSqlColumns(self.sqlColumns, item, options));
             }
         };
 
@@ -55,7 +62,7 @@ class BookshelfModel {
     }
 
     addRelation(prototype, relation) {
-        var relationName = BookshelfModel.toUnderscoreSpace(relation.name);
+        var relationName = BookshelfMapping.toUnderscoreSpace(relation.name);
         var fkName = relation.references.mappedBy = relation.references.mappedBy || relationName + "_id";
 
         prototype["relation_" + relation.name] = function () {
@@ -87,22 +94,6 @@ class BookshelfModel {
         }).then(() => item);
     }
 
-    saveSqlColumns(sqlColumns, item, options) {
-        var writableColumns = sqlColumns.filter(c => c.set);
-
-        if (writableColumns.length === 0) {
-            return item;
-        }
-
-        var query = this.createQuery(item, options);
-        writableColumns.forEach(column => {
-            var setter = typeof column.set === "function" ? column.set(item.get(column.name)) : column.set;
-            query.update(column.name, this.dbContext.knex.raw(setter));
-        });
-
-        return query.then(() => item);
-    }
-
     createQuery(item, options) {
         var query = this.dbContext.knex(this.tableName).where(this.identifiedBy, item.get(this.identifiedBy));
 
@@ -111,7 +102,7 @@ class BookshelfModel {
         }
 
         // todo: transacting
-        if (options.transacting) {
+        if (options && options.transacting) {
             query.transacting(options.transacting);
         }
 
@@ -120,4 +111,4 @@ class BookshelfModel {
 
 }
 
-module.exports = BookshelfModel;
+module.exports = BookshelfMapping;

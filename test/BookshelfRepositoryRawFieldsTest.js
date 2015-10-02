@@ -57,6 +57,16 @@ describe("Bookshelf Repository Raw Fields Test", function () {
 
     describe("save", function () {
 
+        it("should not fail on non-writable column", function () {
+            var car = CarDBMapping.Model.forge({ description: "asdf" });
+
+            var promise = carRepository.save(car);
+
+            return promise.then(function (car) {
+                expect(car.get("description")).to.be.eql("asdf");
+            });
+        });
+
         it("should save calculated field to DB", function () {
             var serialNumber = "sN" + Date.now();
             var car = CarDBMapping.Model.forge({ serial_number: serialNumber });

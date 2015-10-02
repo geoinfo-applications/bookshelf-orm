@@ -1,34 +1,34 @@
 "use strict";
 
 
-function DBMappingRegistry(ModelFactory) {
-    this.mappings = {};
-    this.compiled = {};
-    this.ModelFactory = ModelFactory;
-}
+class DBMappingRegistry {
 
-DBMappingRegistry.prototype = {
+    constructor(ModelFactory) {
+        this.mappings = {};
+        this.compiled = {};
+        this.ModelFactory = ModelFactory;
+    }
 
-    register: function (name, dbContextName, mapping) {
+    register(name, dbContextName, mapping) {
         this.mappings[name] = {
             dbContextName: dbContextName,
             mapping: mapping
         };
-    },
+    }
 
-    get: function (name) {
+    get(name) {
         return this.mappings[name].mapping;
-    },
+    }
 
-    compile: function (name) {
+    compile(name) {
         if (!this.isCached(name)) {
             this.compileAndCache(name);
         }
 
         return this.compiled[name];
-    },
+    }
 
-    compileAndCache: function (name) {
+    compileAndCache(name) {
         if (!this.mappings[name]) {
             throw new Error(name + " is not a registered mapping");
         }
@@ -37,28 +37,27 @@ DBMappingRegistry.prototype = {
         var mapping = Object.create(this.get(name));
 
         if (mapping.relations) {
-            mapping.relations.forEach(function (relation) {
-
+            mapping.relations.forEach(relation => {
                 var getCompiled = this.compile.bind(this, relation.references.mapping);
 
                 Object.defineProperty(relation.references, "mapping", {
 
-                    get: function () {
+                    get() {
                         return getCompiled();
                     }
 
                 });
 
-            }, this);
+            });
         }
 
         this.compiled[name] = factory.createModel(mapping);
-    },
+    }
 
-    isCached: function (name) {
+    isCached(name) {
         return name in this.compiled;
     }
 
-};
+}
 
 module.exports = DBMappingRegistry;

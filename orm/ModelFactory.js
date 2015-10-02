@@ -1,6 +1,6 @@
 "use strict";
 
-var BookshelfModel = require("./BookshelfModel");
+var BookshelfMapping = require("./BookshelfMapping");
 
 
 class ModelFactory {
@@ -11,7 +11,7 @@ class ModelFactory {
     }
 
     createModel(config) {
-        return new BookshelfModel(this.dbContext, config);
+        return new BookshelfMapping(this.dbContext, config);
     }
 
 }

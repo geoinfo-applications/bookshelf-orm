@@ -31,7 +31,7 @@ describe("Entity Repository Test", function () {
 
     describe("findAll", function () {
 
-        it("should return array of ImportTables with specified ids", function () {
+        it("should return array of Cars with specified ids", function () {
             return carRepository.save(createCar()).then(function (model) {
                 return carRepository.findAll([model.id]).then(function (tables) {
                     expect(tables.length).to.be.eql(1);
@@ -40,7 +40,7 @@ describe("Entity Repository Test", function () {
             });
         });
 
-        it("should return all ImportTables", function () {
+        it("should return all Cars", function () {
             return carRepository.save(createCar()).then(function (model1) {
                 return carRepository.save(createCar()).then(function (model2) {
                     return carRepository.findAll().then(function (tables) {

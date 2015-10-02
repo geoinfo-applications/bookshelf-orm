@@ -1,61 +1,61 @@
 "use strict";
 
 
-function BookshelfModelRelation(wrapped, item, wrapper, relation) {
-    this.wrapped = wrapped;
-    this.item = item;
-    this.wrapper = wrapper;
-    this.relation = relation;
-}
+class BookshelfModelRelation {
 
-BookshelfModelRelation.prototype = {
+    constructor(wrapped, item, wrapper, relation) {
+        this.wrapped = wrapped;
+        this.item = item;
+        this.wrapper = wrapper;
+        this.relation = relation;
+    }
 
     get relationName() {
         return "relation_" + this.relation.name;
-    },
+    }
 
     get pascalCasedName() {
         return this.wrapper.firstLetterUp(this.relation.name);
-    },
+    }
 
-    hasMany: function () {
+    hasMany() {
         this.defineProperty({
             get: this.oneToManyGetter.bind(this)
         });
 
         this.wrapped["add" + this.pascalCasedName] = this.addRelated.bind(this);
         this.wrapped["remove" + this.pascalCasedName] = this.removeRelated.bind(this);
-    },
+    }
 
-    belongsTo: function () {
+    belongsTo() {
         this.defineProperty({
             get: this.oneToOneGetter.bind(this),
             set: this.oneToOneSetter.bind(this)
         });
-    },
+    }
 
-    hasOne: function () {
+    hasOne() {
         this.defineProperty({
             get: this.oneToOneGetter.bind(this),
             set: this.oneToManySetter.bind(this)
         });
-    },
+    }
 
-    defineProperty: function (propertyDescriptor) {
+    defineProperty(propertyDescriptor) {
         propertyDescriptor.enumerable = true;
         Object.defineProperty(this.wrapped, this.relation.name, propertyDescriptor);
-    },
+    }
 
-    oneToManyGetter: function oneToManyGetter() {
+    oneToManyGetter() {
         return this.wrapper.wrap(this.item.related(this.relationName).models);
-    },
+    }
 
-    oneToOneGetter: function oneToOneGetter() {
+    oneToOneGetter() {
         var related = this.item.relations[this.relationName];
         return related ? this.wrapper.wrap(related) : null;
-    },
+    }
 
-    oneToOneSetter: function oneToOneSetter(entity) {
+    oneToOneSetter(entity) {
         var unwrapped = null;
         var id = null;
 
@@ -66,9 +66,9 @@ BookshelfModelRelation.prototype = {
 
         this.item.set(this.relation.references.mappedBy, id);
         this.item.relations[this.relationName] = unwrapped;
-    },
+    }
 
-    oneToManySetter: function oneToManySetter(entity) {
+    oneToManySetter(entity) {
         var unwrapped = null;
 
         if (entity) {
@@ -77,21 +77,21 @@ BookshelfModelRelation.prototype = {
         }
 
         this.item.relations[this.relationName] = unwrapped;
-    },
+    }
 
-    addRelated: function addRelated(entity) {
+    addRelated(entity) {
         if (Array.isArray(entity)) {
-            return entity.map(addRelated.bind(this));
+            return entity.map(this.addRelated.bind(this));
         }
 
         var model = this.wrapper.unwrap(entity);
         model.set(this.relation.references.mappedBy, this.item.id);
         this.item.related(this.relationName).add(model);
-    },
+    }
 
-    removeRelated: function removeRelated(entity) {
+    removeRelated(entity) {
         if (Array.isArray(entity)) {
-            return entity.map(removeRelated.bind(this));
+            return entity.map(this.removeRelated.bind(this));
         }
 
         var model = this.wrapper.unwrap(entity);
@@ -99,6 +99,6 @@ BookshelfModelRelation.prototype = {
         this.item.related(this.relationName).remove(model);
     }
 
-};
+}
 
 module.exports = BookshelfModelRelation;

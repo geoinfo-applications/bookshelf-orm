@@ -1,14 +1,14 @@
 "use strict";
 
 
-function MappingRelationsIterator(preOrder, postOrder) {
-    this.preOrder = preOrder;
-    this.postOrder = postOrder;
-}
+class MappingRelationsIterator {
 
-MappingRelationsIterator.prototype = {
+    constructor(preOrder, postOrder) {
+        this.preOrder = preOrder;
+        this.postOrder = postOrder;
+    }
 
-    traverse: function (mapping, node) {
+    traverse(mapping, node) {
         if (node) {
             if (node.models) {
                 node.models.forEach(this.traverse.bind(this, mapping));
@@ -19,21 +19,21 @@ MappingRelationsIterator.prototype = {
         }
 
         return node;
-    },
+    }
 
-    callPreOrder: function (mapping, node) {
+    callPreOrder(mapping, node) {
         if (this.preOrder) {
             this.preOrder(mapping, node);
         }
-    },
+    }
 
-    traverseRelations: function (mapping, node) {
+    traverseRelations(mapping, node) {
         if (mapping.relations && node.relations) {
             mapping.relations.forEach(this.traverseRelation.bind(this, node));
         }
-    },
+    }
 
-    traverseRelation: function (node, relation) {
+    traverseRelation(node, relation) {
         var key = "relation_" + relation.name;
         var relatedNode = node.relations[key];
 
@@ -45,14 +45,14 @@ MappingRelationsIterator.prototype = {
                 this.callPostOrder(relatedNode, node, key);
             }
         }
-    },
+    }
 
-    callPostOrder: function (relatedNode, node, key) {
+    callPostOrder(relatedNode, node, key) {
         if (this.postOrder) {
             this.postOrder(relatedNode, node, key);
         }
     }
 
-};
+}
 
 module.exports = MappingRelationsIterator;
