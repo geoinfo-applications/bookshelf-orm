@@ -24,7 +24,9 @@ class BookshelfModelWrapper {
     }
 
     createWrappedInstance(item, entityConstructorArguments) {
-        var wrapped = Object.create(this.Entity.prototype);
+        entityConstructorArguments = Array.prototype.slice.call(1);
+        var wrapped = new (Function.prototype.bind.apply(this.Entity, entityConstructorArguments))();
+        this.defineProperties(wrapped, item);
 
         Object.defineProperty(wrapped, "item", {
 
@@ -33,9 +35,6 @@ class BookshelfModelWrapper {
             }
 
         });
-
-        this.defineProperties(wrapped, item);
-        this.Entity.apply(wrapped, [].concat(entityConstructorArguments));
 
         return wrapped;
     }
