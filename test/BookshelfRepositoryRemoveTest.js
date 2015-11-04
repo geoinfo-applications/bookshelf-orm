@@ -34,6 +34,16 @@ describe("Bookshelf Repository Remove Test", function () {
         });
     });
 
+    it("should drop unsaved item", function () {
+        var item =  CarDBMapping.Model.forge({ name: "car" + tableIndex++ });
+
+        return carRepository.remove(item).then(function () {
+            return carRepository.findAll().then(function (items) {
+                expect(items.length).to.be.eql(0);
+            });
+        });
+    });
+
     it("should drop item specified by id", function () {
         return createCar().then(function (item) {
             return carRepository.remove(item.id).then(function () {

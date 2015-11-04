@@ -29,26 +29,24 @@ class BookshelfRepository {
             return Q.when(this.Mapping.Collection.forge());
         }
 
-        return this.findWhere(function (q) {
+        return this.findWhere((q) => {
             if (ids) {
                 q.whereIn(this.idColumnName, ids);
 
-                _.each(ids, function (id) {
-                    q.orderByRaw(this.idColumnName + "=" + id + " DESC");
-                }, this);
+                _.each(ids, (id) => q.orderByRaw(this.idColumnName + "=" + id + " DESC"));
             }
         }, options);
     }
 
     findWhere(condition, options) {
-        var collection = this.Mapping.Collection.forge().query(function (q) {
+        var collection = this.Mapping.Collection.forge().query((q) => {
             condition.call(this, q);
 
             if (this.Mapping.discriminator) {
                 q.andWhere(this.Mapping.discriminator);
             }
 
-        }.bind(this));
+        });
 
         return this.fetchWithOptions(collection, options);
     }
@@ -81,7 +79,7 @@ class BookshelfRepository {
     stringifyJson(item) {
         function stringifyJsonFields(mapping, node) {
             if (node.attributes) {
-                _.where(mapping.columns, { type: "json" }).forEach(function (column) {
+                _.where(mapping.columns, { type: "json" }).forEach((column) => {
                     var value = node.attributes[column.name];
 
                     if (!_.isString(value)) {
@@ -102,7 +100,7 @@ class BookshelfRepository {
         var id = item instanceof this.Mapping.Model ? item[this.idColumnName] : item;
         var operation = new RemoveOperation(this.Mapping, options);
 
-        return this.findOne(id).then(operation.remove.bind(operation));
+        return this.findOne(id).then((item) => item && operation.remove(item));
     }
 
     isCollectionType(item) {

@@ -280,6 +280,17 @@ describe("Entity Repository Test", function () {
             });
         });
 
+        it("should not call afterRemove, if entity was unsaved", function () {
+            var car = carRepository.newEntity();
+            carRepository.afterRemove = sinon.stub();
+
+            var promise = carRepository.remove(car.id);
+
+            return promise.then(function () {
+                expect(carRepository.afterRemove).to.have.callCount(0);
+            });
+        });
+
     });
 
     describe("remove", function () {
@@ -326,6 +337,16 @@ describe("Entity Repository Test", function () {
                     return carRepository.findAll().then(function (items) {
                         expect(items.length).to.be.eql(0);
                     });
+                });
+            });
+        });
+
+        it("should drop unsaved item", function () {
+            var item = createCar();
+
+            return carRepository.remove(item).then(function () {
+                return carRepository.findAll().then(function (items) {
+                    expect(items.length).to.be.eql(0);
                 });
             });
         });
