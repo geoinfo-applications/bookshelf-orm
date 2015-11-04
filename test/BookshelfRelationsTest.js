@@ -82,6 +82,22 @@ describe("Bookshelf Relations Test", function () {
             expect(fetchOptions.withRelated).to.be.eql([]);
         });
 
+        it("should return prefixed deep relation name without wildcarded subrelations", function () {
+            var options = { exclude: ["relatedThing.*"] };
+
+            var fetchOptions = relations.getFetchOptions(options);
+
+            expect(fetchOptions.withRelated).to.be.eql(["relation_relatedThing"]);
+        });
+
+        it("should return no relation names if excluded is wildcard only", function () {
+            var options = { exclude: ["*"] };
+
+            var fetchOptions = relations.getFetchOptions(options);
+
+            expect(fetchOptions.withRelated).to.be.eql([]);
+        });
+
     });
 
 });

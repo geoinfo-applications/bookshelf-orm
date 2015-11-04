@@ -20,7 +20,15 @@ class BookshelfRelations {
     }
 
     applyExcludesToFetchProperties(fetchProperties, exclude) {
-        var excludes = exclude.map(this.renameRelationProperty, this);
+        var wildcardExcludes = exclude.filter((e) => e.endsWith("*"));
+        var excludes = _.difference(exclude, wildcardExcludes);
+
+        wildcardExcludes = wildcardExcludes.map((e) => e.substring(0, e.length - 1));
+        wildcardExcludes = this.relationNamesDeep.filter((relationName) => {
+            return wildcardExcludes.some((exclude) => relationName.startsWith(exclude));
+        });
+
+        excludes = _.union(excludes, wildcardExcludes).map(this.renameRelationProperty, this);
 
         fetchProperties.withRelated = fetchProperties.withRelated.filter(property => {
             return !excludes.some(exclude => property.indexOf(exclude) === 0);
