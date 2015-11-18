@@ -19,19 +19,19 @@ class BookshelfMapping {
     }
 
     get sqlColumns() {
-        return this.columns.filter(c => c.type === "sql");
+        return this.columns.filter((c) => c.type === "sql");
     }
 
     get writeableSqlColumns() {
-        return this.sqlColumns.filter(c => c.set);
+        return this.sqlColumns.filter((c) => c.set);
     }
 
     get readableSqlColumns() {
-        return this.sqlColumns.filter(c => c.get);
+        return this.sqlColumns.filter((c) => c.get);
     }
 
     get regularColumns() {
-        return this.columns.filter(c => c.type !== "sql");
+        return this.columns.filter((c) => c.type !== "sql");
     }
 
     createModel() {

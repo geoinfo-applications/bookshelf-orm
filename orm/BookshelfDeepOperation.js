@@ -9,7 +9,7 @@ class BookshelfDeepOperation {
     }
 
     get cascadeRelations() {
-        return this.relations.filter(relation => relation.references.cascade);
+        return this.relations.filter((relation) => relation.references.cascade);
     }
 
     get relationsWhereKeyIsOnRelated() {
@@ -17,7 +17,7 @@ class BookshelfDeepOperation {
     }
 
     get relationsWhereKeyIsOnItem() {
-        return this.relations.filter(relation => relation.type === "belongsTo");
+        return this.relations.filter((relation) => relation.type === "belongsTo");
     }
 
     isRelationWithKeyIsOnRelated(relation) {

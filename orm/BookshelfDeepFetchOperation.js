@@ -43,13 +43,13 @@ class BookshelfDeepFetchOperation extends BookshelfDeepOperation {
     fetchReadableSqlColumns(mapping, model) {
         var query = mapping.createQuery(model, this.options);
 
-        var rawSelects = mapping.readableSqlColumns.map(column => {
+        var rawSelects = mapping.readableSqlColumns.map((column) => {
             var getter = _.isFunction(column.get) ? column.get() : column.get;
             return mapping.dbContext.knex.raw(getter + " as \"" + column.name + "\"");
         });
 
-        return query.select(rawSelects).then(result => {
-            mapping.readableSqlColumns.forEach(column => model.set(column.name, result[0][column.name]));
+        return query.select(rawSelects).then((result) => {
+            mapping.readableSqlColumns.forEach((column) => model.set(column.name, result[0][column.name]));
         });
     }
 
