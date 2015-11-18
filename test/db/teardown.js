@@ -15,7 +15,7 @@ module.exports = function () {
         "datadictionary.injection"
     ];
 
-    return Q.all(tables.map(knex.schema.dropTable.bind(knex.schema)));
+    return Q.all(tables.map((table) => knex.schema.dropTable(table)));
 };
 
 
