@@ -45,11 +45,11 @@ class BookshelfModelWrapper {
     }
 
     get columnMappings() {
-        return _.map(this.Mapping.columns, column => _.isObject(column) ? column : { name: column });
+        return _.map(this.Mapping.columns, (column) => _.isObject(column) ? column : { name: column });
     }
 
     defineColumnProperties(wrapped, item) {
-        this.columnMappings.forEach(property => {
+        this.columnMappings.forEach((property) => {
             Object.defineProperty(wrapped, this.toCamelCase(property.name), {
 
                 get() {
@@ -80,7 +80,7 @@ class BookshelfModelWrapper {
     }
 
     defineRelationalProperties(wrapped, item) {
-        _.each(this.Mapping.relations, relation => {
+        _.each(this.Mapping.relations, (relation) => {
             var wrapper = new BookshelfModelWrapper(relation.references.mapping, relation.references.type);
             var bookshelfModelRelation = new BookshelfModelRelation(wrapped, item, wrapper, relation);
 
@@ -100,7 +100,7 @@ class BookshelfModelWrapper {
             return entity.map(this.unwrap, this);
         }
 
-        this.columnMappings.filter(property => property.type === "json").forEach(property => entity[property.name] = entity[property.name]);
+        this.columnMappings.filter((property) => property.type === "json").forEach((property) => entity[property.name] = entity[property.name]);
 
         return entity.item;
     }
@@ -112,14 +112,14 @@ class BookshelfModelWrapper {
         var item = this.Mapping.Model.forge();
         var wrapped = this.wrap(item, Array.prototype.slice.call(arguments));
 
-        _.extend(wrapped, _.pick(model, _.map(this.columnMappings, m => m.name).map(this.toCamelCase.bind(this))));
+        _.extend(wrapped, _.pick(model, _.map(this.columnMappings, (m) => m.name).map(this.toCamelCase.bind(this))));
 
         if (flatModel && relationNames) {
-            relationNames.forEach(relationName => {
+            relationNames.forEach((relationName) => {
                 var relatedData = flatModel[relationName];
 
                 if (Array.isArray(relatedData)) {
-                    wrapped["add" + this.firstLetterUp(relationName)](relatedData.map(data => {
+                    wrapped["add" + this.firstLetterUp(relationName)](relatedData.map((data) => {
                         return wrapped["new" + this.firstLetterUp(relationName)](data);
                     }));
                 } else if (relatedData) {

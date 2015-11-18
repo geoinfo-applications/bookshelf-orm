@@ -17,7 +17,7 @@ registry.register("CarDBMapping", "test", {
         name: "serial_number",
         type: "sql",
         get: () => "upper(serial_number)",
-        set: v => "lower('" + v + "')"
+        set: (v) => "lower('" + v + "')"
     }],
 
     relations: [

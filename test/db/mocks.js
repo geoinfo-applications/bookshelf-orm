@@ -4,23 +4,21 @@ var registry = require("./registry");
 var EntityRepository = require("../../orm/EntityRepository");
 
 function createRepository(Entity, name) {
-    var constructor = function () {
-        EntityRepository.call(this, Entity, registry.compile(name + "DBMapping"));
+    return class extends EntityRepository{
+        constructor() {
+            super(Entity, registry.compile(name + "DBMapping"));
+        }
     };
-
-    constructor.prototype = Object.create(EntityRepository.prototype);
-
-    return constructor;
 }
 
 
-function Car() {}
-function Part() {}
-function Engine() {}
-function VeyronEngine() {}
-function Wheel() {}
-function Owner() {}
-function ParkingSpace() {}
+class Car {}
+class Part {}
+class Engine {}
+class VeyronEngine {}
+class Wheel {}
+class Owner {}
+class ParkingSpace {}
 
 
 var CarRepository = createRepository(Car, "Car");

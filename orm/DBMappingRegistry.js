@@ -37,7 +37,7 @@ class DBMappingRegistry {
         var mapping = Object.create(this.get(name));
 
         if (mapping.relations) {
-            mapping.relations.forEach(relation => {
+            mapping.relations.forEach((relation) => {
                 var getCompiled = this.compile.bind(this, relation.references.mapping);
 
                 Object.defineProperty(relation.references, "mapping", {
