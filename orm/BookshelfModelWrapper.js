@@ -24,19 +24,18 @@ class BookshelfModelWrapper {
     }
 
     createWrappedInstance(item, entityConstructorArguments) {
-        entityConstructorArguments = Array.prototype.slice.call(1);
+        entityConstructorArguments = Array.prototype.slice.call(arguments, 1);
         var wrapped = new (Function.prototype.bind.apply(this.Entity, entityConstructorArguments))();
         this.defineProperties(wrapped, item);
-
-        Object.defineProperty(wrapped, "item", {
-
-            get() {
-                return item;
-            }
-
-        });
+        this.addItemGetter(wrapped, item);
 
         return wrapped;
+    }
+
+    addItemGetter(wrapped, item) {
+        Object.defineProperty(wrapped, "item", {
+            get: () => item
+        });
     }
 
     defineProperties(wrapped, item) {
@@ -51,23 +50,23 @@ class BookshelfModelWrapper {
     defineColumnProperties(wrapped, item) {
         this.columnMappings.forEach((property) => {
             Object.defineProperty(wrapped, this.toCamelCase(property.name), {
-
-                get() {
-                    var value = item.get(property.name);
-                    return (property.type === "json" && _.isString(value)) ? JSON.parse(value) : value;
-                },
-
-                set(value) {
-                    if (property.type === "json") {
-                        value = JSON.stringify(value);
-                    }
-
-                    item.set(property.name, value);
-                },
-
+                get: getter,
+                set: setter,
                 enumerable: true
-
             });
+
+            function getter() {
+                var value = item.get(property.name);
+                return (property.type === "json" && _.isString(value)) ? JSON.parse(value) : value;
+            }
+
+            function setter(value) {
+                if (property.type === "json") {
+                    value = JSON.stringify(value);
+                }
+
+                item.set(property.name, value);
+            }
         });
     }
 
@@ -106,7 +105,7 @@ class BookshelfModelWrapper {
     }
 
     createNew(flatModel) {
-        var relationNames = _.intersection(_.pluck(this.Mapping.relations, "name"), _.keys(flatModel));
+        var relationNames = _.intersection(_.map(this.Mapping.relations, (r) => r.name), _.keys(flatModel));
         var model = flatModel ? _.omit(flatModel, relationNames) : flatModel;
 
         var item = this.Mapping.Model.forge();
@@ -117,13 +116,14 @@ class BookshelfModelWrapper {
         if (flatModel && relationNames) {
             relationNames.forEach((relationName) => {
                 var relatedData = flatModel[relationName];
+                var pascalCasedName = this.firstLetterUp(relationName);
 
                 if (Array.isArray(relatedData)) {
-                    wrapped["add" + this.firstLetterUp(relationName)](relatedData.map((data) => {
-                        return wrapped["new" + this.firstLetterUp(relationName)](data);
+                    wrapped["add" + pascalCasedName](relatedData.map((data) => {
+                        return wrapped["new" + pascalCasedName](data);
                     }));
                 } else if (relatedData) {
-                    wrapped[relationName] = wrapped["new" + this.firstLetterUp(relationName)](relatedData);
+                    wrapped[relationName] = wrapped["new" + pascalCasedName](relatedData);
                 }
             });
         }
