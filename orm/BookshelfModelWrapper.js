@@ -99,7 +99,10 @@ class BookshelfModelWrapper {
             return entity.map(this.unwrap, this);
         }
 
-        this.columnMappings.filter((property) => property.type === "json").forEach((property) => entity[property.name] = entity[property.name]);
+        this.columnMappings.filter((property) => property.type === "json").forEach((property) => {
+            var propertyName = this.toCamelCase(property.name);
+            entity[propertyName] = entity[propertyName];
+        });
 
         return entity.item;
     }
