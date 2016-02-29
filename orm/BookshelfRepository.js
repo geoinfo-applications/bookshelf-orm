@@ -113,7 +113,13 @@ class BookshelfRepository {
     }
 
     updateRaw(values, where, options) {
-        return this.Mapping.Collection.forge().query().where(where).update(values, options);
+        var query = this.Mapping.Collection.forge().query().where(where).update(values);
+
+        if (options && options.transacting) {
+            query.transacting(options.transacting);
+        }
+
+        return query;
     }
 
     createIdQuery(id) {

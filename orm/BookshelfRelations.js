@@ -22,12 +22,13 @@ class BookshelfRelations {
     }
 
     addOptionalFetchOptions(options, fetchProperties) {
-        if (options.exclude) {
-            this.applyExcludesToFetchProperties(fetchProperties, options.exclude);
-        }
-        if (options.columns) {
-            fetchProperties.columns = options.columns;
-        }
+        var optionalOptions = {
+            exclude: () => this.applyExcludesToFetchProperties(fetchProperties, options.exclude),
+            columns: () => fetchProperties.columns = options.columns,
+            transacting: () => options.transacting
+        };
+
+        Object.keys(optionalOptions).filter((key) => options[key]).forEach((key) => optionalOptions[key]());
     }
 
     applyExcludesToFetchProperties(fetchProperties, exclude) {
