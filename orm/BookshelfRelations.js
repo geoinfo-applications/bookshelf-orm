@@ -25,7 +25,7 @@ class BookshelfRelations {
         var optionalOptions = {
             exclude: () => this.applyExcludesToFetchProperties(fetchProperties, options.exclude),
             columns: () => fetchProperties.columns = options.columns,
-            transacting: () => options.transacting
+            transacting: () => fetchProperties.transacting = options.transacting
         };
 
         Object.keys(optionalOptions).filter((key) => options[key]).forEach((key) => optionalOptions[key]());

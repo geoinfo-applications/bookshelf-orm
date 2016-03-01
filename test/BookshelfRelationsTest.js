@@ -98,6 +98,24 @@ describe("Bookshelf Relations Test", function () {
             expect(fetchOptions.withRelated).to.be.eql([]);
         });
 
+        it("should add columns if specified", function () {
+            var columns = ["b", "b", "c"];
+            var options = { columns: columns };
+
+            var fetchOptions = relations.getFetchOptions(options);
+
+            expect(fetchOptions.columns).to.be.equal(columns);
+        });
+
+        it("should add transaction if specified", function () {
+            var transaction = {};
+            var options = { transacting: transaction };
+
+            var fetchOptions = relations.getFetchOptions(options);
+
+            expect(fetchOptions.transacting).to.be.equal(transaction);
+        });
+
     });
 
 });
