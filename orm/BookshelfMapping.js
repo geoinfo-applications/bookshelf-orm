@@ -7,6 +7,7 @@ class BookshelfMapping {
         this.tableName = config.tableName;
         this.identifiedBy = BookshelfMapping.getOptionOrDefault(config.identifiedBy, "id");
         this.relations = BookshelfMapping.getOptionOrDefault(config.relations, []);
+        this.relationNames = BookshelfMapping.getOptionOrDefault(this.relations, []).map((r) => r.name);
         this.columns = BookshelfMapping.getOptionOrDefault(config.columns, []);
         this.discriminator = config.discriminator;
         this.Model = this.createModel();

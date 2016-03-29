@@ -9,6 +9,8 @@ class BookshelfModelWrapper {
     constructor(Mapping, Entity) {
         this.Mapping = Mapping;
         this.Entity = Entity || Object;
+        this.columnMappings = _.map(this.Mapping.columns, (column) => _.isObject(column) ? column : { name: column });
+        this.columnNames = this.columnMappings.map((column) => column.name);
     }
 
     wrap(item, entityConstructorArguments) {
@@ -43,10 +45,6 @@ class BookshelfModelWrapper {
         this.defineRelationalProperties(wrapped, item);
     }
 
-    get columnMappings() {
-        return _.map(this.Mapping.columns, (column) => _.isObject(column) ? column : { name: column });
-    }
-
     defineColumnProperties(wrapped, item) {
         this.columnMappings.forEach((property) => {
             Object.defineProperty(wrapped, this.toCamelCase(property.name), {
@@ -71,7 +69,16 @@ class BookshelfModelWrapper {
     }
 
     toCamelCase(str) {
-        return str.split("_").map((token, index) => (index === 0 ? token : this.firstLetterUp(token))).join("");
+        var out = "";
+        for (var i = 0; i < str.length; i++) {
+            if (str[i] === "_") {
+                i = i + 1;
+                out = out + str[i].toUpperCase();
+            } else {
+                out = out + str[i];
+            }
+        }
+        return out;
     }
 
     firstLetterUp(str) {
@@ -79,7 +86,7 @@ class BookshelfModelWrapper {
     }
 
     defineRelationalProperties(wrapped, item) {
-        _.each(this.Mapping.relations, (relation) => {
+        this.Mapping.relations.forEach((relation) => {
             var wrapper = new BookshelfModelWrapper(relation.references.mapping, relation.references.type);
             var bookshelfModelRelation = new BookshelfModelRelation(wrapped, item, wrapper, relation);
 
@@ -108,30 +115,49 @@ class BookshelfModelWrapper {
     }
 
     createNew(flatModel) {
-        var relationNames = _.intersection(_.map(this.Mapping.relations, (r) => r.name), _.keys(flatModel));
-        var model = flatModel ? _.omit(flatModel, relationNames) : flatModel;
-
         var item = this.Mapping.Model.forge();
         var wrapped = this.wrap(item, Array.prototype.slice.call(arguments));
 
-        _.extend(wrapped, _.pick(model, _.map(this.columnMappings, (m) => m.name).map(this.toCamelCase.bind(this))));
-
-        if (flatModel && relationNames) {
-            relationNames.forEach((relationName) => {
-                var relatedData = flatModel[relationName];
-                var pascalCasedName = this.firstLetterUp(relationName);
-
-                if (Array.isArray(relatedData)) {
-                    wrapped["add" + pascalCasedName](relatedData.map((data) => {
-                        return wrapped["new" + pascalCasedName](data);
-                    }));
-                } else if (relatedData) {
-                    wrapped[relationName] = wrapped["new" + pascalCasedName](relatedData);
-                }
-            });
-        }
+        this.applyFlatModel(wrapped, flatModel);
 
         return wrapped;
+    }
+
+    applyFlatModel(wrapped, flatModel) {
+        if (flatModel) {
+            var relationNames = this.Mapping.relationNames.filter((name) => name in flatModel);
+
+            this.applyFlatModelValues(wrapped, _.omit(flatModel, relationNames));
+            this.applyFlatModelRelations(wrapped, flatModel, relationNames);
+        }
+    }
+
+    applyFlatModelValues(wrapped, model) {
+        for (var name of this.columnNames) {
+            name = this.toCamelCase(name);
+            if (name in model) {
+                wrapped[name] = model[name];
+            }
+        }
+    }
+
+    applyFlatModelRelations(wrapped, model, relationNames) {
+        if (!relationNames) {
+            return;
+        }
+
+        relationNames.forEach((relationName) => {
+            var relatedData = model[relationName];
+            var pascalCasedName = this.firstLetterUp(relationName);
+
+            if (Array.isArray(relatedData)) {
+                wrapped["add" + pascalCasedName](relatedData.map((data) => {
+                    return wrapped["new" + pascalCasedName](data);
+                }));
+            } else if (relatedData) {
+                wrapped[relationName] = wrapped["new" + pascalCasedName](relatedData);
+            }
+        });
     }
 
 }

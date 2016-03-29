@@ -83,6 +83,7 @@ describe("Bookshelf Model Wrapper Test", function () {
                         name: "thing",
                         type: "json"
                     }],
+                    relations: [],
                     Collection: sinon.stub()
                 };
                 var wrapper = new BookshelfModelWrapper(mapping, sinon.stub().returnsThis());
@@ -104,6 +105,7 @@ describe("Bookshelf Model Wrapper Test", function () {
                         name: "thing",
                         type: "json"
                     }],
+                    relations: [],
                     Collection: sinon.stub()
                 };
                 var wrapper = new BookshelfModelWrapper(mapping, sinon.stub().returnsThis());
@@ -125,6 +127,7 @@ describe("Bookshelf Model Wrapper Test", function () {
                         name: "thing",
                         type: "json"
                     }],
+                    relations: [],
                     Collection: sinon.stub()
                 };
                 var wrapper = new BookshelfModelWrapper(mapping, sinon.stub().returnsThis());
@@ -303,7 +306,7 @@ describe("Bookshelf Model Wrapper Test", function () {
 
             it("should throw error if relation type is not supported", function () {
                 try {
-                    carWrapper.Mapping.relations.push({ type: "unsupported", references: {}, name: "unsupportedRelation" });
+                    carWrapper.Mapping.relations.push({ type: "unsupported", references: { mapping: {} }, name: "unsupportedRelation" });
                     createCar();
                     carWrapper.Mapping.relations.pop();
                     return Q.reject();
@@ -380,6 +383,7 @@ describe("Bookshelf Model Wrapper Test", function () {
                     name: "thing",
                     type: "json"
                 }],
+                relations: [],
                 Collection: sinon.stub()
             };
             var wrapper = new BookshelfModelWrapper(mapping, sinon.stub().returnsThis());
