@@ -1,6 +1,6 @@
 {
   "name": "bookshelf-orm",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "OR-Mapping based on Bookshelf.js",
   "main": "index.js",
   "repository": {
@@ -12,7 +12,10 @@
   },
   "author": "Geoinfo AG",
   "license": "ISC",
-  "private": "true",
+  "private": "false",
+  "publishCondif": {
+    "registry":"http://npm.geoinfo.ch"
+  },
   "engines": {
     "node": "^4.0.0",
     "npm": ">2.7.0"
