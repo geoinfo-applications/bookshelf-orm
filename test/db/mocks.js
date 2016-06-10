@@ -14,6 +14,7 @@ function createRepository(Entity, name) {
 
 class Car {}
 class Part {}
+class VeyronPart {}
 class Engine {}
 class VeyronEngine {}
 class Wheel {}
@@ -24,6 +25,7 @@ class ParkingSpace {}
 
 var CarRepository = createRepository(Car, "Car");
 var PartRepository = createRepository(Part, "Part");
+var VeyronPartRepository = createRepository(VeyronPart, "VeyronPart");
 var VeyronEngineRepository = createRepository(VeyronEngine, "VeyronEngine");
 var EngineRepository = createRepository(Engine, "Engine");
 var WheelRepository = createRepository(Wheel, "Wheel");
@@ -34,6 +36,7 @@ var ParkingSpaceRepository = createRepository(ParkingSpace, "ParkingSpace");
 module.exports = {
     Car: Car,
     Part: Part,
+    VeyronPart: VeyronPart,
     Engine: Engine,
     VeyronEngine: VeyronEngine,
     Wheel: Wheel,
@@ -43,6 +46,7 @@ module.exports = {
 
     CarRepository: CarRepository,
     PartRepository: PartRepository,
+    VeyronPartRepository: VeyronPartRepository,
     EngineRepository: EngineRepository,
     VeyronEngineRepository: VeyronEngineRepository,
     WheelRepository: WheelRepository,

@@ -8,7 +8,7 @@ class BookshelfRelations {
     constructor(Mapping) {
         this.Mapping = Mapping;
         this.relationNamesDeep = this.getRelationNamesDeep();
-        this.relationNamesDeepWithPrefixes = this.getRelationNamesDeepWithPrefixes();
+        this.withRelatedFetchOptions = this.getWithRelatedFetchOptions();
     }
 
     getFetchOptions(options) {
@@ -42,15 +42,16 @@ class BookshelfRelations {
         excludes = this.addWildcardExcludes(excludes, wildcardExcludes);
         excludes = excludes.map(this.renameRelationProperty, this);
 
-        fetchProperties.withRelated = _.reject(fetchProperties.withRelated, (name) => excludes.some((exclude) => name.indexOf(exclude) === 0));
+        fetchProperties.withRelated = _.reject(fetchProperties.withRelated, (name) => {
+            name = _.isObject(name) ? _.keys(name)[0] : name;
+            return excludes.some((exclude) => name.indexOf(exclude) === 0);
+        });
     }
 
     addWildcardExcludes(excludes, wildcardExcludes) {
         if (wildcardExcludes.length) {
             wildcardExcludes = wildcardExcludes.map((e) => e.substring(0, e.length - 1));
-            wildcardExcludes = this.relationNamesDeep.filter((name) => wildcardExcludes.some((exclude) => {
-                return name.startsWith(exclude);
-            }));
+            wildcardExcludes = this.relationNamesDeep.filter((name) => wildcardExcludes.some((exclude) => name.startsWith(exclude)));
             excludes = _.union(excludes, wildcardExcludes);
         }
         return excludes;
@@ -79,12 +80,28 @@ class BookshelfRelations {
         return _.flatten(_.map(this.Mapping.relations, _.partial(extractName, "")));
     }
 
-    getRelationNamesDeepWithPrefixes() {
-        return this.relationNamesDeep.map((relationName) => relationName.split(".").map((name) => "relation_" + name).join("."));
+    get fetchProperties() {
+        return { withRelated: this.withRelatedFetchOptions };
     }
 
-    get fetchProperties() {
-        return { withRelated: this.relationNamesDeepWithPrefixes };
+    getWithRelatedFetchOptions() {
+        return this.relationNamesDeep.map((relationName) => {
+            var relationNamePath = relationName.split(".");
+            var prefixedRelationName = relationNamePath.map((name) => "relation_" + name).join(".");
+            var mapping = relationNamePath.reduce(this.lookupReferencedMapping, this.Mapping);
+
+            if (mapping.discriminator) {
+                var relatedQuery = Object.create(null);
+                relatedQuery[prefixedRelationName] = (query) => query.where(mapping.discriminator);
+                return relatedQuery;
+            } else {
+                return prefixedRelationName;
+            }
+        });
+    }
+
+    lookupReferencedMapping(mapping, name) {
+        return _.findWhere(mapping.relations, { name: name }).references.mapping;
     }
 
 }

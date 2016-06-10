@@ -1,6 +1,7 @@
 "use strict";
 
 var Engine = require("./mocks").Engine;
+var VeyronEngine = require("./mocks").VeyronEngine;
 var Part = require("./mocks").Part;
 var Owner = require("./mocks").Owner;
 var ParkingSpace = require("./mocks").ParkingSpace;
@@ -124,6 +125,21 @@ registry.register("NamelessOwnerDBMapping", "test", {
     tableName: "datadictionary.owner",
     columns: ["id"],
     discriminator: { name: null }
+});
+
+registry.register("VeyronPartDBMapping", "test", {
+    tableName: "datadictionary.part",
+    columns: ["id"],
+
+    relations: [{
+        name: "engine",
+        type: "belongsTo",
+        references: {
+            type: VeyronEngine,
+            mapping: "VeyronEngineDBMapping"
+            // TODO: removal and cascade
+        }
+    }]
 });
 
 registry.register("ParkingSpaceDBMapping", "test", {

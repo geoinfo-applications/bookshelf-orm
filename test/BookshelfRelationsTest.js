@@ -2,13 +2,14 @@
 
 var expect = require("chai").expect;
 var BookshelfRelations = require("../orm/BookshelfRelations");
-var mapping, subMapping, relations;
+var mapping, subMapping, subSubMapping, relations;
 
 
 describe("Bookshelf Relations Test", function () {
 
     beforeEach(function () {
-        subMapping = { relations: [{ name: "subRelatedThing", references: { mapping: {} } }] };
+        subSubMapping = { discriminator: {}, relations: [{ name: "subSubRelatedThing", references: { mapping: {} } }] };
+        subMapping = { relations: [{ name: "subRelatedThing", references: { mapping: subSubMapping } }] };
         mapping = { relations: [{ name: "relatedThing", references: { mapping: subMapping } }] };
         relations = new BookshelfRelations(mapping);
     });
@@ -39,18 +40,11 @@ describe("Bookshelf Relations Test", function () {
 
             var relationNames = relations.relationNamesDeep;
 
-            expect(relationNames).to.be.eql(["relatedThing", "relatedThing.subRelatedThing"]);
-        });
-
-    });
-
-    describe("relationNamesDeepWithPrefixes", function () {
-
-        it("should return relation names deeply in dot notation with 'relation_' prefix", function () {
-
-            var relationNames = relations.relationNamesDeepWithPrefixes;
-
-            expect(relationNames).to.be.eql(["relation_relatedThing", "relation_relatedThing.relation_subRelatedThing"]);
+            expect(relationNames).to.be.eql([
+                "relatedThing",
+                "relatedThing.subRelatedThing",
+                "relatedThing.subRelatedThing.subSubRelatedThing"
+            ]);
         });
 
     });

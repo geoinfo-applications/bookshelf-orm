@@ -4,6 +4,7 @@ var expect = require("chai").expect;
 var CarRepository = require("./db/mocks").CarRepository;
 var EngineRepository = require("./db/mocks").EngineRepository;
 var VeyronEngineRepository = require("./db/mocks").VeyronEngineRepository;
+var VeyronPartRepository = require("./db/mocks").VeyronPartRepository;
 var OwnerRepository = require("./db/mocks").OwnerRepository;
 var NamelessOwnerRepository = require("./db/mocks").NamelessOwnerRepository;
 
@@ -203,6 +204,71 @@ describe("Bookshelf Repository Test", function () {
                 expect(owner).to.be.eql(null);
             });
         });
+
+    });
+
+    describe("related discriminator", function () {
+        var veyronPartRepository, engineRepository;
+        var engine, veyronEngine, veyronPart;
+
+        beforeEach(function () {
+            veyronPartRepository = new VeyronPartRepository();
+            veyronPart = veyronPartRepository.newEntity();
+
+            engineRepository = new EngineRepository();
+            engine = engineRepository.newEntity({ ps: 100 });
+            veyronEngine = engineRepository.newEntity({ ps: 1000 });
+
+            return engineRepository.save([engine, veyronEngine]).then(function () {
+                return veyronPartRepository.save(veyronPart);
+            });
+        });
+
+        it("should findOne related item if discriminator matches", function () {
+            veyronPart.engine = veyronEngine;
+            var promise = veyronPartRepository.save(veyronPart);
+
+            promise = promise.then(() => veyronPartRepository.findOne(veyronPart.id));
+
+            return promise.then((part) => {
+                expect(part.engine.id).to.be.eql(veyronEngine.id);
+            });
+        });
+
+        it("should not findOne related item if discriminator does not match", function () {
+            veyronPart.engine = engine;
+            var promise = veyronPartRepository.save(veyronPart);
+
+            promise = promise.then(() => veyronPartRepository.findOne(veyronPart.id));
+
+            return promise.then((part) => {
+                expect(part.engine).to.be.eql(null);
+            });
+        });
+
+        it("should findAll related item if discriminator matches", function () {
+            veyronPart.engine = veyronEngine;
+            var promise = veyronPartRepository.save(veyronPart);
+
+            promise = promise.then(() => veyronPartRepository.findAll());
+
+            return promise.then((parts) => {
+                expect(parts[0].engine.id).to.be.eql(veyronEngine.id);
+            });
+        });
+
+        it("should not findAll related item if discriminator does not match", function () {
+            veyronPart.engine = engine;
+            var promise = veyronPartRepository.save(veyronPart);
+
+            promise = promise.then(() => veyronPartRepository.findAll());
+
+            return promise.then((parts) => {
+                expect(parts[0].engine).to.be.eql(null);
+            });
+        });
+
+        // TODO: cascade and orphanRemoval
 
     });
 
