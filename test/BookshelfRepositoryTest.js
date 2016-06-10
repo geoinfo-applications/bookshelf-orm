@@ -4,6 +4,8 @@ var expect = require("chai").expect;
 var CarRepository = require("./db/mocks").CarRepository;
 var EngineRepository = require("./db/mocks").EngineRepository;
 var VeyronEngineRepository = require("./db/mocks").VeyronEngineRepository;
+var OwnerRepository = require("./db/mocks").OwnerRepository;
+var NamelessOwnerRepository = require("./db/mocks").NamelessOwnerRepository;
 
 require("./db/connection");
 var registry = require("./db/registry");
@@ -139,27 +141,66 @@ describe("Bookshelf Repository Test", function () {
     describe("discriminator", function () {
         var engineRepository, veyronEngineRepository, engine1, engine2;
 
-        beforeEach(function (done) {
+        beforeEach(function () {
             engineRepository = new EngineRepository();
             veyronEngineRepository = new VeyronEngineRepository();
 
             engine1 = engineRepository.newEntity({ ps: 100 });
             engine2 = engineRepository.newEntity({ ps: 1000 });
 
-            return engineRepository.save([engine1, engine2]).then(function () {
-                done();
-            });
+            return engineRepository.save([engine1, engine2]);
         });
 
         it("findAll should return items which are matched by discriminator", function () {
             return veyronEngineRepository.findAll().then(function (engines) {
                 expect(engines.length).to.be.eql(1);
+                expect(engines[0].id).to.be.eql(engine2.id);
             });
         });
 
         it("findOne should return item which is matched by discriminator", function () {
             return veyronEngineRepository.findOne(engine2.id).then(function (engine) {
                 expect(engine.id).to.be.eql(engine2.id);
+            });
+        });
+
+        it("findOne should return null if id doesn't find one matched by discriminator", function () {
+            return veyronEngineRepository.findOne(engine1.id).then(function (engine) {
+                expect(engine).to.be.eql(null);
+            });
+        });
+
+    });
+
+    describe("null discriminator", function () {
+        var ownerRepository, namelessOwnerRepository, owner, namelessOwner;
+
+        beforeEach(function () {
+            ownerRepository = new OwnerRepository();
+            namelessOwnerRepository = new NamelessOwnerRepository();
+
+            owner = ownerRepository.newEntity({ name: "blubi" });
+            namelessOwner = ownerRepository.newEntity({ name: null });
+
+            return ownerRepository.save([owner, namelessOwner]);
+        });
+
+        it("findAll should return items which are matched by null discriminator", function () {
+            return namelessOwnerRepository.findAll().then(function (owners) {
+                expect(owners.length).to.be.eql(1);
+                expect(owners[0].id).to.be.eql(namelessOwner.id);
+            });
+        });
+
+        it("findOne should return item which is matched by null discriminator", function () {
+            return namelessOwnerRepository.findOne(namelessOwner.id).then(function (owner) {
+                expect(owner.id).to.be.eql(namelessOwner.id);
+            });
+        });
+
+        it("findOne should return null if id doesn't find one matched by null discriminator", function () {
+            return namelessOwnerRepository.findOne(owner.id).then(function (owner) {
+                expect(owner).to.be.eql(null);
             });
         });
 

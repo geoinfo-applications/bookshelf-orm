@@ -120,6 +120,12 @@ registry.register("OwnerDBMapping", "test", {
     columns: ["id", "name"]
 });
 
+registry.register("NamelessOwnerDBMapping", "test", {
+    tableName: "datadictionary.owner",
+    columns: ["id"],
+    discriminator: { name: null }
+});
+
 registry.register("ParkingSpaceDBMapping", "test", {
     tableName: "datadictionary.parking_space",
     columns: ["id", "name"]

@@ -18,6 +18,7 @@ class Engine {}
 class VeyronEngine {}
 class Wheel {}
 class Owner {}
+class NamelessOwner {}
 class ParkingSpace {}
 
 
@@ -27,6 +28,7 @@ var VeyronEngineRepository = createRepository(VeyronEngine, "VeyronEngine");
 var EngineRepository = createRepository(Engine, "Engine");
 var WheelRepository = createRepository(Wheel, "Wheel");
 var OwnerRepository = createRepository(Owner, "Owner");
+var NamelessOwnerRepository = createRepository(NamelessOwner, "NamelessOwner");
 var ParkingSpaceRepository = createRepository(ParkingSpace, "ParkingSpace");
 
 module.exports = {
@@ -36,6 +38,7 @@ module.exports = {
     VeyronEngine: VeyronEngine,
     Wheel: Wheel,
     Owner: Owner,
+    NamelessOwner: NamelessOwner,
     ParkingSpace: ParkingSpace,
 
     CarRepository: CarRepository,
@@ -44,5 +47,6 @@ module.exports = {
     VeyronEngineRepository: VeyronEngineRepository,
     WheelRepository: WheelRepository,
     OwnerRepository: OwnerRepository,
+    NamelessOwnerRepository: NamelessOwnerRepository,
     ParkingSpaceRepository: ParkingSpaceRepository
 };
