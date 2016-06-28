@@ -13,7 +13,7 @@
   "author": "Geoinfo AG",
   "license": "ISC",
   "private": false,
-  "publishCondif": {
+  "publishConfig": {
     "registry": "http://npm.geoinfo.ch"
   },
   "engines": {
