@@ -34,11 +34,11 @@ class EntityRepository {
 
     /**
      * Fetch one Entity from this Repository
-     * @param {Number | *} id - Identifier of Entity, specified in Mapping by "identifiedBy". Defaults to "id".
+     * @param {ID} id - Identifier of Entity, specified in Mapping by "identifiedBy". Defaults to "id".
      * @param {object} [options] - Bookshelf fetch options
      * @param {Transaction} [options.transacting] - Run in given transaction
      * @param {boolean} [options.transactional] - Run in a transaction, start new one if not already transacting
-     * @param {string[]} [options.exclude] - Relation names to exclude, deep relations in dot notation. Specify wildcards using "*"
+     * @param {Array<string>} [options.exclude] - Relation names to exclude, deep relations in dot notation. Specify wildcards using "*"
      * @returns {Promise<Entity|null>} - Returns Promise resolved with entity, or null if not found
      */
     findOne(id, options) {
@@ -47,12 +47,12 @@ class EntityRepository {
 
     /**
      * Fetch all Entities, or Entities with given Ids from this Repository
-     * @param {Number[] | *[]} ids - Identifiers of Entities, specified in Mapping by "identifiedBy". Defaults to "id".
+     * @param {Array<ID>} ids - Identifiers of Entities, specified in Mapping by "identifiedBy". Defaults to "id".
      * @param {object} [options] - Bookshelf fetch options
      * @param {Transaction} [options.transacting] - Run in given transaction
      * @param {boolean} [options.transactional] - Run in a transaction, start new one if not already transacting
-     * @param {string[]} [options.exclude] - Relation names to exclude, deep relations in dot notation. Specify wildcards using "*"
-     * @returns {Promise<Entity[]>} - Returns Promise resolved with array of entities, or empty list if not found.
+     * @param {Array<string>} [options.exclude] - Relation names to exclude, deep relations in dot notation. Specify wildcards using "*"
+     * @returns {Promise<Array<Entity>>} - Returns Promise resolved with array of entities, or empty list if not found.
      *                                If ids were specified, Entities are sorted statically by given ids
      */
     findAll(ids, options) {
@@ -65,8 +65,8 @@ class EntityRepository {
      * @param {object} [options] - Bookshelf fetch options
      * @param {Transaction} [options.transacting] - Run in given transaction
      * @param {boolean} [options.transactional] - Run in a transaction, start new one if not already transacting
-     * @param {string[]} [options.exclude] - Relation names to exclude, deep relations in dot notation. Specify wildcards using "*"
-     * @returns {Promise<Entity[]>} - Returns Promise resolved with array of entities, or empty list if not found.
+     * @param {Array<string>} [options.exclude] - Relation names to exclude, deep relations in dot notation. Specify wildcards using "*"
+     * @returns {Promise<Array<Entity>>} - Returns Promise resolved with array of entities, or empty list if not found.
      */
     findAllWhere(q, options) {
         return this.repository.findWhere(q, options).then((items) => {
@@ -80,7 +80,7 @@ class EntityRepository {
      * @param {object} [options] - Bookshelf fetch options
      * @param {Transaction} [options.transacting] - Run in given transaction
      * @param {boolean} [options.transactional] - Run in a transaction, start new one if not already transacting
-     * @param {string[]} [options.exclude] - Relation names to exclude, deep relations in dot notation. Specify wildcards using "*"
+     * @param {Array<string>} [options.exclude] - Relation names to exclude, deep relations in dot notation. Specify wildcards using "*"
      * @returns {Promise<Entity|null>} - Returns Promise resolved with entity, or null if not found
      */
     findWhere(q, options) {
@@ -95,12 +95,12 @@ class EntityRepository {
 
     /**
      * Save one or multiple Entities to this Repository
-     * @param {Entity | Entity[]} entity - Entity or Entities to save
+     * @param {Entity | Array<Entity>} entity - Entity or Entities to save
      * @param {object} [options] - Bookshelf save options
      * @param {Transaction} [options.transacting] - Run in given transaction
      * @param {boolean} [options.transactional] - Run in a transaction, start new one if not already transacting
      * @param {string} [options.method] - Specify "update" or "insert". Defaults to "update", or "insert" if Id is null
-     * @returns {Promise<Entity | Entity[]>} - Returns Promise resolved with saved entity, or array of saved entities
+     * @returns {Promise<Entity | Array<Entity>>} - Returns Promise resolved with saved entity, or array of saved entities
      */
     save(entity, options) {
         if (Array.isArray(entity)) {
@@ -116,14 +116,14 @@ class EntityRepository {
 
     /**
      * Hook, is called once after every successful save operation
-     * @param {Number | *} id - Identifier of saved Entity
+     * @param {ID} id - Identifier of saved Entity
      */
     afterSave() {
     }
 
     /**
      * Remove one or multiple Entities from this Repository
-     * @param {Entity | Entity[] | Number | Number[] | * | *[]} entity - Entity or Entities, Id or Ids to remove
+     * @param {Entity | Array<Entity> | ID | Array<ID>} entity - Entity or Entities, Id or Ids to remove
      * @param {object} [options] - Bookshelf save options
      * @param {Transaction} [options.transacting] - Run in given transaction
      * @param {boolean} [options.transactional] - Run in a transaction, start new one if not already transacting
@@ -149,7 +149,7 @@ class EntityRepository {
 
     /**
      * Hook, is called once after every successful remove operation
-     * @param {Number | *} id - Identifier of removed Entity
+     * @param {ID} id - Identifier of removed Entity
      */
     afterRemove() {
     }
