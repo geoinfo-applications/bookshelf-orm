@@ -1,5 +1,15 @@
 "use strict";
 
+/**
+ * Describes a DB Mapping
+ * @property {string} tableName - Fully qualified name of DB Table
+ * @property {string} [identifiedBy = "id"] - Primary key column
+ * @property {Array<String | ColumnDescriptor>} [columns] - columns to fetch. 'underscore_space' will be converted to 'lowerCamelCase' in Entity
+ * @property {Object | Function} [discriminator] - Fetch only Entities which match a given query, Knex where condition
+ * @property {Array<RelationDescriptor>} [relations] - Managed relations of this Entity.
+ *                                                     There will be a getter and setter for n:1 relations
+ *                                                     There will be a getter and modifiers ("add"/"remove" + relation.name) for m:n relations
+ */
 class BookshelfMapping {
 
     constructor(dbContext, config) {

@@ -1,6 +1,8 @@
 "use strict";
 
-
+/**
+ * Holds all Mappings and converts them to Bookshelf Models
+ */
 class DBMappingRegistry {
 
     constructor(ModelFactory) {
@@ -9,6 +11,12 @@ class DBMappingRegistry {
         this.ModelFactory = ModelFactory;
     }
 
+    /**
+     * Register a Mapping
+     * @param {string} name - Name of the mapping
+     * @param {string} dbContextName - DB context / connection name
+     * @param {BookshelfMapping} mapping - Mapping description of columns, relations etc.
+     */
     register(name, dbContextName, mapping) {
         this.mappings[name] = {
             dbContextName: dbContextName,

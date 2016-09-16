@@ -34,7 +34,7 @@ class EntityRepository {
 
     /**
      * Fetch one Entity from this Repository
-     * @param {ID} id - Identifier of Entity, specified in Mapping by "identifiedBy". Defaults to "id".
+     * @param {ID} id - Identifier of Entity, specified in Mapping by "identifiedBy"
      * @param {object} [options] - Bookshelf fetch options
      * @param {Transaction} [options.transacting] - Run in given transaction
      * @param {boolean} [options.transactional] - Run in a transaction, start new one if not already transacting
@@ -47,7 +47,7 @@ class EntityRepository {
 
     /**
      * Fetch all Entities, or Entities with given Ids from this Repository
-     * @param {Array<ID>} ids - Identifiers of Entities, specified in Mapping by "identifiedBy". Defaults to "id".
+     * @param {Array<ID>} ids - Identifiers of Entities, specified in Mapping by "identifiedBy"
      * @param {object} [options] - Bookshelf fetch options
      * @param {Transaction} [options.transacting] - Run in given transaction
      * @param {boolean} [options.transactional] - Run in a transaction, start new one if not already transacting
