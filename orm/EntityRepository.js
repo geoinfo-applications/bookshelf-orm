@@ -14,7 +14,7 @@ class EntityRepository {
 
     /**
      * @param {Class | Function} Entity - Class or constructor function. Entities from this repository will be instances of this Type
-     * @param {BookshelfMapping} Mapping - Mapping which describes this type and its relations
+     * @param {BookshelfMapping} Mapping - {@link DBMappingRegistry#compile Compiled Mapping} which describes this type and its relations
      */
     constructor(Entity, Mapping) {
         this.Entity = Entity;

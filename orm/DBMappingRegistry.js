@@ -28,6 +28,11 @@ class DBMappingRegistry {
         return this.mappings[name].mapping;
     }
 
+    /**
+     * Compile a BookshelfMapping for use with an EntityRepository
+     * @param {string} name - Name of a registered Mapping
+     * @returns {EntityRepository} compiled Mapping, ready to use
+     */
     compile(name) {
         if (!this.isCached(name)) {
             this.compileAndCache(name);
