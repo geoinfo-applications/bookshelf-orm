@@ -270,7 +270,7 @@ describe("Bookshelf Model Wrapper Test", function () {
             it("should add getter for related Entity", function () {
                 var part = partRepository.newEntity();
                 var engine = { id: Date.now() };
-                partRepository.unwrap(part).relations.relation_engine = engine;
+                partWrapper.unwrap(part).relations.relation_engine = engine;
 
                 expect(part.engine.item).to.be.equal(engine);
             });
@@ -288,7 +288,7 @@ describe("Bookshelf Model Wrapper Test", function () {
                 var engine = part.newEngine({ id: Date.now() });
                 part.engine = engine;
 
-                var item = partRepository.unwrap(part);
+                var item = partWrapper.unwrap(part);
 
                 expect(item.get("engine_id")).to.be.eql(engine.id);
                 expect(item.related("relation_engine")).to.be.eql(engine.item);
@@ -298,7 +298,7 @@ describe("Bookshelf Model Wrapper Test", function () {
                 var part = partRepository.newEntity();
                 part.engine = null;
 
-                var item = partRepository.unwrap(part);
+                var item = partWrapper.unwrap(part);
 
                 expect(item.get("engine_id")).to.be.eql(null);
                 expect(item.relations.relation_engine).to.be.eql(null);
