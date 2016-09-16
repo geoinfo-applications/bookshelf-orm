@@ -4,6 +4,7 @@ var Q = require("q");
 var _ = require("underscore");
 var BookshelfRepository = require("./BookshelfRepository");
 var BookshelfModelWrapper = require("./BookshelfModelWrapper");
+var BookshelfDeepOperation = require("./BookshelfDeepOperation");
 
 
 class EntityRepository {
@@ -103,6 +104,10 @@ class EntityRepository {
 
     unwrap(entity) {
         return this.wrapper.unwrap(entity);
+    }
+
+    addTransactionToQuery(options, query) {
+        return BookshelfDeepOperation.addTransactionToQuery(options, query);
     }
 
 }
