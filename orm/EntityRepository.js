@@ -183,6 +183,23 @@ class EntityRepository {
         return BookshelfDeepOperation.addTransactionToQuery(options, query);
     }
 
+    /**
+     * Returns whether an Entity with the given Identifier exists.
+     * @param {ID} id - Identifier
+     * @param {object} [options] - Bookshelf save options
+     * @param {Transaction} [options.transacting] - Run in given transaction
+     * @param {boolean} [options.transactional] - Run in a transaction, start new one if not already transacting
+     * @returns {Promise<boolean>} - Returns Promise resolved with flag indicating whether an Entity with the given Identifier exists
+     */
+    exists(id, options) {
+        if (!id) {
+            return Q.when(false);
+        }
+
+        options = _.extend({}, options, { exclude: ["*"] });
+        return this.findOne(id, options).then((entity) => !!entity);
+    }
+
 }
 
 module.exports = EntityRepository;

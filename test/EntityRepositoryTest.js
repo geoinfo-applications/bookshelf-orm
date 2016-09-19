@@ -129,6 +129,39 @@ describe("Entity Repository Test", function () {
 
     });
 
+    describe("exists", function () {
+
+        it("should return instance of EntityClass with specified id", function () {
+            return carRepository.save(createCar()).then(function (model) {
+                return carRepository.findOne(model.id).then(function (fetchedModel) {
+                    expect(fetchedModel).to.be.instanceof(Car);
+                    expect(fetchedModel.id).to.be.eql(model.id);
+                });
+            });
+        });
+
+        it("should return true if item with given id exists", () => {
+            return carRepository.save(createCar()).then(function (model) {
+                return carRepository.exists(model.id).then(function (exists) {
+                    expect(exists).to.be.equal(true);
+                });
+            });
+        });
+
+        it("should return false if item with given id doesn't exist", () => {
+            return carRepository.exists(123).then(function (exists) {
+                expect(exists).to.be.equal(false);
+            });
+        });
+
+        it("should return false if id is null", () => {
+            return carRepository.exists(null).then(function (exists) {
+                expect(exists).to.be.equal(false);
+            });
+        });
+
+    });
+
     describe("save", function () {
 
         it("should return EntityClass", function () {
