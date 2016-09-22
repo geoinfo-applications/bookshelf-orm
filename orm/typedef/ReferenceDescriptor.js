@@ -7,7 +7,7 @@
  * @property {string} [mappedBy = relation.name + _id] - FK name
  * @property {boolean} [orphanRemoval = false] - Remove all orphans upon save/remove
  * @property {boolean} [cascade = false] - Save/remove objects of this relation
- * @property {boolean} [sequential = false] - Force sequential saving of this relation objects. Useful e.g. when dealing with foreign table wrapper tables to avoid transaction errors.
+ * @property {boolean} [saveSequential = false] - Force sequential saving of this relation objects. Useful e.g. when dealing with foreign table wrapper tables to avoid transaction errors.
  */
 class ReferenceDescriptor {
 
