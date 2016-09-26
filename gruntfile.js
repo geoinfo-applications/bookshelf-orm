@@ -52,6 +52,17 @@ module.exports = function (grunt) {
             src: jsFiles
         },
 
+        jsdoc: {
+            doc: {
+                src: ["orm/**/*.js", "readme.md"],
+                options: {
+                    destination: "doc",
+                    template: "node_modules/ink-docstrap/template",
+                    configure: "jsdoc.conf.json"
+                }
+            }
+        },
+
         mochaTest: {
             options: {
                 reporter: "spec"
@@ -111,6 +122,6 @@ module.exports = function (grunt) {
     grunt.registerTask("update", ["npm-install", "clean", "david"]);
     grunt.registerTask("update-development", ["env:unit_test", "update", "env:development"]);
     grunt.registerTask("test", ["env:unit_test", "code-check", "mochaTest"]);
-    grunt.registerTask("build", ["env:build", "code-check", "update", "mocha_istanbul", "plato"]);
+    grunt.registerTask("build", ["env:build", "code-check", "update", "mocha_istanbul", "plato", "jsdoc"]);
 
 };

@@ -25,8 +25,12 @@ class BookshelfDeepOperation {
     }
 
     addTransactionToQuery(query) {
-        if (this.options && this.options.transacting) {
-            query.transacting(this.options.transacting);
+        return BookshelfDeepOperation.addTransactionToQuery(this.options, query);
+    }
+
+    static addTransactionToQuery(options, query) {
+        if (options && options.transacting) {
+            query.transacting(options.transacting);
         }
 
         return query;

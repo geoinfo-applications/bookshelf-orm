@@ -77,21 +77,35 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
         var operation = new BookshelfDeepSaveOperation(relation.references.mapping, this.options);
         var curriedSaveFunction = saveFunction.bind(this, item, keyName, operation);
 
-        return Q.when(value && this.saveRelatedValue(value, curriedSaveFunction)).then(() => {
+        return Q.when(value && this.saveRelatedValue(value, curriedSaveFunction, relation.references.saveSequential)).then(() => {
             if (relation.references.orphanRemoval) {
                 return this.removeOrphans(item, relation, value);
             }
         });
     }
 
-    saveRelatedValue(value, saveOperation) {
+    saveRelatedValue(value, saveOperation, sequential) {
         if (_.isFunction(value.save)) {
             return saveOperation(value);
         } else if (Array.isArray(value.models)) {
-            return Q.all(value.models.map(saveOperation));
+            return this.runSaveOperation(value.models, saveOperation, sequential);
         } else {
             throw new Error("Related value of type '" + typeof value + "' can not be saved");
         }
+    }
+
+    runSaveOperation(models, saveOperation, sequential) {
+        if (sequential === true) {
+            return this.doSequential(models, saveOperation);
+        } else {
+            return Q.all(models.map(saveOperation));
+        }
+    }
+
+    doSequential(list, callback) {
+        return _.reduce(list, (promise, item, index) => {
+            return promise.then(() => callback(item, index));
+        }, Q.when());
     }
 
     removeOrphans(item, relation, value) {

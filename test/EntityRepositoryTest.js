@@ -129,6 +129,39 @@ describe("Entity Repository Test", function () {
 
     });
 
+    describe("exists", function () {
+
+        it("should return instance of EntityClass with specified id", function () {
+            return carRepository.save(createCar()).then(function (model) {
+                return carRepository.findOne(model.id).then(function (fetchedModel) {
+                    expect(fetchedModel).to.be.instanceof(Car);
+                    expect(fetchedModel.id).to.be.eql(model.id);
+                });
+            });
+        });
+
+        it("should return true if item with given id exists", () => {
+            return carRepository.save(createCar()).then(function (model) {
+                return carRepository.exists(model.id).then(function (exists) {
+                    expect(exists).to.be.equal(true);
+                });
+            });
+        });
+
+        it("should return false if item with given id doesn't exist", () => {
+            return carRepository.exists(123).then(function (exists) {
+                expect(exists).to.be.equal(false);
+            });
+        });
+
+        it("should return false if id is null", () => {
+            return carRepository.exists(null).then(function (exists) {
+                expect(exists).to.be.equal(false);
+            });
+        });
+
+    });
+
     describe("save", function () {
 
         it("should return EntityClass", function () {
@@ -358,7 +391,7 @@ describe("Entity Repository Test", function () {
         it("should wrap Model in EntityClass", function () {
             var item = CarDBMapping.Model.forge({ name: "", label: "", srid: 1 });
 
-            var entity = carRepository.wrap(item);
+            var entity = carRepository.wrapper.wrap(item);
 
             expect(entity).to.be.instanceof(Car);
         });
@@ -369,9 +402,9 @@ describe("Entity Repository Test", function () {
 
         it("should return Model for EntityClass", function () {
             var item = CarDBMapping.Model.forge({ name: "", label: "", srid: 1 });
-            var entity = carRepository.wrap(item);
+            var entity = carRepository.wrapper.wrap(item);
 
-            var unwrappedItem = carRepository.unwrap(entity);
+            var unwrappedItem = carRepository.wrapper.unwrap(entity);
 
             expect(item).to.be.equal(unwrappedItem);
         });
@@ -389,7 +422,7 @@ describe("Entity Repository Test", function () {
         it("should return wrapped and initialized Entity", function () {
             var entity = carRepository.newEntity();
 
-            var model = carRepository.unwrap(entity);
+            var model = carRepository.wrapper.unwrap(entity);
             model.set("name", "name " + Date.now());
 
             expect(entity.name).to.be.eql(model.get("name"));
@@ -421,8 +454,8 @@ describe("Entity Repository Test", function () {
 
             var entity = carRepository.newEntity(forgeArgument);
 
-            expect(carRepository.unwrap(entity).get("name")).to.be.eql(forgeArgument.name);
-            expect(carRepository.unwrap(entity).get("model_name")).to.be.eql(forgeArgument.modelName);
+            expect(carRepository.wrapper.unwrap(entity).get("name")).to.be.eql(forgeArgument.name);
+            expect(carRepository.wrapper.unwrap(entity).get("model_name")).to.be.eql(forgeArgument.modelName);
         });
 
         it("should reconstruct relations", function () {
@@ -431,7 +464,7 @@ describe("Entity Repository Test", function () {
                 parts: [{ name: "attr1name" }, { name: "attr2name" }]
             });
 
-            var item = carRepository.unwrap(entity);
+            var item = carRepository.wrapper.unwrap(entity);
 
             expect(item.get("parts")).to.be.eql(void 0);
             expect(item.related("relation_parts").length).to.be.eql(2);

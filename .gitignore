@@ -8,3 +8,6 @@ node_modules
 
 # WebStorm settings
 .idea
+
+# doc
+doc
