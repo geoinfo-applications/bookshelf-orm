@@ -88,13 +88,17 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
         if (_.isFunction(value.save)) {
             return saveOperation(value);
         } else if (Array.isArray(value.models)) {
-            if (sequential === true) {
-                return this.doSequential(value.models, saveOperation);
-            } else {
-                return Q.all(value.models.map(saveOperation));
-            }
+            return this.runSaveOperation(value.models, saveOperation, sequential);
         } else {
             throw new Error("Related value of type '" + typeof value + "' can not be saved");
+        }
+    }
+
+    runSaveOperation(models, saveOperation, sequential) {
+        if (sequential === true) {
+            return this.doSequential(models, saveOperation);
+        } else {
+            return Q.all(models.map(saveOperation));
         }
     }
 
