@@ -84,7 +84,8 @@ describe("Bookshelf Model Wrapper Test", function () {
                         type: "json"
                     }],
                     relations: [],
-                    Collection: sinon.stub()
+                    Collection: sinon.stub(),
+                    identifiedBy: "id"
                 };
                 var wrapper = new BookshelfModelWrapper(mapping, sinon.stub().returnsThis());
                 var item = {
@@ -106,7 +107,8 @@ describe("Bookshelf Model Wrapper Test", function () {
                         type: "json"
                     }],
                     relations: [],
-                    Collection: sinon.stub()
+                    Collection: sinon.stub(),
+                    identifiedBy: "id"
                 };
                 var wrapper = new BookshelfModelWrapper(mapping, sinon.stub().returnsThis());
                 var item = {
@@ -128,7 +130,8 @@ describe("Bookshelf Model Wrapper Test", function () {
                         type: "json"
                     }],
                     relations: [],
-                    Collection: sinon.stub()
+                    Collection: sinon.stub(),
+                    identifiedBy: "id"
                 };
                 var wrapper = new BookshelfModelWrapper(mapping, sinon.stub().returnsThis());
                 var item = {
@@ -326,14 +329,14 @@ describe("Bookshelf Model Wrapper Test", function () {
                         car_id: car.id,
                         name: "attrName"
                     }).save().then(function () {
-                        return carRepository.findOne(car.id).then(function (importTable) {
-                            importTable.name = "theName";
-                            importTable.model_name = "aLabel";
+                        return carRepository.findOne(car.id).then(function (car) {
+                            car.name = "theName";
+                            car.modelName = "aLabel";
 
-                            var json = JSON.parse(JSON.stringify(importTable));
+                            var json = JSON.parse(JSON.stringify(car));
 
                             expect(json.name).to.be.eql("theName");
-                            expect(json.model_name).to.be.eql("aLabel");
+                            expect(json.modelName).to.be.eql("aLabel");
                             expect("parts" in json).to.be.eql(true);
                             expect(json.parts).to.be.an("array");
                             expect(json.parts[0].name).to.be.eql("attrName");
@@ -343,8 +346,8 @@ describe("Bookshelf Model Wrapper Test", function () {
             });
 
             it("should not include 'item' in JSON", function (done) {
-                carRepository.save(createCar()).then(function (importTable) {
-                    var json = JSON.parse(JSON.stringify(importTable));
+                carRepository.save(createCar()).then(function (car) {
+                    var json = JSON.parse(JSON.stringify(car));
 
                     expect("item" in json).to.be.eql(false);
 
@@ -384,7 +387,8 @@ describe("Bookshelf Model Wrapper Test", function () {
                     type: "json"
                 }],
                 relations: [],
-                Collection: sinon.stub()
+                Collection: sinon.stub(),
+                identifiedBy: "id"
             };
             var wrapper = new BookshelfModelWrapper(mapping, sinon.stub().returnsThis());
             var item = {
