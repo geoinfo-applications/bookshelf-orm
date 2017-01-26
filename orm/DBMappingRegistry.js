@@ -18,6 +18,10 @@ class DBMappingRegistry {
      * @param {BookshelfMapping} mapping - Mapping description of columns, relations etc.
      */
     register(name, dbContextName, mapping) {
+        if (this.mappings[name]) {
+            throw new Error(`A mapping with name '${name}' is already registered`);
+        }
+
         this.mappings[name] = {
             dbContextName: dbContextName,
             mapping: mapping
