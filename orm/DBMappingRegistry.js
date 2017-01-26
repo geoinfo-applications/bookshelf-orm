@@ -18,7 +18,7 @@ class DBMappingRegistry {
      * @param {BookshelfMapping} mapping - Mapping description of columns, relations etc.
      */
     register(name, dbContextName, mapping) {
-        if (this.mappings[name]) {
+        if (this.isRegistered(name)) {
             throw new Error(`A mapping with name '${name}' is already registered`);
         }
 
@@ -30,6 +30,10 @@ class DBMappingRegistry {
 
     get(name) {
         return this.mappings[name].mapping;
+    }
+
+    isRegistered(name) {
+        return name in this.mappings;
     }
 
     /**
@@ -46,7 +50,7 @@ class DBMappingRegistry {
     }
 
     compileAndCache(name) {
-        if (!this.mappings[name]) {
+        if (!this.isRegistered(name)) {
             throw new Error(name + " is not a registered mapping");
         }
 
