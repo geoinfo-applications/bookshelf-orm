@@ -66,4 +66,12 @@ describe("DB-Mapping Registry Test", function () {
 
     });
 
+    it("should throw if two mappings with same name are registered", () => {
+        var testModel = {};
+
+        registry.register("model", "dbContext", testModel);
+
+        expect(registry.register.bind(registry, "model", "dbContext", testModel)).to.throw(/already registered/);
+    });
+
 });
