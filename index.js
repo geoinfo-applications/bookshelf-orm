@@ -10,5 +10,6 @@ module.exports = {
     DBMappingRegistry: require("./orm/DBMappingRegistry"),
     EntityRepository: require("./orm/EntityRepository"),
     MappingRelationsIterator: require("./orm/MappingRelationsIterator"),
-    ModelFactory: require("./orm/ModelFactory")
+    ModelFactory: require("./orm/ModelFactory"),
+    PostgresDBDefinition: require("./orm/PostgresDBDefinition")
 };
