@@ -23,26 +23,18 @@ class BookshelfMapping {
         this.Model = this.createModel();
         this.Collection = this.createCollection();
         this.startTransaction = dbContext.transaction.bind(dbContext);
+
+        this.columnMappings = this.columns.map((column) => typeof column === "string" ? { name: column } : column);
+        this.columnNames = this.columnMappings.map((column) => column.name);
+        this.regularColumns = this.columnMappings.filter((c) => c.type !== "sql");
+        this.regularColumnNames = this.regularColumns.map((column) => column.name);
+        this.sqlColumns = this.columnMappings.filter((c) => c.type === "sql");
+        this.writeableSqlColumns = this.sqlColumns.filter((c) => c.set);
+        this.readableSqlColumns = this.sqlColumns.filter((c) => c.get);
     }
 
     static getOptionOrDefault(configProperty, defaultValue) {
         return configProperty || defaultValue;
-    }
-
-    get sqlColumns() {
-        return this.columns.filter((c) => c.type === "sql");
-    }
-
-    get writeableSqlColumns() {
-        return this.sqlColumns.filter((c) => c.set);
-    }
-
-    get readableSqlColumns() {
-        return this.sqlColumns.filter((c) => c.get);
-    }
-
-    get regularColumns() {
-        return this.columns.filter((c) => c.type !== "sql");
     }
 
     createModel() {

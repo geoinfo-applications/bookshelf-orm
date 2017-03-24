@@ -9,8 +9,14 @@ class BookshelfModelWrapper {
     constructor(Mapping, Entity) {
         this.Mapping = Mapping;
         this.Entity = Entity || Object;
-        this.columnMappings = _.map(this.Mapping.columns, (column) => _.isObject(column) ? column : { name: column });
-        this.columnNames = this.columnMappings.map((column) => column.name);
+    }
+
+    get columnMappings() {
+        return this.Mapping.columnMappings;
+    }
+
+    get columnNames() {
+        return this.Mapping.columnNames;
     }
 
     wrap(item) {

@@ -35,6 +35,38 @@ describe("Bookshelf Repository Raw Fields Test", function () {
             });
         });
 
+        it("should not return calculated field from DB if excluded", function () {
+            var name = "name" + Date.now();
+            var modelName = "modelName" + Date.now();
+            var car = CarDBMapping.Model.forge({ name: name, model_name: modelName });
+            var promise = carRepository.save(car);
+
+            promise = promise.then(function () {
+                return carRepository.findAll({ exclude: ["description"] });
+            });
+
+            return promise.then(function (cars) {
+                expect(cars.length).to.be.eql(1);
+                expect(cars.at(0).get("description")).to.be.eql(void 0);
+            });
+        });
+
+        it("should not return calculated field from DB if all excluded", function () {
+            var name = "name" + Date.now();
+            var modelName = "modelName" + Date.now();
+            var car = CarDBMapping.Model.forge({ name: name, model_name: modelName });
+            var promise = carRepository.save(car);
+
+            promise = promise.then(function () {
+                return carRepository.findAll({ exclude: ["*"] });
+            });
+
+            return promise.then(function (cars) {
+                expect(cars.length).to.be.eql(1);
+                expect(cars.at(0).get("description")).to.be.eql(void 0);
+            });
+        });
+
     });
 
     describe("findOne", function () {
@@ -50,6 +82,34 @@ describe("Bookshelf Repository Raw Fields Test", function () {
 
             return promise.then(function (car) {
                 expect(car.get("serial_number")).to.be.eql(serialNumber.toUpperCase());
+            });
+        });
+
+        it("should not restore calculated field from DB if excluded", function () {
+            var serialNumber = "sN" + Date.now();
+            var car = CarDBMapping.Model.forge({ serial_number: serialNumber });
+            var promise = carRepository.save(car);
+
+            promise = promise.then(function (car) {
+                return carRepository.findOne(car.id, { exclude: ["serial_number"] });
+            });
+
+            return promise.then(function (car) {
+                expect(car.get("serial_number")).to.be.eql(void 0);
+            });
+        });
+
+        it("should not restore calculated field from DB if all excluded", function () {
+            var serialNumber = "sN" + Date.now();
+            var car = CarDBMapping.Model.forge({ serial_number: serialNumber });
+            var promise = carRepository.save(car);
+
+            promise = promise.then(function (car) {
+                return carRepository.findOne(car.id, { exclude: ["*"] });
+            });
+
+            return promise.then(function (car) {
+                expect(car.get("serial_number")).to.be.eql(void 0);
             });
         });
 

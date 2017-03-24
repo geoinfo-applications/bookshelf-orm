@@ -79,7 +79,7 @@ describe("Bookshelf Model Wrapper Test", function () {
             it("should stringify JSON fileds through setter", function () {
                 var thing = { date: Date.now() };
                 var mapping = {
-                    columns: [{
+                    columnMappings: [{
                         name: "thing",
                         type: "json"
                     }],
@@ -102,7 +102,7 @@ describe("Bookshelf Model Wrapper Test", function () {
             it("should parse JSON fileds through getter", function () {
                 var thing = { date: Date.now() };
                 var mapping = {
-                    columns: [{
+                    columnMappings: [{
                         name: "thing",
                         type: "json"
                     }],
@@ -125,7 +125,7 @@ describe("Bookshelf Model Wrapper Test", function () {
             it("should only parse JSON if value is a string", function () {
                 var thing = { date: Date.now() };
                 var mapping = {
-                    columns: [{
+                    columnMappings: [{
                         name: "thing",
                         type: "json"
                     }],
@@ -382,7 +382,7 @@ describe("Bookshelf Model Wrapper Test", function () {
         it("should stringify json fields", function () {
             var thing = { date: Date.now() };
             var mapping = {
-                columns: [{
+                columnMappings: [{
                     name: "thing",
                     type: "json"
                 }],
