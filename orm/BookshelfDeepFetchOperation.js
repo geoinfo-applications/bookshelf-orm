@@ -1,9 +1,10 @@
 "use strict";
 
-var Q = require("q");
-var _ = require("underscore");
-var BookshelfDeepOperation = require("./BookshelfDeepOperation");
-var MappingRelationsIterator = require("./MappingRelationsIterator");
+const Q = require("q");
+const _ = require("underscore");
+const BookshelfDeepOperation = require("./BookshelfDeepOperation");
+const MappingRelationsIterator = require("./MappingRelationsIterator");
+const StringUtils = require("./StringUtils");
 
 
 class BookshelfDeepFetchOperation extends BookshelfDeepOperation {
@@ -48,7 +49,7 @@ class BookshelfDeepFetchOperation extends BookshelfDeepOperation {
         var query = mapping.createQuery(model, this.options);
 
         var rawSelects = mapping.readableSqlColumns.filter((column) => {
-            return !_.contains(fetchOptions.exclude, column.name);
+            return !_.contains(fetchOptions.exclude, StringUtils.snakeToCamelCase(column.name));
         }).map((column) => {
             var getter = _.isFunction(column.get) ? column.get() : column.get;
             return mapping.dbContext.knex.raw(getter + " as \"" + column.name + "\"");

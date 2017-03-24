@@ -1,22 +1,24 @@
 "use strict";
 
-var expect = require("chai").expect;
-var BookshelfRelations = require("../orm/BookshelfRelations");
-var mapping, subMapping, subSubMapping, relations;
-
 
 describe("Bookshelf Relations Test", function () {
+    // jshint maxstatements:false
 
-    beforeEach(function () {
+    const expect = require("chai").expect;
+    const BookshelfRelations = require("../orm/BookshelfRelations");
+
+    var mapping, subMapping, subSubMapping, relations;
+
+    beforeEach(() => {
         subSubMapping = { discriminator: {}, relations: [{ name: "subSubRelatedThing", references: { mapping: {} } }] };
         subMapping = { relations: [{ name: "subRelatedThing", references: { mapping: subSubMapping } }] };
         mapping = { relations: [{ name: "relatedThing", references: { mapping: subMapping } }] };
         relations = new BookshelfRelations(mapping);
     });
 
-    describe("relationNames", function () {
+    describe("relationNames", () => {
 
-        it("should pluck relation.names from Mapping.relations", function () {
+        it("should pluck relation.names from Mapping.relations", () => {
             mapping.relations.push({ name: "relatedThing2" });
 
             var relationNames = relations.relationNames;
@@ -24,7 +26,7 @@ describe("Bookshelf Relations Test", function () {
             expect(relationNames).to.be.eql(["relatedThing", "relatedThing2"]);
         });
 
-        it("should return empty array if no relations present", function () {
+        it("should return empty array if no relations present", () => {
             mapping.relations = [];
 
             var relationNames = relations.relationNames;
@@ -34,9 +36,9 @@ describe("Bookshelf Relations Test", function () {
 
     });
 
-    describe("relationNamesDeep", function () {
+    describe("relationNamesDeep", () => {
 
-        it("should return relation names deeply in dot notation", function () {
+        it("should return relation names deeply in dot notation", () => {
 
             var relationNames = relations.relationNamesDeep;
 
@@ -49,9 +51,9 @@ describe("Bookshelf Relations Test", function () {
 
     });
 
-    describe("getFetchOptions", function () {
+    describe("getFetchOptions", () => {
 
-        it("should return prefixed relation name", function () {
+        it("should return prefixed relation name", () => {
             mapping.relations[0].references.mapping = {};
             var options = { exclude: ["relatedThing"] };
 
@@ -60,7 +62,7 @@ describe("Bookshelf Relations Test", function () {
             expect(fetchOptions.withRelated).to.be.eql([]);
         });
 
-        it("should return prefixed deep relation name", function () {
+        it("should return prefixed deep relation name", () => {
             var options = { exclude: ["relatedThing.subRelatedThing"] };
 
             var fetchOptions = relations.getFetchOptions(options);
@@ -68,7 +70,7 @@ describe("Bookshelf Relations Test", function () {
             expect(fetchOptions.withRelated).to.be.eql(["relation_relatedThing"]);
         });
 
-        it("should return exclude descendent properties", function () {
+        it("should return exclude descendent properties", () => {
             var options = { exclude: ["relatedThing"] };
 
             var fetchOptions = relations.getFetchOptions(options);
@@ -76,7 +78,7 @@ describe("Bookshelf Relations Test", function () {
             expect(fetchOptions.withRelated).to.be.eql([]);
         });
 
-        it("should return prefixed deep relation name without wildcarded subrelations", function () {
+        it("should return prefixed deep relation name without wildcarded subrelations", () => {
             var options = { exclude: ["relatedThing.*"] };
 
             var fetchOptions = relations.getFetchOptions(options);
@@ -84,7 +86,7 @@ describe("Bookshelf Relations Test", function () {
             expect(fetchOptions.withRelated).to.be.eql(["relation_relatedThing"]);
         });
 
-        it("should return no relation names if excluded is wildcard only", function () {
+        it("should return no relation names if excluded is wildcard only", () => {
             var options = { exclude: ["*"] };
 
             var fetchOptions = relations.getFetchOptions(options);
@@ -92,7 +94,7 @@ describe("Bookshelf Relations Test", function () {
             expect(fetchOptions.withRelated).to.be.eql([]);
         });
 
-        it("should add columns if specified", function () {
+        it("should add columns if specified", () => {
             var columns = ["b", "b", "c"];
             var options = { columns: columns };
 
@@ -101,7 +103,7 @@ describe("Bookshelf Relations Test", function () {
             expect(fetchOptions.columns).to.be.equal(columns);
         });
 
-        it("should add transaction if specified", function () {
+        it("should add transaction if specified", () => {
             var transaction = {};
             var options = { transacting: transaction };
 

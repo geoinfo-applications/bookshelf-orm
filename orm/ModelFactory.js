@@ -1,6 +1,6 @@
 "use strict";
 
-var BookshelfMapping = require("./BookshelfMapping");
+const BookshelfMapping = require("./BookshelfMapping");
 
 
 class ModelFactory {

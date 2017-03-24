@@ -1,50 +1,52 @@
 "use strict";
 
-var Q = require("q");
-var chai = require("chai");
-var expect = chai.expect;
-var sinon = require("sinon");
-var sinonChai = require("sinon-chai");
-chai.use(sinonChai);
-
-var BookshelfModelWrapper = require("../orm/BookshelfModelWrapper");
-
-var Car = require("./db/mocks").Car;
-var Part = require("./db/mocks").Part;
-var Engine = require("./db/mocks").Engine;
-var CarRepository = require("./db/mocks").CarRepository;
-var PartRepository = require("./db/mocks").PartRepository;
-
-require("./db/connection");
-var registry = require("./db/registry");
-require("./db/mappings");
-
-var CarDBMapping = registry.compile("CarDBMapping");
-var PartDBMapping = registry.compile("PartDBMapping");
-
 
 describe("Bookshelf Model Wrapper Test", function () {
+    // jshint maxstatements:false
+
+    const Q = require("q");
+    const chai = require("chai");
+    const expect = chai.expect;
+    const sinon = require("sinon");
+    const sinonChai = require("sinon-chai");
+    chai.use(sinonChai);
+
+    const BookshelfModelWrapper = require("../orm/BookshelfModelWrapper");
+
+    const Car = require("./db/mocks").Car;
+    const Part = require("./db/mocks").Part;
+    const Engine = require("./db/mocks").Engine;
+    const CarRepository = require("./db/mocks").CarRepository;
+    const PartRepository = require("./db/mocks").PartRepository;
+
+    require("./db/connection");
+    const registry = require("./db/registry");
+    require("./db/mappings");
+
+    const CarDBMapping = registry.compile("CarDBMapping");
+    const PartDBMapping = registry.compile("PartDBMapping");
+
     var carRepository, carWrapper, partRepository, partWrapper;
     this.timeout(1000);
 
-    beforeEach(function () {
+    beforeEach(() => {
         carRepository = new CarRepository();
         partRepository = new PartRepository();
         carWrapper = carRepository.wrapper;
         partWrapper = partRepository.wrapper;
     });
 
-    describe("wrap", function () {
+    describe("wrap", () => {
 
-        it("should return null if item is null", function () {
+        it("should return null if item is null", () => {
             var entity = carWrapper.wrap(null);
 
             expect(entity).to.be.eql(null);
         });
 
-        describe("properties", function () {
+        describe("properties", () => {
 
-            it("should wrap Model in Car", function () {
+            it("should wrap Model in Car", () => {
                 var item = CarDBMapping.Model.forge({ name: "", label: "" });
                 item.set("name", "testName " + Date.now());
                 item.set("model_name", Date.now());
@@ -56,7 +58,7 @@ describe("Bookshelf Model Wrapper Test", function () {
                 expect(entity.modelName).to.be.eql(item.get("model_name"));
             });
 
-            it("should add setters through Car to Model", function () {
+            it("should add setters through Car to Model", () => {
                 var item = CarDBMapping.Model.forge({
                     name: "",
                     model_name: ""
@@ -70,13 +72,13 @@ describe("Bookshelf Model Wrapper Test", function () {
                 expect(entity.modelName).to.be.eql(item.get("model_name"));
             });
 
-            it("should convert underscore_space to lowerCamelCase for column names", function () {
+            it("should convert underscore_space to lowerCamelCase for column names", () => {
                 var entity = createCar();
 
                 expect("modelName" in entity).to.be.eql(true);
             });
 
-            it("should stringify JSON fileds through setter", function () {
+            it("should stringify JSON fileds through setter", () => {
                 var thing = { date: Date.now() };
                 var mapping = {
                     columnMappings: [{
@@ -99,7 +101,7 @@ describe("Bookshelf Model Wrapper Test", function () {
                 expect(item.set).to.have.been.calledWith("thing", JSON.stringify(thing));
             });
 
-            it("should parse JSON fileds through getter", function () {
+            it("should parse JSON fileds through getter", () => {
                 var thing = { date: Date.now() };
                 var mapping = {
                     columnMappings: [{
@@ -122,7 +124,7 @@ describe("Bookshelf Model Wrapper Test", function () {
                 expect(thingFromEntity).to.be.eql(thing);
             });
 
-            it("should only parse JSON if value is a string", function () {
+            it("should only parse JSON if value is a string", () => {
                 var thing = { date: Date.now() };
                 var mapping = {
                     columnMappings: [{
@@ -147,19 +149,19 @@ describe("Bookshelf Model Wrapper Test", function () {
 
         });
 
-        describe("relations", function () {
+        describe("relations", () => {
 
-            it("should add properties for relations", function () {
+            it("should add properties for relations", () => {
                 var item = CarDBMapping.Model.forge({ name: "", label: "" });
                 var entity = carWrapper.wrap(item);
 
                 expect("parts" in entity).to.be.eql(true);
             });
 
-            it("should add getter for related list", function () {
-                return carRepository.save(createCar()).then(function (item) {
-                    return PartDBMapping.Model.forge({ car_id: item.id }).save().then(function (part) {
-                        return carRepository.findOne(item.id).then(function (item) {
+            it("should add getter for related list", () => {
+                return carRepository.save(createCar()).then((item) => {
+                    return PartDBMapping.Model.forge({ car_id: item.id }).save().then((part) => {
+                        return carRepository.findOne(item.id).then((item) => {
                             expect(item.parts).to.be.an("array");
                             expect(item.parts.length).to.be.eql(1);
                             expect(item.parts[0].id).to.be.eql(part.id);
@@ -168,10 +170,10 @@ describe("Bookshelf Model Wrapper Test", function () {
                 });
             });
 
-            it("should wrap items in related list", function () {
-                return carRepository.save(createCar()).then(function (item) {
-                    return PartDBMapping.Model.forge({ car_id: item.id }).save().then(function () {
-                        return carRepository.findOne(item.id).then(function (item) {
+            it("should wrap items in related list", () => {
+                return carRepository.save(createCar()).then((item) => {
+                    return PartDBMapping.Model.forge({ car_id: item.id }).save().then(() => {
+                        return carRepository.findOne(item.id).then((item) => {
                             expect(item.parts[0]).to.be.instanceof(Part);
                             expect(carWrapper.unwrap(item.parts[0])).to.be.instanceof(PartDBMapping.Model);
                         });
@@ -179,33 +181,33 @@ describe("Bookshelf Model Wrapper Test", function () {
                 });
             });
 
-            it("changes on returned related list should not reflect in inner entity state", function () {
-                return carRepository.save(createCar()).then(function (item) {
-                    return carRepository.findOne(item.id).then(function (item) {
+            it("changes on returned related list should not reflect in inner entity state", () => {
+                return carRepository.save(createCar()).then((item) => {
+                    return carRepository.findOne(item.id).then((item) => {
                         item.parts.push("foo");
                         expect(item.parts.length).to.be.eql(0);
                     });
                 });
             });
 
-            it("should provide modifier methods for related list", function () {
+            it("should provide modifier methods for related list", () => {
                 var item = carRepository.newEntity();
 
                 expect(item.addParts).to.be.a("function");
                 expect(item.removeParts).to.be.a("function");
             });
 
-            it("should return empty array for empty related list", function () {
+            it("should return empty array for empty related list", () => {
                 var item = carRepository.newEntity();
 
                 expect(item.parts).to.be.an("array");
                 expect(item.parts.length).to.be.eql(0);
             });
 
-            it("should remove removed item from related list", function () {
-                return carRepository.save(createCar()).then(function (item) {
-                    return PartDBMapping.Model.forge({ car_id: item.id }).save().then(function () {
-                        return carRepository.findOne(item.id).then(function (item) {
+            it("should remove removed item from related list", () => {
+                return carRepository.save(createCar()).then((item) => {
+                    return PartDBMapping.Model.forge({ car_id: item.id }).save().then(() => {
+                        return carRepository.findOne(item.id).then((item) => {
                             item.removeParts(item.parts[0]);
                             expect(item.parts.length).to.be.eql(0);
                         });
@@ -213,10 +215,10 @@ describe("Bookshelf Model Wrapper Test", function () {
                 });
             });
 
-            it("should remove array of removed item from related list", function () {
-                return carRepository.save(createCar()).then(function (item) {
-                    return PartDBMapping.Model.forge({ car_id: item.id }).save().then(function () {
-                        return carRepository.findOne(item.id).then(function (item) {
+            it("should remove array of removed item from related list", () => {
+                return carRepository.save(createCar()).then((item) => {
+                    return PartDBMapping.Model.forge({ car_id: item.id }).save().then(() => {
+                        return carRepository.findOne(item.id).then((item) => {
                             item.removeParts(item.parts);
                             expect(item.parts.length).to.be.eql(0);
                         });
@@ -224,10 +226,10 @@ describe("Bookshelf Model Wrapper Test", function () {
                 });
             });
 
-            it("should add added item to related list", function () {
-                return carRepository.save(createCar()).then(function (item) {
-                    return PartDBMapping.Model.forge({ car_id: item.id }).save().then(function () {
-                        return carRepository.findOne(item.id).then(function (item) {
+            it("should add added item to related list", () => {
+                return carRepository.save(createCar()).then((item) => {
+                    return PartDBMapping.Model.forge({ car_id: item.id }).save().then(() => {
+                        return carRepository.findOne(item.id).then((item) => {
                             var part = item.parts[0];
                             item.removeParts(part);
                             item.addParts(part);
@@ -237,8 +239,8 @@ describe("Bookshelf Model Wrapper Test", function () {
                 });
             });
 
-            it("should link added item to this", function () {
-                return carRepository.save(createCar()).then(function (item) {
+            it("should link added item to this", () => {
+                return carRepository.save(createCar()).then((item) => {
                     var part = item.newParts({ name: "", label: "" });
                     item.addParts(part);
 
@@ -246,8 +248,8 @@ describe("Bookshelf Model Wrapper Test", function () {
                 });
             });
 
-            it("should unlink removed item", function () {
-                return carRepository.save(createCar()).then(function (item) {
+            it("should unlink removed item", () => {
+                return carRepository.save(createCar()).then((item) => {
                     var part = item.newParts({ name: "", label: "" });
                     item.addParts(part);
 
@@ -257,10 +259,10 @@ describe("Bookshelf Model Wrapper Test", function () {
                 });
             });
 
-            it("should add array of added item to related list", function () {
-                return carRepository.save(createCar()).then(function (item) {
-                    return PartDBMapping.Model.forge({ car_id: item.id }).save().then(function () {
-                        return carRepository.findOne(item.id).then(function (item) {
+            it("should add array of added item to related list", () => {
+                return carRepository.save(createCar()).then((item) => {
+                    return PartDBMapping.Model.forge({ car_id: item.id }).save().then(() => {
+                        return carRepository.findOne(item.id).then((item) => {
                             var parts = item.parts;
                             item.removeParts(parts);
                             item.addParts(parts);
@@ -270,7 +272,7 @@ describe("Bookshelf Model Wrapper Test", function () {
                 });
             });
 
-            it("should add getter for related Entity", function () {
+            it("should add getter for related Entity", () => {
                 var part = partRepository.newEntity();
                 var engine = { id: Date.now() };
                 partWrapper.unwrap(part).relations.relation_engine = engine;
@@ -278,7 +280,7 @@ describe("Bookshelf Model Wrapper Test", function () {
                 expect(part.engine.item).to.be.equal(engine);
             });
 
-            it("should return null from getter if related Entity is not set", function () {
+            it("should return null from getter if related Entity is not set", () => {
                 var part = partRepository.newEntity();
 
                 var engine = part.engine;
@@ -286,7 +288,7 @@ describe("Bookshelf Model Wrapper Test", function () {
                 expect(engine).to.be.equal(null);
             });
 
-            it("should add setter for related Entity", function () {
+            it("should add setter for related Entity", () => {
                 var part = partRepository.newEntity();
                 var engine = part.newEngine({ id: Date.now() });
                 part.engine = engine;
@@ -297,7 +299,7 @@ describe("Bookshelf Model Wrapper Test", function () {
                 expect(item.related("relation_engine")).to.be.eql(engine.item);
             });
 
-            it("should allow to set null via setter for related Entity", function () {
+            it("should allow to set null via setter for related Entity", () => {
                 var part = partRepository.newEntity();
                 part.engine = null;
 
@@ -307,7 +309,7 @@ describe("Bookshelf Model Wrapper Test", function () {
                 expect(item.relations.relation_engine).to.be.eql(null);
             });
 
-            it("should throw error if relation type is not supported", function () {
+            it("should throw error if relation type is not supported", () => {
                 try {
                     carWrapper.Mapping.relations.push({ type: "unsupported", references: { mapping: {} }, name: "unsupportedRelation" });
                     createCar();
@@ -321,15 +323,15 @@ describe("Bookshelf Model Wrapper Test", function () {
 
         });
 
-        describe("toJSON", function () {
+        describe("toJSON", () => {
 
-            it("should create nice JSON", function () {
-                return carRepository.save(createCar()).then(function (car) {
+            it("should create nice JSON", () => {
+                return carRepository.save(createCar()).then((car) => {
                     return PartDBMapping.Model.forge({
                         car_id: car.id,
                         name: "attrName"
-                    }).save().then(function () {
-                        return carRepository.findOne(car.id).then(function (car) {
+                    }).save().then(() => {
+                        return carRepository.findOne(car.id).then((car) => {
                             car.name = "theName";
                             car.modelName = "aLabel";
 
@@ -345,23 +347,24 @@ describe("Bookshelf Model Wrapper Test", function () {
                 });
             });
 
-            it("should not include 'item' in JSON", function (done) {
-                carRepository.save(createCar()).then(function (car) {
+            it("should not include 'item' in JSON", () => {
+
+                var promise = carRepository.save(createCar());
+
+                return promise.then((car) => {
                     var json = JSON.parse(JSON.stringify(car));
 
                     expect("item" in json).to.be.eql(false);
-
-                    done();
-                }, done);
+                });
             });
 
         });
 
     });
 
-    describe("unwrap", function () {
+    describe("unwrap", () => {
 
-        it("should return Model for Car", function () {
+        it("should return Model for Car", () => {
             var item = CarDBMapping.Model.forge({ name: "", label: "", srid: 1 });
             var entity = carWrapper.wrap(item);
 
@@ -370,7 +373,7 @@ describe("Bookshelf Model Wrapper Test", function () {
             expect(item).to.be.equal(unwrappedItem);
         });
 
-        it("should return array of Models for array of EntityClasses", function () {
+        it("should return array of Models for array of EntityClasses", () => {
             var item = CarDBMapping.Model.forge({ name: "", label: "", srid: 1 });
             var entity = carWrapper.wrap(item);
 
@@ -379,7 +382,7 @@ describe("Bookshelf Model Wrapper Test", function () {
             expect(item).to.be.equal(unwrappedItem[0]);
         });
 
-        it("should stringify json fields", function () {
+        it("should stringify json fields", () => {
             var thing = { date: Date.now() };
             var mapping = {
                 columnMappings: [{
@@ -402,14 +405,14 @@ describe("Bookshelf Model Wrapper Test", function () {
 
     });
 
-    describe("createNew", function () {
+    describe("createNew", () => {
 
-        it("should return instanceof Entity", function () {
+        it("should return instanceof Entity", () => {
             var item = carWrapper.createNew();
             expect(item).to.be.instanceof(Car);
         });
 
-        it("should set given properties on Entity", function () {
+        it("should set given properties on Entity", () => {
             var flatModel = {
                 name: "name" + Date.now()
             };
@@ -419,7 +422,7 @@ describe("Bookshelf Model Wrapper Test", function () {
             expect(item.name).to.be.eql(flatModel.name);
         });
 
-        it("should set given related list of data on Entity", function () {
+        it("should set given related list of data on Entity", () => {
             var flatModel = {
                 parts: [{
                     name: "name" + Date.now()
@@ -431,7 +434,7 @@ describe("Bookshelf Model Wrapper Test", function () {
             expect(item.parts[0].name).to.be.eql(flatModel.parts[0].name);
         });
 
-        it("should set given related single item of data on list in Entity", function () {
+        it("should set given related single item of data on list in Entity", () => {
             var flatModel = {
                 engine: {
                     name: "label" + Date.now()

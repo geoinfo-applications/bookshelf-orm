@@ -1,6 +1,6 @@
 "use strict";
 
-var knex = require("knex")({
+const knex = require("knex")({
     client: "pg",
     connection: {
         host: process.env.TESTSERVER_HOST || "localhost",
@@ -12,7 +12,7 @@ var knex = require("knex")({
     }
 });
 
-var bookshelf = require("bookshelf")(knex);
+const bookshelf = require("bookshelf")(knex);
 
 require("../../orm/ModelFactory").registerContext("test", bookshelf);
 

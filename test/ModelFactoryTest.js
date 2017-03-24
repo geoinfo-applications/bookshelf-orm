@@ -1,16 +1,18 @@
 "use strict";
 
-var expect = require("chai").expect;
-var ModelFactory = require("../orm/ModelFactory");
-var connection = require("./db/connection");
-
 
 describe("Model Factory Test", function () {
+    // jshint maxstatements:false
+
+    const expect = require("chai").expect;
+    const ModelFactory = require("../orm/ModelFactory");
+    const connection = require("./db/connection");
+
     this.timeout(1000);
 
-    describe("Context Registration", function () {
+    describe("Context Registration", () => {
 
-        it("should hold context for key", function () {
+        it("should hold context for key", () => {
             var context = {};
 
             ModelFactory.registerContext("thatContext", context);
@@ -21,7 +23,7 @@ describe("Model Factory Test", function () {
 
     });
 
-    describe("createModel", function () {
+    describe("createModel", () => {
         var factory;
 
         beforeEach(function () {
@@ -29,19 +31,19 @@ describe("Model Factory Test", function () {
             factory = ModelFactory.context.testContext;
         });
 
-        it("should return Model", function () {
+        it("should return Model", () => {
             var mapping = factory.createModel({});
 
             expect("Model" in mapping).to.be.eql(true);
         });
 
-        it("should return Collection", function () {
+        it("should return Collection", () => {
             var mapping = factory.createModel({});
 
             expect("Collection" in mapping).to.be.eql(true);
         });
 
-        it("should return columns", function () {
+        it("should return columns", () => {
             var columns = [];
 
             var mapping = factory.createModel({ columns: columns });
@@ -50,7 +52,7 @@ describe("Model Factory Test", function () {
 
         });
 
-        it("should return relations", function () {
+        it("should return relations", () => {
             var relations = [];
 
             var mapping = factory.createModel({ relations: relations });
@@ -58,7 +60,7 @@ describe("Model Factory Test", function () {
             expect(mapping.relations).to.be.eql(relations);
         });
 
-        it("should initialize relations on Model", function () {
+        it("should initialize relations on Model", () => {
             var mapping = factory.createModel({
                 relations: [{
                     name: "theName",
@@ -76,7 +78,7 @@ describe("Model Factory Test", function () {
             expect("relation_theName" in model).to.be.eql(true);
         });
 
-        it("should throw if relation type doesn't exits", function () {
+        it("should throw if relation type doesn't exits", () => {
             var mapping = factory.createModel({
                 relations: [{
                     name: "theName",

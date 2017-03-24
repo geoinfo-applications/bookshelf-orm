@@ -1,12 +1,12 @@
 "use strict";
 
-var Q = require("q");
-var _ = require("underscore");
-var SaveOperation = require("./BookshelfDeepSaveOperation");
-var RemoveOperation = require("./BookshelfDeepRemoveOperation");
-var FetchOperation = require("./BookshelfDeepFetchOperation");
-var BookshelfRelations = require("./BookshelfRelations");
-var MappingRelationsIterator = require("./MappingRelationsIterator");
+const Q = require("q");
+const _ = require("underscore");
+const SaveOperation = require("./BookshelfDeepSaveOperation");
+const RemoveOperation = require("./BookshelfDeepRemoveOperation");
+const FetchOperation = require("./BookshelfDeepFetchOperation");
+const BookshelfRelations = require("./BookshelfRelations");
+const MappingRelationsIterator = require("./MappingRelationsIterator");
 
 
 class BookshelfRepository {

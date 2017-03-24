@@ -1,49 +1,51 @@
 "use strict";
 
-var Q = require("q");
-var chai = require("chai");
-var expect = chai.expect;
-var sinon = require("sinon");
-var sinonChai = require("sinon-chai");
-chai.use(sinonChai);
-
-var Car = require("./db/mocks").Car;
-var CarRepository = require("./db/mocks").CarRepository;
-
-require("./db/connection");
-var registry = require("./db/registry");
-require("./db/mappings");
-
-var CarDBMapping = registry.compile("CarDBMapping");
-
 
 describe("Entity Repository Test", function () {
+    // jshint maxstatements:false
+
+    const Q = require("q");
+    const chai = require("chai");
+    const expect = chai.expect;
+    const sinon = require("sinon");
+    const sinonChai = require("sinon-chai");
+    chai.use(sinonChai);
+
+    const Car = require("./db/mocks").Car;
+    const CarRepository = require("./db/mocks").CarRepository;
+
+    require("./db/connection");
+    const registry = require("./db/registry");
+    require("./db/mappings");
+
+    const CarDBMapping = registry.compile("CarDBMapping");
+
     this.timeout(1000);
     var carRepository;
 
-    beforeEach(function () {
+    beforeEach(() => {
         carRepository = new CarRepository();
     });
 
-    it("should be defined", function () {
+    it("should be defined", () => {
         expect(CarRepository).to.be.a("function");
     });
 
-    describe("findAll", function () {
+    describe("findAll", () => {
 
-        it("should return array of Cars with specified ids", function () {
-            return carRepository.save(createCar()).then(function (model) {
-                return carRepository.findAll([model.id]).then(function (tables) {
+        it("should return array of Cars with specified ids", () => {
+            return carRepository.save(createCar()).then((model) => {
+                return carRepository.findAll([model.id]).then((tables) => {
                     expect(tables.length).to.be.eql(1);
                     expect(tables[0].id).to.be.eql(model.id);
                 });
             });
         });
 
-        it("should return all Cars", function () {
-            return carRepository.save(createCar()).then(function (model1) {
-                return carRepository.save(createCar()).then(function (model2) {
-                    return carRepository.findAll().then(function (tables) {
+        it("should return all Cars", () => {
+            return carRepository.save(createCar()).then((model1) => {
+                return carRepository.save(createCar()).then((model2) => {
+                    return carRepository.findAll().then((tables) => {
                         expect(tables.length).to.be.eql(2);
                         expect(tables[0].id).to.be.eql(model1.id);
                         expect(tables[1].id).to.be.eql(model2.id);
@@ -52,58 +54,58 @@ describe("Entity Repository Test", function () {
             });
         });
 
-        it("should not include excluded relations", function () {
+        it("should not include excluded relations", () => {
             var options = { exclude: ["parts"] };
             var car = carRepository.newEntity({ name: "", label: "" });
             car.addParts(car.newParts({ name: "", label: "" }));
             var promise = carRepository.save(car);
 
-            promise = promise.then(function () {
+            promise = promise.then(() => {
                 return carRepository.findAll(options);
             });
 
-            return promise.then(function (cars) {
+            return promise.then((cars) => {
                 expect(cars[0].parts.length).to.be.eql(0);
             });
         });
 
-        it("should not include excluded relations", function () {
+        it("should not include excluded relations", () => {
             var options = { exclude: ["parts"] };
             var car = carRepository.newEntity({ name: "", label: "" });
             car.addParts(car.newParts({ name: "", label: "" }));
             var promise = carRepository.save(car);
 
-            promise = promise.then(function (car) {
+            promise = promise.then((car) => {
                 return carRepository.findAll([car.id], options);
             });
 
-            return promise.then(function (cars) {
+            return promise.then((cars) => {
                 expect(cars[0].parts.length).to.be.eql(0);
             });
         });
 
     });
 
-    describe("findOne", function () {
+    describe("findOne", () => {
 
-        it("should return instance of EntityClass with specified id", function () {
-            return carRepository.save(createCar()).then(function (model) {
-                return carRepository.findOne(model.id).then(function (fetchedModel) {
+        it("should return instance of EntityClass with specified id", () => {
+            return carRepository.save(createCar()).then((model) => {
+                return carRepository.findOne(model.id).then((fetchedModel) => {
                     expect(fetchedModel).to.be.instanceof(Car);
                     expect(fetchedModel.id).to.be.eql(model.id);
                 });
             });
         });
 
-        it("should fetch relations deeply", function () {
+        it("should fetch relations deeply", () => {
             var car = carRepository.newEntity({
                 parts: [{
                     wheels: [{ index: 0 }, { index: 1 }]
                 }]
             });
 
-            return carRepository.save(car).then(function (car) {
-                return carRepository.findOne(car.id).then(function (car) {
+            return carRepository.save(car).then((car) => {
+                return carRepository.findOne(car.id).then((car) => {
                     expect("parts" in car);
                     expect(car.parts.length).to.be.eql(1);
                     expect("wheels" in car.parts[0]);
@@ -112,28 +114,28 @@ describe("Entity Repository Test", function () {
             });
         });
 
-        it("should not include excluded relations", function () {
+        it("should not include excluded relations", () => {
             var options = { exclude: ["parts"] };
             var car = carRepository.newEntity({ name: "", label: "" });
             car.addParts(car.newParts({ name: "", label: "" }));
             var promise = carRepository.save(car);
 
-            promise = promise.then(function (car) {
+            promise = promise.then((car) => {
                 return carRepository.findOne(car.id, options);
             });
 
-            return promise.then(function (car) {
+            return promise.then((car) => {
                 expect(car.parts.length).to.be.eql(0);
             });
         });
 
     });
 
-    describe("exists", function () {
+    describe("exists", () => {
 
-        it("should return instance of EntityClass with specified id", function () {
-            return carRepository.save(createCar()).then(function (model) {
-                return carRepository.findOne(model.id).then(function (fetchedModel) {
+        it("should return instance of EntityClass with specified id", () => {
+            return carRepository.save(createCar()).then((model) => {
+                return carRepository.findOne(model.id).then((fetchedModel) => {
                     expect(fetchedModel).to.be.instanceof(Car);
                     expect(fetchedModel.id).to.be.eql(model.id);
                 });
@@ -141,42 +143,42 @@ describe("Entity Repository Test", function () {
         });
 
         it("should return true if item with given id exists", () => {
-            return carRepository.save(createCar()).then(function (model) {
-                return carRepository.exists(model.id).then(function (exists) {
+            return carRepository.save(createCar()).then((model) => {
+                return carRepository.exists(model.id).then((exists) => {
                     expect(exists).to.be.equal(true);
                 });
             });
         });
 
         it("should return false if item with given id doesn't exist", () => {
-            return carRepository.exists(123).then(function (exists) {
+            return carRepository.exists(123).then((exists) => {
                 expect(exists).to.be.equal(false);
             });
         });
 
         it("should return false if id is null", () => {
-            return carRepository.exists(null).then(function (exists) {
+            return carRepository.exists(null).then((exists) => {
                 expect(exists).to.be.equal(false);
             });
         });
 
     });
 
-    describe("save", function () {
+    describe("save", () => {
 
-        it("should return EntityClass", function () {
+        it("should return EntityClass", () => {
             var item = createCar();
 
-            return carRepository.save(item).then(function (saved) {
+            return carRepository.save(item).then((saved) => {
                 expect(saved).to.be.instanceof(Car);
             });
         });
 
-        it("should return array of EntityClass", function () {
+        it("should return array of EntityClass", () => {
             var item1 = createCar();
             var item2 = createCar();
 
-            return carRepository.save([item1, item2]).then(function (saved) {
+            return carRepository.save([item1, item2]).then((saved) => {
                 expect(saved).to.be.an("array");
                 expect(saved.length).to.eql(2);
                 expect(saved[0]).to.be.instanceof(Car);
@@ -184,29 +186,29 @@ describe("Entity Repository Test", function () {
             });
         });
 
-        it("should persist item", function () {
+        it("should persist item", () => {
             var item = createCar();
 
-            return carRepository.save(item).then(function (item) {
-                return carRepository.findOne(item.id).then(function (fetchedItem) {
+            return carRepository.save(item).then((item) => {
+                return carRepository.findOne(item.id).then((fetchedItem) => {
                     expect(item.id).to.be.eql(fetchedItem.id);
                 });
             });
         });
 
-        it("should persist array of item", function () {
+        it("should persist array of item", () => {
             var item1 = createCar();
             var item2 = createCar();
 
-            return carRepository.save([item1, item2]).then(function (savedItems) {
-                carRepository.findAll([savedItems[0].id, savedItems[1].id]).then(function (items) {
+            return carRepository.save([item1, item2]).then((savedItems) => {
+                carRepository.findAll([savedItems[0].id, savedItems[1].id]).then((items) => {
                     expect(savedItems[0].id).to.be.eql(items[0].id);
                     expect(savedItems[1].id).to.be.eql(items[1].id);
                 });
             });
         });
 
-        it("should persist related items", function () {
+        it("should persist related items", () => {
             var name = "partname" + Date.now();
             var car = carRepository.newEntity({
                 parts: [{
@@ -215,8 +217,8 @@ describe("Entity Repository Test", function () {
                 }]
             });
 
-            return carRepository.save(car).then(function (car) {
-                return carRepository.findOne(car.id).then(function (car) {
+            return carRepository.save(car).then((car) => {
+                return carRepository.findOne(car.id).then((car) => {
                     expect(car.parts[0].name).to.be.eql(name);
                 });
             });
@@ -224,161 +226,161 @@ describe("Entity Repository Test", function () {
 
     });
 
-    describe("hooks", function () {
+    describe("hooks", () => {
 
-        it("should call afterSave, with saved entity id", function () {
+        it("should call afterSave, with saved entity id", () => {
             var car = carRepository.newEntity();
             carRepository.afterSave = sinon.stub();
 
             var promise = carRepository.save(car);
 
-            return promise.then(function () {
+            return promise.then(() => {
                 expect(carRepository.afterSave).to.have.been.calledWith(car.id);
             });
         });
 
-        it("should call afterSave, with saved array of entity id", function () {
+        it("should call afterSave, with saved array of entity id", () => {
             var car1 = carRepository.newEntity();
             var car2 = carRepository.newEntity();
             carRepository.afterSave = sinon.stub();
 
             var promise = carRepository.save([car1, car2]);
 
-            return promise.then(function () {
+            return promise.then(() => {
                 expect(carRepository.afterSave).to.have.callCount(2);
                 expect(carRepository.afterSave).to.have.been.calledWith(car1.id);
                 expect(carRepository.afterSave).to.have.been.calledWith(car2.id);
             });
         });
 
-        it("should call afterRemove, with removed entity id", function () {
+        it("should call afterRemove, with removed entity id", () => {
             var car = carRepository.newEntity();
             carRepository.afterRemove = sinon.stub();
             var promise = carRepository.save(car);
 
-            promise = promise.then(function (car) {
+            promise = promise.then((car) => {
                 return carRepository.remove(car);
             });
 
-            return promise.then(function () {
+            return promise.then(() => {
                 expect(carRepository.afterRemove).to.have.been.calledWith(car.id);
             });
         });
 
-        it("should call afterRemove, with removed id", function () {
+        it("should call afterRemove, with removed id", () => {
             var car = carRepository.newEntity();
             carRepository.afterRemove = sinon.stub();
             var promise = carRepository.save(car);
 
-            promise = promise.then(function (car) {
+            promise = promise.then((car) => {
                 return carRepository.remove(car.id);
             });
 
-            return promise.then(function () {
+            return promise.then(() => {
                 expect(carRepository.afterRemove).to.have.been.calledWith(car.id);
             });
         });
 
-        it("should call afterRemove, with removed array of id", function () {
+        it("should call afterRemove, with removed array of id", () => {
             var car1 = carRepository.newEntity();
             var car2 = carRepository.newEntity();
             carRepository.afterRemove = sinon.stub();
             var promise = carRepository.save([car1, car2]);
 
-            promise = promise.then(function () {
+            promise = promise.then(() => {
                 return carRepository.remove([car1.id, car2.id]);
             });
 
-            return promise.then(function () {
+            return promise.then(() => {
                 expect(carRepository.afterRemove).to.have.callCount(2);
                 expect(carRepository.afterRemove).to.have.been.calledWith(car1.id);
                 expect(carRepository.afterRemove).to.have.been.calledWith(car2.id);
             });
         });
 
-        it("should call afterRemove, with removed array of entity", function () {
+        it("should call afterRemove, with removed array of entity", () => {
             var car1 = carRepository.newEntity();
             var car2 = carRepository.newEntity();
             carRepository.afterRemove = sinon.stub();
             var promise = carRepository.save([car1, car2]);
 
-            promise = promise.then(function () {
+            promise = promise.then(() => {
                 return carRepository.remove([car1, car2]);
             });
 
-            return promise.then(function () {
+            return promise.then(() => {
                 expect(carRepository.afterRemove).to.have.callCount(2);
                 expect(carRepository.afterRemove).to.have.been.calledWith(car1.id);
                 expect(carRepository.afterRemove).to.have.been.calledWith(car2.id);
             });
         });
 
-        it("should not call afterRemove, if entity was unsaved", function () {
+        it("should not call afterRemove, if entity was unsaved", () => {
             var car = carRepository.newEntity();
             carRepository.afterRemove = sinon.stub();
 
             var promise = carRepository.remove(car.id);
 
-            return promise.then(function () {
+            return promise.then(() => {
                 expect(carRepository.afterRemove).to.have.callCount(0);
             });
         });
 
     });
 
-    describe("remove", function () {
+    describe("remove", () => {
 
-        it("should drop item", function () {
-            return carRepository.save(createCar()).then(function (item) {
-                return carRepository.remove(item).then(function () {
-                    return carRepository.findAll().then(function (items) {
+        it("should drop item", () => {
+            return carRepository.save(createCar()).then((item) => {
+                return carRepository.remove(item).then(() => {
+                    return carRepository.findAll().then((items) => {
                         expect(items.length).to.be.eql(0);
                     });
                 });
             });
         });
 
-        it("should drop item specified by id", function () {
-            return carRepository.save(createCar()).then(function (item) {
-                return carRepository.remove(item.id).then(function () {
-                    return carRepository.findAll().then(function (items) {
+        it("should drop item specified by id", () => {
+            return carRepository.save(createCar()).then((item) => {
+                return carRepository.remove(item.id).then(() => {
+                    return carRepository.findAll().then((items) => {
                         expect(items.length).to.be.eql(0);
                     });
                 });
             });
         });
 
-        it("should drop array of item", function () {
+        it("should drop array of item", () => {
             var item1 = createCar();
             var item2 = createCar();
 
-            return carRepository.save([item1, item2]).then(function (items) {
-                return carRepository.remove(items).then(function () {
-                    return carRepository.findAll().then(function (items) {
+            return carRepository.save([item1, item2]).then((items) => {
+                return carRepository.remove(items).then(() => {
+                    return carRepository.findAll().then((items) => {
                         expect(items.length).to.be.eql(0);
                     });
                 });
             });
         });
 
-        it("should drop array of items specified by id", function () {
+        it("should drop array of items specified by id", () => {
             var item1 = createCar();
             var item2 = createCar();
 
-            return carRepository.save([item1, item2]).then(function (items) {
-                return carRepository.remove([items[0].id, items[1].id]).then(function () {
-                    return carRepository.findAll().then(function (items) {
+            return carRepository.save([item1, item2]).then((items) => {
+                return carRepository.remove([items[0].id, items[1].id]).then(() => {
+                    return carRepository.findAll().then((items) => {
                         expect(items.length).to.be.eql(0);
                     });
                 });
             });
         });
 
-        it("should drop unsaved item", function () {
+        it("should drop unsaved item", () => {
             var item = createCar();
 
-            return carRepository.remove(item).then(function () {
-                return carRepository.findAll().then(function (items) {
+            return carRepository.remove(item).then(() => {
+                return carRepository.findAll().then((items) => {
                     expect(items.length).to.be.eql(0);
                 });
             });
@@ -386,9 +388,9 @@ describe("Entity Repository Test", function () {
 
     });
 
-    describe("wrap", function () {
+    describe("wrap", () => {
 
-        it("should wrap Model in EntityClass", function () {
+        it("should wrap Model in EntityClass", () => {
             var item = CarDBMapping.Model.forge({ name: "", label: "", srid: 1 });
 
             var entity = carRepository.wrapper.wrap(item);
@@ -398,9 +400,9 @@ describe("Entity Repository Test", function () {
 
     });
 
-    describe("unwrap", function () {
+    describe("unwrap", () => {
 
-        it("should return Model for EntityClass", function () {
+        it("should return Model for EntityClass", () => {
             var item = CarDBMapping.Model.forge({ name: "", label: "", srid: 1 });
             var entity = carRepository.wrapper.wrap(item);
 
@@ -411,15 +413,15 @@ describe("Entity Repository Test", function () {
 
     });
 
-    describe("newEntity", function () {
+    describe("newEntity", () => {
 
-        it("should return new Entity", function () {
+        it("should return new Entity", () => {
             var entity = carRepository.newEntity();
 
             expect(entity).to.be.instanceof(Car);
         });
 
-        it("should return wrapped and initialized Entity", function () {
+        it("should return wrapped and initialized Entity", () => {
             var entity = carRepository.newEntity();
 
             var model = carRepository.wrapper.unwrap(entity);
@@ -428,7 +430,7 @@ describe("Entity Repository Test", function () {
             expect(entity.name).to.be.eql(model.get("name"));
         });
 
-        it("should call constructor with given arguments", function () {
+        it("should call constructor with given arguments", () => {
             var args = [{}, "a", 0];
             carRepository.Entity = function () {
                 expect(args).to.be.eql([].slice.call(arguments));
@@ -437,7 +439,7 @@ describe("Entity Repository Test", function () {
             carRepository.newEntity.apply(carRepository, args);
         });
 
-        it("should call constructor after initialization", function () {
+        it("should call constructor after initialization", () => {
             carRepository.Entity = function () {
                 expect(this.item).to.be.instanceof(CarDBMapping.Model);
                 expect("name" in this).to.be.eql(true);
@@ -446,7 +448,7 @@ describe("Entity Repository Test", function () {
             carRepository.newEntity.apply(carRepository);
         });
 
-        it("should call model.forge with given argument", function () {
+        it("should call model.forge with given argument", () => {
             var forgeArgument = {
                 name: "thename" + Date.now(),
                 modelName: "theLabel" + Date.now()
@@ -458,7 +460,7 @@ describe("Entity Repository Test", function () {
             expect(carRepository.wrapper.unwrap(entity).get("model_name")).to.be.eql(forgeArgument.modelName);
         });
 
-        it("should reconstruct relations", function () {
+        it("should reconstruct relations", () => {
             var entity = carRepository.newEntity({
                 name: "tablename",
                 parts: [{ name: "attr1name" }, { name: "attr2name" }]
@@ -474,217 +476,217 @@ describe("Entity Repository Test", function () {
 
     });
 
-    describe("findAllWhere", function () {
+    describe("findAllWhere", () => {
 
-        it("should fetch entities matched by query", function () {
+        it("should fetch entities matched by query", () => {
             var car1 = carRepository.newEntity({ name: "abc" });
             var car2 = carRepository.newEntity({ name: "efg" });
             var promise = carRepository.save([car1, car2]);
 
-            promise = promise.then(function () {
-                return carRepository.findAllWhere(function (q) {
+            promise = promise.then(() => {
+                return carRepository.findAllWhere((q) => {
                     q.where("name", "abc");
                 });
             });
 
-            return promise.then(function (cars) {
+            return promise.then((cars) => {
                 expect(cars.length).to.be.eql(1);
                 expect(cars[0].name).to.be.eql("abc");
             });
         });
 
-        it("should wrap entity", function () {
+        it("should wrap entity", () => {
             var car1 = carRepository.newEntity({ name: "abc" });
             var promise = carRepository.save(car1);
 
-            promise = promise.then(function () {
-                return carRepository.findAllWhere(function (q) {
+            promise = promise.then(() => {
+                return carRepository.findAllWhere((q) => {
                     q.where("name", "abc");
                 });
             });
 
-            return promise.then(function (cars) {
+            return promise.then((cars) => {
                 expect(cars[0]).to.be.an.instanceof(Car);
             });
         });
 
-        it("should return an empty array if no item was found", function () {
+        it("should return an empty array if no item was found", () => {
 
-            var promise = carRepository.findAllWhere(function (q) {
+            var promise = carRepository.findAllWhere((q) => {
                 q.where("name", "abc");
             });
 
-            return promise.then(function (cars) {
+            return promise.then((cars) => {
                 expect(cars).to.be.an("array");
                 expect(cars.length).to.be.eql(0);
             });
         });
 
-        it("should not include excluded relations", function () {
+        it("should not include excluded relations", () => {
             var options = { exclude: ["parts"] };
             var car = carRepository.newEntity({ name: "name", label: "abc" });
             car.addParts(car.newParts({ name: "", label: "" }));
             var promise = carRepository.save(car);
 
-            promise = promise.then(function () {
-                return carRepository.findAllWhere(function (q) {
+            promise = promise.then(() => {
+                return carRepository.findAllWhere((q) => {
                     q.where("name", "name");
                 }, options);
             });
 
-            return promise.then(function (cars) {
+            return promise.then((cars) => {
                 expect(cars[0].parts.length).to.be.eql(0);
             });
         });
 
     });
 
-    describe("findWhere", function () {
+    describe("findWhere", () => {
 
-        it("should fetch entities matched by query", function () {
+        it("should fetch entities matched by query", () => {
             var car1 = carRepository.newEntity({ name: "abc" });
             var car2 = carRepository.newEntity({ name: "efg" });
             var promise = carRepository.save([car1, car2]);
 
-            promise = promise.then(function () {
-                return carRepository.findWhere(function (q) {
+            promise = promise.then(() => {
+                return carRepository.findWhere((q) => {
                     q.where("name", "abc");
                 });
             });
 
-            return promise.then(function (car) {
+            return promise.then((car) => {
                 expect(car.name).to.be.eql("abc");
             });
         });
 
-        it("should wrap entity", function () {
+        it("should wrap entity", () => {
             var car1 = carRepository.newEntity({ name: "abc" });
             var promise = carRepository.save(car1);
 
-            promise = promise.then(function () {
-                return carRepository.findWhere(function (q) {
+            promise = promise.then(() => {
+                return carRepository.findWhere((q) => {
                     q.where("name", "abc");
                 });
             });
 
-            return promise.then(function (car) {
+            return promise.then((car) => {
                 expect(car).to.be.an.instanceof(Car);
             });
         });
 
-        it("should return null if no item was found", function () {
+        it("should return null if no item was found", () => {
 
-            var promise = carRepository.findWhere(function (q) {
+            var promise = carRepository.findWhere((q) => {
                 q.where("name", "abc");
             });
 
-            return promise.then(function (car) {
+            return promise.then((car) => {
                 expect(car).to.be.eql(null);
             });
         });
 
-        it("should return last match if multiple items were found", function () {
+        it("should return last match if multiple items were found", () => {
             var car1 = carRepository.newEntity({ name: "abc" });
             var car2 = carRepository.newEntity({ name: "efg" });
             var promise = carRepository.save([car1, car2]);
 
-            promise = promise.then(function () {
-                return carRepository.findWhere(function (q) {
+            promise = promise.then(() => {
+                return carRepository.findWhere((q) => {
                     q.whereNotNull("name");
                     q.orderBy("name");
                 });
             });
 
-            return promise.then(function (car) {
+            return promise.then((car) => {
                 expect(car.name).to.be.eql("efg");
             });
         });
 
-        it("should not include excluded relations", function () {
+        it("should not include excluded relations", () => {
             var options = { exclude: ["parts"] };
             var car = carRepository.newEntity({ name: "name", label: "abc" });
             car.addParts(car.newParts({ name: "", label: "" }));
             var promise = carRepository.save(car);
 
-            promise = promise.then(function () {
-                return carRepository.findWhere(function (q) {
+            promise = promise.then(() => {
+                return carRepository.findWhere((q) => {
                     q.where("name", "name");
                 }, options);
             });
 
-            return promise.then(function (cars) {
+            return promise.then((cars) => {
                 expect(cars.parts.length).to.be.eql(0);
             });
         });
 
     });
 
-    describe("transactions", function () {
+    describe("transactions", () => {
 
-        beforeEach(function () {
+        beforeEach(() => {
             sinon.spy(CarDBMapping, "startTransaction");
             sinon.spy(carRepository.repository, "save");
             sinon.spy(carRepository.repository, "remove");
         });
 
-        afterEach(function () {
+        afterEach(() => {
             CarDBMapping.startTransaction.restore();
         });
 
-        it("should save in transaction", function () {
+        it("should save in transaction", () => {
             var car = carRepository.newEntity();
             var options = { transactional: true };
 
             var promise = carRepository.save(car, options);
 
-            return promise.then(function () {
+            return promise.then(() => {
                 expect("transacting" in options).to.be.eql(true);
                 expect(options.transacting).to.be.a("function");
                 expect(carRepository.repository.save).to.have.been.calledWithExactly(car.item, options);
             });
         });
 
-        it("should save in given transaction", function () {
+        it("should save in given transaction", () => {
             var car = carRepository.newEntity();
 
-            return CarDBMapping.startTransaction(function (transaction) {
+            return CarDBMapping.startTransaction((transaction) => {
                 var options = { transacting: transaction };
 
                 var promise = carRepository.save(car, options);
 
-                return promise.then(function () {
+                return promise.then(() => {
                     expect(options.transacting).to.be.equal(transaction);
                     expect(carRepository.repository.save).to.have.been.calledWithExactly(car.item, options);
                 });
             });
         });
 
-        it("should remove in transaction", function () {
+        it("should remove in transaction", () => {
             var car = carRepository.newEntity();
             var promise = carRepository.save(car);
             var options = { transactional: true };
 
-            promise = promise.then(function () {
+            promise = promise.then(() => {
                 return carRepository.remove(car, options);
             });
 
-            return promise.then(function () {
+            return promise.then(() => {
                 expect("transacting" in options).to.be.eql(true);
                 expect(options.transacting).to.be.a("function");
                 expect(carRepository.repository.remove).to.have.been.calledWithExactly(car.item, options);
             });
         });
 
-        it("should remove in given transaction", function () {
+        it("should remove in given transaction", () => {
             var car = carRepository.newEntity();
 
-            return carRepository.save(car).then(function () {
-                return CarDBMapping.startTransaction(function (transaction) {
+            return carRepository.save(car).then(() => {
+                return CarDBMapping.startTransaction((transaction) => {
                     var options = { transactional: transaction };
 
                     var promise = carRepository.remove(car, options);
 
-                    return promise.then(function () {
+                    return promise.then(() => {
                         expect("transacting" in options).to.be.eql(true);
                         expect(options.transacting).to.be.a("function");
                         expect(carRepository.repository.remove).to.have.been.calledWithExactly(car.item, options);
@@ -693,41 +695,41 @@ describe("Entity Repository Test", function () {
             });
         });
 
-        it("should not start new transaction if transaction object is provided", function () {
+        it("should not start new transaction if transaction object is provided", () => {
             var car = carRepository.newEntity();
 
-            return CarDBMapping.startTransaction(function (transaction) {
+            return CarDBMapping.startTransaction((transaction) => {
                 var options = { transacting: transaction };
 
                 var promise = carRepository.save(car, options);
 
-                return promise.then(function () {
+                return promise.then(() => {
                     expect(CarDBMapping.startTransaction).to.have.callCount(1);
                     expect(CarDBMapping.startTransaction).to.have.been.calledBefore(carRepository.repository.save);
                 });
             });
         });
 
-        it("should not commit transaction if transaction object is provided", function () {
+        it("should not commit transaction if transaction object is provided", () => {
             var car = carRepository.newEntity();
 
-            return CarDBMapping.startTransaction(function (transaction) {
+            return CarDBMapping.startTransaction((transaction) => {
                 sinon.spy(transaction, "commit");
                 var options = { transacting: transaction };
 
                 var promise = carRepository.save(car, options);
 
-                return promise.then(function () {
+                return promise.then(() => {
                     expect(transaction.commit).to.not.have.been.callCount(1);
                 });
             });
         });
 
-        it("should rollback if save failed", function () {
+        it("should rollback if save failed", () => {
             var transaction;
             var car = carRepository.newEntity();
 
-            var promise = CarDBMapping.startTransaction(function (t) {
+            var promise = CarDBMapping.startTransaction((t) => {
                 transaction = t;
                 sinon.spy(transaction, "commit");
                 sinon.spy(transaction, "rollback");
@@ -737,19 +739,19 @@ describe("Entity Repository Test", function () {
                 return carRepository.save(car, options);
             });
 
-            return promise.then(function () {
+            return promise.then(() => {
                 expect(promise.isRejected()).to.be.eql(true);
-            }).catch(function () {
+            }).catch(() => {
                 expect(transaction.commit).to.have.callCount(0);
                 expect(transaction.rollback).to.have.callCount(1);
             });
         });
 
-        it("should rollback if remove failed", function () {
+        it("should rollback if remove failed", () => {
             var transaction;
             var car = carRepository.newEntity();
 
-            var promise = CarDBMapping.startTransaction(function (t) {
+            var promise = CarDBMapping.startTransaction((t) => {
                 transaction = t;
                 sinon.spy(transaction, "commit");
                 sinon.spy(transaction, "rollback");
@@ -759,19 +761,19 @@ describe("Entity Repository Test", function () {
                 return carRepository.remove(car, options);
             });
 
-            return promise.then(function () {
+            return promise.then(() => {
                 expect(promise.isRejected()).to.be.eql(true);
-            }).catch(function () {
+            }).catch(() => {
                 expect(transaction.commit).to.have.callCount(0);
                 expect(transaction.rollback).to.have.callCount(1);
             });
         });
 
-        it("should not rollback if save failed and transaction was passed in", function () {
+        it("should not rollback if save failed and transaction was passed in", () => {
             var transaction;
             var car = carRepository.newEntity();
 
-            return CarDBMapping.startTransaction(function (t) {
+            return CarDBMapping.startTransaction((t) => {
                 transaction = t;
                 sinon.spy(transaction, "commit");
                 sinon.spy(transaction, "rollback");
@@ -780,20 +782,20 @@ describe("Entity Repository Test", function () {
 
                 var promise = carRepository.save(car, options);
 
-                return promise.then(function () {
+                return promise.then(() => {
                     expect(promise.isRejected()).to.be.eql(true);
-                }).catch(function () {
+                }).catch(() => {
                     expect(transaction.commit).to.have.callCount(0);
                     expect(transaction.rollback).to.have.callCount(0);
                 });
             });
         });
 
-        it("should not rollback if remove failed and transaction was passed in", function () {
+        it("should not rollback if remove failed and transaction was passed in", () => {
             var transaction;
             var car = carRepository.newEntity();
 
-            return CarDBMapping.startTransaction(function (t) {
+            return CarDBMapping.startTransaction((t) => {
                 transaction = t;
                 sinon.spy(transaction, "commit");
                 sinon.spy(transaction, "rollback");
@@ -802,9 +804,9 @@ describe("Entity Repository Test", function () {
 
                 var promise = carRepository.remove(car, options);
 
-                return promise.then(function () {
+                return promise.then(() => {
                     expect(promise.isRejected()).to.be.eql(true);
-                }).catch(function () {
+                }).catch(() => {
                     expect(transaction.commit).to.have.callCount(0);
                     expect(transaction.rollback).to.have.callCount(0);
                 });
@@ -812,40 +814,40 @@ describe("Entity Repository Test", function () {
 
         });
 
-        it("should commit transaction when save succeeded", function () {
+        it("should commit transaction when save succeeded", () => {
             var transaction;
             var car = carRepository.newEntity();
 
-            return CarDBMapping.startTransaction(function (t) {
+            return CarDBMapping.startTransaction((t) => {
                 transaction = t;
                 sinon.spy(transaction, "commit");
                 var options = { transacting: transaction };
 
                 return carRepository.save(car, options);
-            }).then(function () {
+            }).then(() => {
                 expect(transaction.commit).to.have.been.callCount(1);
             });
         });
 
-        it("should commit transaction when remove succeeded", function () {
+        it("should commit transaction when remove succeeded", () => {
             var transaction;
             var car = carRepository.newEntity();
 
-            return carRepository.save(car).then(function () {
-                return CarDBMapping.startTransaction(function (t) {
+            return carRepository.save(car).then(() => {
+                return CarDBMapping.startTransaction((t) => {
                     transaction = t;
                     sinon.spy(transaction, "commit");
                     var options = { transactional: transaction };
 
                     var promise = carRepository.remove(car, options);
 
-                    return promise.then(function () {
+                    return promise.then(() => {
                         expect("transacting" in options).to.be.eql(true);
                         expect(options.transacting).to.be.a("function");
                         expect(carRepository.repository.remove).to.have.been.calledWithExactly(car.item, options);
                     });
                 });
-            }).then(function () {
+            }).then(() => {
                 expect(transaction.commit).to.have.callCount(1);
             });
         });

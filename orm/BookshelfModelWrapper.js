@@ -1,7 +1,8 @@
 "use strict";
 
-var _ = require("underscore");
-var BookshelfModelRelation = require("./BookshelfModelRelation");
+const _ = require("underscore");
+const BookshelfModelRelation = require("./BookshelfModelRelation");
+const StringUtils = require("./StringUtils");
 
 
 class BookshelfModelWrapper {
@@ -83,7 +84,7 @@ class BookshelfModelWrapper {
     }
 
     defineColumnProperty(wrapped, property) {
-        Object.defineProperty(wrapped, this.toCamelCase(property.name), {
+        Object.defineProperty(wrapped, StringUtils.snakeToCamelCase(property.name), {
             get() {
                 var value = this.item.get(property.name);
                 return (property.type === "json" && _.isString(value)) ? JSON.parse(value) : value;
@@ -99,29 +100,12 @@ class BookshelfModelWrapper {
         });
     }
 
-    toCamelCase(str) {
-        var out = "";
-        for (var i = 0; i < str.length; i++) {
-            if (str[i] === "_") {
-                i = i + 1;
-                out = out + str[i].toUpperCase();
-            } else {
-                out = out + str[i];
-            }
-        }
-        return out;
-    }
-
-    firstLetterUp(str) {
-        return str[0].toUpperCase() + str.substr(1);
-    }
-
     defineRelationalProperties(wrapped) {
         this.Mapping.relations.forEach((relation) => {
             var wrapper = new BookshelfModelWrapper(relation.references.mapping, relation.references.type);
             var bookshelfModelRelation = new BookshelfModelRelation(wrapped, wrapper, relation);
 
-            wrapped["new" + this.firstLetterUp(relation.name)] = (model) => wrapper.createNew(model);
+            wrapped["new" + StringUtils.firstLetterUp(relation.name)] = (model) => wrapper.createNew(model);
 
             if (relation.type in bookshelfModelRelation) {
                 bookshelfModelRelation[relation.type]();
@@ -146,7 +130,7 @@ class BookshelfModelWrapper {
         }
 
         this.columnMappings.filter((property) => property.type === "json").forEach((property) => {
-            var propertyName = this.toCamelCase(property.name);
+            var propertyName = StringUtils.snakeToCamelCase(property.name);
             entity[propertyName] = entity[propertyName];
         });
 
@@ -173,7 +157,7 @@ class BookshelfModelWrapper {
 
     applyFlatModelValues(wrapped, model) {
         for (var name of this.columnNames) {
-            name = this.toCamelCase(name);
+            name = StringUtils.snakeToCamelCase(name);
             if (name in model) {
                 wrapped[name] = model[name];
             }
@@ -187,7 +171,7 @@ class BookshelfModelWrapper {
 
         relationNames.forEach((relationName) => {
             var relatedData = model[relationName];
-            var pascalCasedName = this.firstLetterUp(relationName);
+            var pascalCasedName = StringUtils.firstLetterUp(relationName);
 
             if (Array.isArray(relatedData)) {
                 wrapped["add" + pascalCasedName](relatedData.map((data) => {

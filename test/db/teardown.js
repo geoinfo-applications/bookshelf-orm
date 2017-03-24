@@ -1,10 +1,10 @@
 "use strict";
 
-var Q = require("q");
-var knex = require("./connection").knex;
+const Q = require("q");
+const knex = require("./connection").knex;
 
-module.exports = function () {
-    var tables = [
+module.exports = () => {
+    const tables = [
         "datadictionary.car",
         "datadictionary.part",
         "datadictionary.wheel",
