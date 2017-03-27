@@ -10,6 +10,7 @@ module.exports = function () {
         table.string("name");
         table.string("model_name");
         table.string("serial_number");
+        table.integer("owner_id");
     });
 
     const part = knex.schema.createTable("datadictionary.part", (table) => {
