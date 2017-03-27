@@ -1,6 +1,6 @@
 {
   "name": "bookshelf-orm",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "OR-Mapping based on Bookshelf.js",
   "main": "index.js",
   "repository": {
