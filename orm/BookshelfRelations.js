@@ -29,7 +29,7 @@ class BookshelfRelations {
         };
 
         fetchProperties.exclude = options.exclude;
-        fetchProperties.columns = fetchProperties.columns || this.Mapping.regularColumnNames;
+        fetchProperties.columns = fetchProperties.columns || this.Mapping.qualifiedRegularColumnNames;
 
         Object.keys(optionalOptions).filter((key) => options[key]).forEach((key) => optionalOptions[key]());
     }
