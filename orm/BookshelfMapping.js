@@ -28,10 +28,14 @@ class BookshelfMapping {
         this.columnNames = this.columnMappings.map((column) => column.name);
         this.regularColumns = this.columnMappings.filter((c) => c.type !== "sql");
         this.regularColumnNames = this.regularColumns.map((column) => column.name);
-        this.qualifiedRegularColumnNames = this.regularColumnNames.map((name) => `${this.tableName}.${name}`);
         this.sqlColumns = this.columnMappings.filter((c) => c.type === "sql");
         this.writeableSqlColumns = this.sqlColumns.filter((c) => c.set);
         this.readableSqlColumns = this.sqlColumns.filter((c) => c.get);
+
+        this.qualifiedRegularColumnNames =
+            this.relations.filter((r) => r.type === "belongsTo").map((r) => r.references.mappedBy)
+            .concat(this.regularColumnNames)
+            .map((name) => `${this.tableName}.${name}`);
     }
 
     static getOptionOrDefault(configProperty, defaultValue) {
