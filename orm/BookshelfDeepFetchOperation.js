@@ -1,9 +1,10 @@
 "use strict";
 
-var Q = require("q");
-var _ = require("underscore");
-var BookshelfDeepOperation = require("./BookshelfDeepOperation");
-var MappingRelationsIterator = require("./MappingRelationsIterator");
+const Q = require("q");
+const _ = require("underscore");
+const BookshelfDeepOperation = require("./BookshelfDeepOperation");
+const MappingRelationsIterator = require("./MappingRelationsIterator");
+const StringUtils = require("./StringUtils");
 
 
 class BookshelfDeepFetchOperation extends BookshelfDeepOperation {
@@ -14,8 +15,8 @@ class BookshelfDeepFetchOperation extends BookshelfDeepOperation {
 
     fetch(model, fetchOptions) {
         return model.fetch(fetchOptions)
-            .then(this.stripEmptyRelations.bind(this))
-            .then(this.fetchSqlColumns.bind(this));
+            .then((model) => this.stripEmptyRelations(model))
+            .then((model) => this.fetchSqlColumns(model, fetchOptions));
     }
 
     stripEmptyRelations(model) {
@@ -28,22 +29,28 @@ class BookshelfDeepFetchOperation extends BookshelfDeepOperation {
         }
     }
 
-    fetchSqlColumns(model) {
+    fetchSqlColumns(model, fetchOptions) {
         var fetchOperations = [];
+
+        if (_.contains(fetchOptions.exclude, "*")) {
+            return model;
+        }
 
         this.mappingRelationsIterator(model, (mapping, model) => {
             if (mapping.readableSqlColumns.length) {
-                fetchOperations.push(this.fetchReadableSqlColumns(mapping, model));
+                fetchOperations.push(this.fetchReadableSqlColumns(mapping, model, fetchOptions));
             }
         });
 
         return Q.all(fetchOperations).then(() => model);
     }
 
-    fetchReadableSqlColumns(mapping, model) {
+    fetchReadableSqlColumns(mapping, model, fetchOptions) {
         var query = mapping.createQuery(model, this.options);
 
-        var rawSelects = mapping.readableSqlColumns.map((column) => {
+        var rawSelects = mapping.readableSqlColumns.filter((column) => {
+            return !_.contains(fetchOptions.exclude, StringUtils.snakeToCamelCase(column.name));
+        }).map((column) => {
             var getter = _.isFunction(column.get) ? column.get() : column.get;
             return mapping.dbContext.knex.raw(getter + " as \"" + column.name + "\"");
         });

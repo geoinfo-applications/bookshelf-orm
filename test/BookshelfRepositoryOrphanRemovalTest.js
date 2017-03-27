@@ -1,45 +1,47 @@
 "use strict";
 
-var chai = require("chai");
-var expect = chai.expect;
-
-var CarRepository = require("./db/mocks").CarRepository;
-var EngineRepository = require("./db/mocks").EngineRepository;
-var PartRepository = require("./db/mocks").PartRepository;
-
-require("./db/connection");
-var registry = require("./db/registry");
-require("./db/mappings");
-
-var CarDBMapping = registry.compile("CarDBMapping");
-var PartDBMapping = registry.compile("PartDBMapping");
-var EngineDBMapping = registry.compile("EngineDBMapping");
-var OutletDBMapping = registry.compile("OutletDBMapping");
-var InjectionDBMapping = registry.compile("InjectionDBMapping");
-
 
 describe("Bookshelf Repository Orphan Removal Test", function () {
+    // jshint maxstatements:false
+
+    const chai = require("chai");
+    const expect = chai.expect;
+
+    const CarRepository = require("./db/mocks").CarRepository;
+    const EngineRepository = require("./db/mocks").EngineRepository;
+    const PartRepository = require("./db/mocks").PartRepository;
+
+    require("./db/connection");
+    const registry = require("./db/registry");
+    require("./db/mappings");
+
+    const CarDBMapping = registry.compile("CarDBMapping");
+    const PartDBMapping = registry.compile("PartDBMapping");
+    const EngineDBMapping = registry.compile("EngineDBMapping");
+    const OutletDBMapping = registry.compile("OutletDBMapping");
+    const InjectionDBMapping = registry.compile("InjectionDBMapping");
+
     this.timeout(1000);
     var carRepository;
 
-    beforeEach(function () {
+    beforeEach(() => {
         carRepository = new CarRepository().repository;
     });
 
-    describe("1:n relations", function () {
+    describe("1:n relations", () => {
 
-        it("should remove orphans", function () {
-            return createCar().then(function (item) {
+        it("should remove orphans", () => {
+            return createCar().then((item) => {
                 var part = PartDBMapping.Model.forge({
                     car_id: item.id,
                     name: "name" + Date.now()
                 });
                 item.relations.relation_parts = PartDBMapping.Collection.forge(part);
 
-                return carRepository.save(item).then(function (item) {
+                return carRepository.save(item).then((item) => {
                     item.relations.relation_parts.models = [];
-                    return carRepository.save(item).then(function () {
-                        return PartDBMapping.Collection.forge().fetch().then(function (parts) {
+                    return carRepository.save(item).then(() => {
+                        return PartDBMapping.Collection.forge().fetch().then((parts) => {
                             expect(parts.length).to.be.eql(0);
                         });
                     });
@@ -47,17 +49,17 @@ describe("Bookshelf Repository Orphan Removal Test", function () {
             });
         });
 
-        it("should not remove still attached relations", function () {
-            return createCar().then(function (item) {
+        it("should not remove still attached relations", () => {
+            return createCar().then((item) => {
                 var part = PartDBMapping.Model.forge({
                     car_id: item.id,
                     name: "name" + Date.now()
                 });
                 item.relations.relation_parts = PartDBMapping.Collection.forge(part);
 
-                return carRepository.save(item).then(function (item) {
-                    return carRepository.save(item).then(function () {
-                        return PartDBMapping.Collection.forge().fetch().then(function (parts) {
+                return carRepository.save(item).then((item) => {
+                    return carRepository.save(item).then(() => {
+                        return PartDBMapping.Collection.forge().fetch().then((parts) => {
                             expect(parts.length).to.be.eql(1);
                         });
                     });
@@ -67,42 +69,42 @@ describe("Bookshelf Repository Orphan Removal Test", function () {
 
     });
 
-    describe("n:1 relations", function () {
+    describe("n:1 relations", () => {
 
-        it("should remove orphans", function () {
+        it("should remove orphans", () => {
             var partRepository = new PartRepository();
             var engineRepository = new EngineRepository();
             var engine = engineRepository.newEntity();
             var part = partRepository.newEntity();
             part.engine = engine;
 
-            return partRepository.save(part).then(function () {
+            return partRepository.save(part).then(() => {
                 part.engine = null;
-                return partRepository.save(part).then(function () {
-                    return EngineDBMapping.Collection.forge().fetch().then(function (parts) {
+                return partRepository.save(part).then(() => {
+                    return EngineDBMapping.Collection.forge().fetch().then((parts) => {
                         expect(parts.length).to.be.eql(0);
                     });
                 });
             });
         });
 
-        it("should not remove still attached relations", function () {
+        it("should not remove still attached relations", () => {
             var partRepository = new PartRepository();
             var engineRepository = new EngineRepository();
             var engine = engineRepository.newEntity();
             var part = partRepository.newEntity();
             part.engine = engine;
 
-            return partRepository.save(part).then(function () {
-                return partRepository.save(part).then(function () {
-                    return EngineDBMapping.Collection.forge().fetch().then(function (parts) {
+            return partRepository.save(part).then(() => {
+                return partRepository.save(part).then(() => {
+                    return EngineDBMapping.Collection.forge().fetch().then((parts) => {
                         expect(parts.length).to.be.eql(1);
                     });
                 });
             });
         });
 
-        it("should remove orphans deeply", function () {
+        it("should remove orphans deeply", () => {
             var partRepository = new PartRepository();
             var engineRepository = new EngineRepository();
             var engine = engineRepository.newEntity();
@@ -111,12 +113,12 @@ describe("Bookshelf Repository Orphan Removal Test", function () {
             engine.injection = engine.newInjection();
             engine.addOutlets(engine.newOutlets());
 
-            return partRepository.save(part).then(function () {
+            return partRepository.save(part).then(() => {
                 part.engine = null;
-                return partRepository.save(part).then(function () {
-                    return EngineDBMapping.Collection.forge().fetch().then(function (parts) {
-                        return InjectionDBMapping.Collection.forge().fetch().then(function (injection) {
-                            return OutletDBMapping.Collection.forge().fetch().then(function (outlets) {
+                return partRepository.save(part).then(() => {
+                    return EngineDBMapping.Collection.forge().fetch().then((parts) => {
+                        return InjectionDBMapping.Collection.forge().fetch().then((injection) => {
+                            return OutletDBMapping.Collection.forge().fetch().then((outlets) => {
                                 expect(parts.length).to.be.eql(0);
                                 expect(injection.length).to.be.eql(0);
                                 expect(outlets.length).to.be.eql(0);

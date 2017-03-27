@@ -1,5 +1,7 @@
 "use strict";
 
+const StringUtils = require("./StringUtils");
+
 
 class BookshelfModelRelation {
 
@@ -14,7 +16,7 @@ class BookshelfModelRelation {
     }
 
     get pascalCasedName() {
-        return this.wrapper.firstLetterUp(this.relation.name);
+        return StringUtils.firstLetterUp(this.relation.name);
     }
 
     hasMany() {

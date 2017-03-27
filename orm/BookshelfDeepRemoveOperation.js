@@ -1,8 +1,8 @@
 "use strict";
 
-var Q = require("q");
-var _ = require("underscore");
-var BookshelfDeepOperation = require("./BookshelfDeepOperation");
+const Q = require("q");
+const _ = require("underscore");
+const BookshelfDeepOperation = require("./BookshelfDeepOperation");
 
 
 class BookshelfDeepRemoveOperation extends BookshelfDeepOperation {

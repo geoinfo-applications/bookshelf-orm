@@ -1,10 +1,10 @@
 "use strict";
 
-var Q = require("q");
-var _ = require("underscore");
-var BookshelfRepository = require("./BookshelfRepository");
-var BookshelfModelWrapper = require("./BookshelfModelWrapper");
-var BookshelfDeepOperation = require("./BookshelfDeepOperation");
+const Q = require("q");
+const _ = require("underscore");
+const BookshelfRepository = require("./BookshelfRepository");
+const BookshelfModelWrapper = require("./BookshelfModelWrapper");
+const BookshelfDeepOperation = require("./BookshelfDeepOperation");
 
 
 /**

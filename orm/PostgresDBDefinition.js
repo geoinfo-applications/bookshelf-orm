@@ -4,6 +4,7 @@ const knex = require("knex");
 const bookshelf = require("bookshelf");
 const _ = require("underscore");
 
+
 class PostgresDBDefinition {
 
     constructor(config, ModelFactory) {

@@ -1,7 +1,7 @@
 "use strict";
 
-var registry = require("./registry");
-var EntityRepository = require("../../orm/EntityRepository");
+const registry = require("./registry");
+const EntityRepository = require("../../orm/EntityRepository");
 
 function createRepository(Entity, name) {
     return class extends EntityRepository{
@@ -23,15 +23,15 @@ class NamelessOwner {}
 class ParkingSpace {}
 
 
-var CarRepository = createRepository(Car, "Car");
-var PartRepository = createRepository(Part, "Part");
-var VeyronPartRepository = createRepository(VeyronPart, "VeyronPart");
-var VeyronEngineRepository = createRepository(VeyronEngine, "VeyronEngine");
-var EngineRepository = createRepository(Engine, "Engine");
-var WheelRepository = createRepository(Wheel, "Wheel");
-var OwnerRepository = createRepository(Owner, "Owner");
-var NamelessOwnerRepository = createRepository(NamelessOwner, "NamelessOwner");
-var ParkingSpaceRepository = createRepository(ParkingSpace, "ParkingSpace");
+const CarRepository = createRepository(Car, "Car");
+const PartRepository = createRepository(Part, "Part");
+const VeyronPartRepository = createRepository(VeyronPart, "VeyronPart");
+const VeyronEngineRepository = createRepository(VeyronEngine, "VeyronEngine");
+const EngineRepository = createRepository(Engine, "Engine");
+const WheelRepository = createRepository(Wheel, "Wheel");
+const OwnerRepository = createRepository(Owner, "Owner");
+const NamelessOwnerRepository = createRepository(NamelessOwner, "NamelessOwner");
+const ParkingSpaceRepository = createRepository(ParkingSpace, "ParkingSpace");
 
 module.exports = {
     Car: Car,

@@ -1,5 +1,8 @@
 "use strict";
 
+const ModelFactory = require("./ModelFactory");
+var instance;
+
 /**
  * Holds all Mappings and converts them to Bookshelf Models
  */
@@ -9,6 +12,14 @@ class DBMappingRegistry {
         this.mappings = {};
         this.compiled = {};
         this.ModelFactory = ModelFactory;
+    }
+
+    static getInstance() {
+        if (!instance) {
+            instance = new DBMappingRegistry(ModelFactory);
+        }
+
+        return instance;
     }
 
     /**

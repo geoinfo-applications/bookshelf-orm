@@ -1,6 +1,6 @@
 "use strict";
 
-var _ = require("underscore");
+const _ = require("underscore");
 
 
 class BookshelfRelations {
@@ -27,6 +27,9 @@ class BookshelfRelations {
             columns: () => fetchProperties.columns = options.columns,
             transacting: () => fetchProperties.transacting = options.transacting
         };
+
+        fetchProperties.exclude = options.exclude;
+        fetchProperties.columns = fetchProperties.columns || this.Mapping.qualifiedRegularColumnNames;
 
         Object.keys(optionalOptions).filter((key) => options[key]).forEach((key) => optionalOptions[key]());
     }

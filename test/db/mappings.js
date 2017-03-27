@@ -1,11 +1,11 @@
 "use strict";
 
-var Engine = require("./mocks").Engine;
-var VeyronEngine = require("./mocks").VeyronEngine;
-var Part = require("./mocks").Part;
-var Owner = require("./mocks").Owner;
-var ParkingSpace = require("./mocks").ParkingSpace;
-var registry = require("./registry");
+const Engine = require("./mocks").Engine;
+const VeyronEngine = require("./mocks").VeyronEngine;
+const Part = require("./mocks").Part;
+const Owner = require("./mocks").Owner;
+const ParkingSpace = require("./mocks").ParkingSpace;
+const registry = require("./registry");
 
 
 registry.register("CarDBMapping", "test", {

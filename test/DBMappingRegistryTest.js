@@ -1,18 +1,20 @@
 "use strict";
 
-var expect = require("chai").expect;
-var ModelFactory = require("../orm/ModelFactory");
-var DBMappingRegistry = require("../orm/DBMappingRegistry");
 
+describe("DB-Mapping Registry Test", () => {
+    // jshint maxstatements:false
 
-describe("DB-Mapping Registry Test", function () {
+    const expect = require("chai").expect;
+    const ModelFactory = require("../orm/ModelFactory");
+    const DBMappingRegistry = require("../orm/DBMappingRegistry");
+
     var registry;
 
-    beforeEach(function () {
+    beforeEach(() => {
         registry = new DBMappingRegistry(ModelFactory);
     });
 
-    it("should hold registered Mapping", function () {
+    it("should hold registered Mapping", () => {
         var testModel = {};
 
         registry.register("model", "dbContext", testModel);
@@ -20,11 +22,11 @@ describe("DB-Mapping Registry Test", function () {
         expect(registry.get("model")).to.be.equal(testModel);
     });
 
-    describe("compile", function () {
+    describe("compile", () => {
 
-        it("should link Mappings with related Models and Entityclasses", function () {
+        it("should link Mappings with related Models and Entityclasses", () => {
             ModelFactory.context.ctx = {
-                createModel: function (m) {
+                createModel(m) {
                     return {
                         Model: m,
                         relations: m.relations
@@ -60,7 +62,7 @@ describe("DB-Mapping Registry Test", function () {
             expect(bar.relations[0].references.mapping).to.be.equal(foo);
         });
 
-        it("should throw an error if Mapping is not registered", function () {
+        it("should throw an error if Mapping is not registered", () => {
             expect(registry.compile.bind(registry, "NonExistingModel")).to.throw("NonExistingModel is not a registered mapping");
         });
 
