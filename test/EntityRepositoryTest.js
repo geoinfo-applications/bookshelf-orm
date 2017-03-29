@@ -685,8 +685,8 @@ describe("Entity Repository Test", function () {
 
         it("should return item by condition in mapped relation table", () => {
             var condition = [{
-                    name: "wheels",
-                    query: (q) => q.where("engine.serial_number", "asdf789")
+                name: "wheels",
+                query: (q) => q.where("engine.serial_number", "asdf789")
             }];
 
             var promise = carRepository.save([car1Entity, car2Entity]);
@@ -720,8 +720,6 @@ describe("Entity Repository Test", function () {
             });
 
             return promise.then((cars) => {
-                cars.forEach((car) => {
-                });
                 expect(cars.length).to.be.eql(1);
                 expect(cars[0].name).to.be.eql(car1.name);
             });
