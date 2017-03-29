@@ -14,6 +14,11 @@ class BookshelfRepository {
     constructor(Mapping) {
         this.Mapping = Mapping;
         this.relations = new BookshelfRelations(this.Mapping);
+        this.conditionHandlers = [];
+    }
+
+    addConditionHandler(conditionHandler) {
+        this.conditionHandlers.push(conditionHandler);
     }
 
     get idColumnName() {
@@ -49,6 +54,38 @@ class BookshelfRepository {
         });
 
         return this.fetchWithOptions(collection, options);
+    }
+
+    findByConditions(conditions, options) {
+        return this.findWhere((q) => {
+            this.Mapping.relations.forEach((relation) => {
+                this.joinRelations(q, relation, this.Mapping);
+            });
+            conditions.forEach((condition) => {
+                condition.query(q);
+            });
+
+        }, options);
+    }
+
+    joinRelations(q, relation, parentMapping) {
+        this.mapToRelation(q, relation, parentMapping, relation.type === "belongsTo");
+            var mapping = relation.references.mapping;
+            mapping.relations.forEach((child) => this.joinRelations(q, child, mapping));
+    }
+
+    mapToRelation(q, relation, parentMapping, isBelongTo) {
+        var mappingTableName = relation.references.mapping.tableName;
+        var mappingDefaultArray = [mappingTableName, parentMapping.tableName];
+        var mappingArray = isBelongTo ? mappingDefaultArray : mappingDefaultArray.reverse();
+
+        q.leftOuterJoin.apply(q,
+            [
+                mappingTableName,
+                _.first(mappingArray) + "." + relation.references.mapping.identifiedBy,
+                _.last(mappingArray) + "." + relation.references.mappedBy
+            ]
+        );
     }
 
     findOne(id, options) {

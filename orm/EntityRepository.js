@@ -93,6 +93,12 @@ class EntityRepository {
         });
     }
 
+    findByConditions(conditions, options) {
+        return this.repository.findByConditions(conditions, options).then((items) => {
+            return items.length ? this.wrapper.wrap(items) : [];
+        });
+    }
+
     /**
      * Save one or multiple Entities to this Repository
      * @param {Entity | Array<Entity>} entity - Entity or Entities to save

@@ -101,7 +101,8 @@ describe("Entity Repository Test", function () {
             var car = carRepository.newEntity({
                 parts: [{
                     wheels: [{ index: 0 }, { index: 1 }]
-                }]
+                }
+                ]
             });
 
             return carRepository.save(car).then((car) => {
@@ -214,7 +215,8 @@ describe("Entity Repository Test", function () {
                 parts: [{
                     name: name,
                     wheels: [{ index: 0 }, { index: 1 }]
-                }]
+                }
+                ]
             });
 
             return carRepository.save(car).then((car) => {
@@ -619,6 +621,111 @@ describe("Entity Repository Test", function () {
             });
         });
 
+    });
+
+    describe("findWithConditions", () => {
+        var car1, car2, car3, car1Entity, car2Entity, car3Entity;
+
+
+        beforeEach(() => {
+
+            car1 = { name: "car1", modelName: "carLabel1", ownerId: 1, parts: [{ wheels: [{ index: 1 }], engine: { serialNumber: "asdf234" } }] };
+            car2 = { name: "car2", modelName: "carLabel2", ownerId: 2, parts: [{ wheels: [{ index: 2 }], engine: { serialNumber: "asdf789" } }] };
+            car3 = { name: "car3", modelName: "carLabel3", ownerId: 2, parts: [{ wheels: [{ index: 1 }], engine: { serialNumber: "asdf100" } }] };
+
+            car1Entity = carRepository.newEntity(car1);
+            car2Entity = carRepository.newEntity(car2);
+            car3Entity = carRepository.newEntity(car3);
+        });
+
+        it("should return object with all properties", () => {
+            var condition = [
+                {
+                    name: "name",
+                    query: (q) => q.where("car.name", car1.name)
+                }
+            ];
+
+            var promise = carRepository.save([car1Entity, car2Entity]);
+
+            promise = promise.then(() => {
+                return carRepository.findByConditions(condition, void 0);
+            });
+
+            return promise.then((cars) => {
+                expect(cars.length).to.be.eql(1);
+                expect(cars[0]).to.have.any.keys("name", "description", "modelName", "parts", "serialNumber", "ownerId");
+                expect(cars[0].parts).to.be.an("array");
+                expect(cars[0].parts[0]).to.have.any.keys("engine", "wheels");
+                expect(cars[0].parts[0].engine).to.have.any.keys("ps", "injection", "serialNumber");
+                expect(cars[0].parts[0].wheels).to.be.an("array");
+                expect(cars[0].parts[0].wheels[0]).to.have.any.keys("index");
+            });
+        });
+
+        it("should return item by condition name", () => {
+            var condition = [
+                {
+                    name: "name",
+                    query: (q) => q.where("car.name", car1.name)
+                }
+            ];
+
+            var promise = carRepository.save([car1Entity, car2Entity]);
+
+            promise = promise.then(() => {
+                return carRepository.findByConditions(condition, void 0);
+            });
+
+            return promise.then((cars) => {
+                expect(cars.length).to.be.eql(1);
+                expect(cars[0].name).to.be.eql(car1.name);
+            });
+        });
+
+        it("should return item by condition in mapped relation table", () => {
+            var condition = [{
+                    name: "wheels",
+                    query: (q) => q.where("engine.serial_number", "asdf789")
+            }];
+
+            var promise = carRepository.save([car1Entity, car2Entity]);
+
+            promise = promise.then(() => {
+                return carRepository.findByConditions(condition, void 0);
+            });
+
+            return promise.then((cars) => {
+                expect(cars.length).to.be.eql(1);
+                expect(cars[0].name).to.be.eql(car2.name);
+            });
+        });
+
+        it("should return items that satisfy all conditions (AND clause)", () => {
+            var condition = [
+                {
+                    name: "wheels",
+                    query: (q) => q.where("index", 1)
+                },
+                {
+                    name: "owner",
+                    query: (q) => q.where("car.model_name", "carLabel1")
+                }
+            ];
+
+            var promise = carRepository.save([car1Entity, car2Entity, car3Entity]);
+
+            promise = promise.then(() => {
+                return carRepository.findByConditions(condition, void 0);
+            });
+
+            return promise.then((cars) => {
+                cars.forEach((car) => {
+                });
+                expect(cars.length).to.be.eql(1);
+                expect(cars[0].name).to.be.eql(car1.name);
+            });
+        });
     });
 
     describe("transactions", () => {
