@@ -17,7 +17,7 @@ class StringUtils {
     }
 
     static camelToSnakeCase(string) {
-        return string.replace(/([a-z][A-Z])/g, (match) => "_" + match[1].toLowerCase());
+        return string.replace(/([a-z][A-Z])/g, (match) => match[0] + "_" + match[1].toLowerCase());
     }
 
     static firstLetterUp(string) {
