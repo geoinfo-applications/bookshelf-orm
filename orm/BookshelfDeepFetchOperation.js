@@ -1,10 +1,7 @@
 "use strict";
 
-const Q = require("q");
-const _ = require("underscore");
 const BookshelfDeepOperation = require("./BookshelfDeepOperation");
 const MappingRelationsIterator = require("./MappingRelationsIterator");
-const StringUtils = require("./StringUtils");
 
 
 class BookshelfDeepFetchOperation extends BookshelfDeepOperation {
@@ -15,8 +12,7 @@ class BookshelfDeepFetchOperation extends BookshelfDeepOperation {
 
     fetch(model, fetchOptions) {
         return model.fetch(fetchOptions)
-            .then((model) => this.stripEmptyRelations(model))
-            .then((model) => this.fetchSqlColumns(model, fetchOptions));
+            .then((model) => this.stripEmptyRelations(model));
     }
 
     stripEmptyRelations(model) {
@@ -27,37 +23,6 @@ class BookshelfDeepFetchOperation extends BookshelfDeepOperation {
         if (Object.keys(relatedNode.attributes).length === 0) {
             delete node.relations[key];
         }
-    }
-
-    fetchSqlColumns(model, fetchOptions) {
-        var fetchOperations = [];
-
-        if (_.contains(fetchOptions.exclude, "*")) {
-            return model;
-        }
-
-        this.mappingRelationsIterator(model, (mapping, model) => {
-            if (mapping.readableSqlColumns.length) {
-                fetchOperations.push(this.fetchReadableSqlColumns(mapping, model, fetchOptions));
-            }
-        });
-
-        return Q.all(fetchOperations).then(() => model);
-    }
-
-    fetchReadableSqlColumns(mapping, model, fetchOptions) {
-        var query = mapping.createQuery(model, this.options);
-
-        var rawSelects = mapping.readableSqlColumns.filter((column) => {
-            return !_.contains(fetchOptions.exclude, StringUtils.snakeToCamelCase(column.name));
-        }).map((column) => {
-            var getter = _.isFunction(column.get) ? column.get() : column.get;
-            return mapping.dbContext.knex.raw(getter + " as \"" + column.name + "\"");
-        });
-
-        return query.select(rawSelects).then((result) => {
-            mapping.readableSqlColumns.forEach((column) => model.set(column.name, result[0][column.name]));
-        });
     }
 
     mappingRelationsIterator(model, preOrder, postOrder) {

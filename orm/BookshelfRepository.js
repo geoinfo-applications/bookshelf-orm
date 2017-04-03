@@ -17,10 +17,6 @@ class BookshelfRepository {
         this.conditionHandlers = [];
     }
 
-    addConditionHandler(conditionHandler) {
-        this.conditionHandlers.push(conditionHandler);
-    }
-
     get idColumnName() {
         return this.Mapping.identifiedBy;
     }
@@ -68,10 +64,11 @@ class BookshelfRepository {
         }, options);
     }
 
+
     joinRelations(q, relation, parentMapping) {
         this.mapToRelation(q, relation, parentMapping, relation.type === "belongsTo");
-            var mapping = relation.references.mapping;
-            mapping.relations.forEach((child) => this.joinRelations(q, child, mapping));
+        var mapping = relation.references.mapping;
+        mapping.relations.forEach((child) => this.joinRelations(q, child, mapping));
     }
 
     mapToRelation(q, relation, parentMapping, isBelongTo) {
