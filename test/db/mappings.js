@@ -13,11 +13,11 @@ registry.register("CarDBMapping", "test", {
     columns: ["id", "name", "model_name", {
         name: "description",
         type: "sql",
-        get: "lower(coalesce(name, '') || '::' || coalesce(model_name))"
+        get: "lower(coalesce(car.name, '') || '::' || coalesce(model_name))"
     }, {
         name: "serial_number",
         type: "sql",
-        get: () => "upper(serial_number)",
+        get: () => "upper(car.serial_number)",
         set: (v) => "lower('" + v + "')"
     }],
 
@@ -54,7 +54,12 @@ registry.register("CarDBMapping", "test", {
 
 registry.register("PartDBMapping", "test", {
     tableName: "datadictionary.part",
-    columns: ["id", "name"],
+    columns: ["id", "name",
+        {
+            type: "sql",
+            name: "upperName",
+            get: () => "upper(part.name)"
+        }],
 
     relations: [
         {
