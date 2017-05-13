@@ -56,26 +56,25 @@ class BookshelfRelations {
 
     addReadableSqlColumnsToFetchProperties(fetchProperties) {
         let selectedReadableSqlColumnNames = this.getSelectedReadableColumnNames(fetchProperties);
-        var selectedReadableSqlColumns = selectedReadableSqlColumnNames.map((name) => _.findWhere(this.Mapping.readableSqlColumns, { name }))
+        var selectedReadableSqlColumns = selectedReadableSqlColumnNames.map((name) => _.findWhere(this.Mapping.readableSqlColumns, { name }));
 
         return this.addSqlColumnsToFetchPropertiesColumnsAsSqlQuery(fetchProperties, selectedReadableSqlColumns);
     }
 
     getSelectedReadableColumnNames(fetchProperties) {
+        const defaultSqlReadableColumnNames = this.Mapping.readableSqlColumns.map((sqlColumns) => sqlColumns.name);
+        const excludedSqlReadableColumnNames = _.intersection(fetchProperties.exclude, defaultSqlReadableColumnNames);
+        const selectedSqlReadableColumnNames = _.intersection(fetchProperties.columns, defaultSqlReadableColumnNames);
 
-        let defaultSqlReadableColumnNames = this.Mapping.readableSqlColumns.map((sqlColumns) => sqlColumns.name);
-        let excludedSqlReadableColumnNames = _.intersection(fetchProperties.exclude, defaultSqlReadableColumnNames);
-        let selectedSqlReadableColumnNames = _.intersection(fetchProperties.columns, defaultSqlReadableColumnNames);
-
-        let readableColumnNamesAppearConditions = [
+        const readableColumnNamesAppearConditions = [
             {
-                condition: _.contains(fetchProperties.exclude, "*"),
+                condition: () =>  _.contains(fetchProperties.exclude, "*"),
                 execute: () => []
             }, {
-                condition: excludedSqlReadableColumnNames.length,
+                condition: () =>  excludedSqlReadableColumnNames.length,
                 execute: () => _.difference(defaultSqlReadableColumnNames, excludedSqlReadableColumnNames)
             }, {
-                condition: selectedSqlReadableColumnNames.length,
+                condition: () =>  selectedSqlReadableColumnNames.length,
                 execute: () => {
                     selectedSqlReadableColumnNames.forEach((sqlColumn) => {
                         let sqlColumnIndex = fetchProperties.columns.indexOf(sqlColumn);
@@ -84,12 +83,12 @@ class BookshelfRelations {
                     return selectedSqlReadableColumnNames;
                 }
             }, {
-                condition: true,
+                condition: () =>  true,
                 execute: () => defaultSqlReadableColumnNames
             }
         ];
 
-        return _.find(readableColumnNamesAppearConditions, (condition) => condition.condition).execute();
+        return _.find(readableColumnNamesAppearConditions, (condition) => condition.condition()).execute();
     }
 
     addSqlColumnsToFetchPropertiesColumnsAsSqlQuery(fetchProperties, selectedReadableSqlColumns) {
@@ -158,18 +157,22 @@ class BookshelfRelations {
 
     getWithRelatedFetchOptions() {
         return this.relationNamesDeep.map((relationName) => {
-            var relationNamePath = relationName.split(".");
-            var prefixedRelationName = relationNamePath.map((name) => "relation_" + name).join(".");
-            var mapping = relationNamePath.reduce(this.lookupReferencedMapping, this.Mapping);
+            const relationNamePath = relationName.split(".");
+            const prefixedRelationName = relationNamePath.map((name) => "relation_" + name).join(".");
+            const mapping = relationNamePath.reduce(this.lookupReferencedMapping, this.Mapping);
 
 
-            var relatedQuery = Object.create(null);
+            const relatedQuery = Object.create(null);
             relatedQuery[prefixedRelationName] = (query) => {
                 if (mapping.discriminator) {
                     query.where(mapping.discriminator);
                 }
 
-                query.select(this.getRawColumnSelectStatements(mapping.readableSqlColumns).concat("*"));
+                const regularColumns = mapping.qualifiedRegularColumnNames;
+                const sqlColumns = this.getRawColumnSelectStatements(mapping.readableSqlColumns);
+                const columns = regularColumns.concat(sqlColumns);
+
+                query.select(columns);
             };
 
             return relatedQuery;

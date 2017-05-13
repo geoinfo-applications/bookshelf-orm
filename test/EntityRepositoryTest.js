@@ -670,7 +670,7 @@ describe("Entity Repository Test", function () {
             });
 
             return promise.then((car) => {
-                expect(car.parts[0].upperName).to.be.eql("PARTNAME")
+                expect(car.parts[0].upperName).to.be.eql("PARTNAME");
             });
         });
 
