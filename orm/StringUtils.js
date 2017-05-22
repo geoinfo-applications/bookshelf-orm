@@ -17,13 +17,12 @@ class StringUtils {
     }
 
     static camelToSnakeCase(string) {
-        return string.replace(/([a-z][A-Z])/g, (match) => "_" + match[1].toLowerCase());
+        return string.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase();
     }
 
     static firstLetterUp(string) {
         return string[0].toUpperCase() + string.substr(1);
     }
-
 
 }
 

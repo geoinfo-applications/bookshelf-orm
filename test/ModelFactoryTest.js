@@ -68,7 +68,10 @@ describe("Model Factory Test", function () {
                     references: {
                         type: {},
                         model: {},
-                        mappedBy: "theName_fk_name"
+                        mappedBy: "theName_fk_name",
+                        mapping: {
+                            qualifiedRegularColumnNames: []
+                        }
                     }
                 }]
             });

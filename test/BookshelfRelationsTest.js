@@ -3,16 +3,24 @@
 
 describe("Bookshelf Relations Test", function () {
     // jshint maxstatements:false
-
+    const _ = require("underscore");
     const expect = require("chai").expect;
     const BookshelfRelations = require("../orm/BookshelfRelations");
 
-    var mapping, subMapping, subSubMapping, relations;
+    var mapping, subMapping, subSubMapping, relations, tableName, identifiedBy;
 
     beforeEach(() => {
+        tableName = "datadictionary";
+        identifiedBy = "id";
         subSubMapping = { discriminator: {}, relations: [{ name: "subSubRelatedThing", references: { mapping: {} } }] };
         subMapping = { relations: [{ name: "subRelatedThing", references: { mapping: subSubMapping } }] };
-        mapping = { relations: [{ name: "relatedThing", references: { mapping: subMapping } }] };
+        mapping = {
+            relations: [{ name: "relatedThing", references: { mapping: subMapping } }],
+            qualifiedRegularColumnNames: [],
+            readableSqlColumns: [],
+            tableName: tableName,
+            identifiedBy: identifiedBy
+        };
         relations = new BookshelfRelations(mapping);
     });
 
@@ -67,7 +75,9 @@ describe("Bookshelf Relations Test", function () {
 
             var fetchOptions = relations.getFetchOptions(options);
 
-            expect(fetchOptions.withRelated).to.be.eql(["relation_relatedThing"]);
+            expect(fetchOptions.withRelated.length).to.be.eql(1);
+            expect(fetchOptions.withRelated[0]).to.have.keys("relation_relatedThing");
+            expect(fetchOptions.withRelated[0].relation_relatedThing).to.be.a("function");
         });
 
         it("should return exclude descendent properties", () => {
@@ -83,7 +93,9 @@ describe("Bookshelf Relations Test", function () {
 
             var fetchOptions = relations.getFetchOptions(options);
 
-            expect(fetchOptions.withRelated).to.be.eql(["relation_relatedThing"]);
+            expect(fetchOptions.withRelated.length).to.be.eql(1);
+            expect(fetchOptions.withRelated[0]).to.have.keys("relation_relatedThing");
+            expect(fetchOptions.withRelated[0].relation_relatedThing).to.be.a("function");
         });
 
         it("should return no relation names if excluded is wildcard only", () => {
@@ -95,12 +107,13 @@ describe("Bookshelf Relations Test", function () {
         });
 
         it("should add columns if specified", () => {
-            var columns = ["b", "b", "c"];
+            var primaryKey = `${tableName}.${identifiedBy}`;
+            var columns = ["b", "b", "c", primaryKey];
             var options = { columns: columns };
 
             var fetchOptions = relations.getFetchOptions(options);
 
-            expect(fetchOptions.columns).to.be.equal(columns);
+            expect(_.isEqual(fetchOptions.columns, columns)).to.be.equal(true);
         });
 
         it("should add transaction if specified", () => {

@@ -1,5 +1,8 @@
 "use strict";
 
+const StringUtils = require("./StringUtils");
+
+
 /**
  * Describes a DB Mapping
  * @property {string} tableName - Fully qualified name of DB Table
@@ -36,10 +39,18 @@ class BookshelfMapping {
             this.relations.filter((r) => r.type === "belongsTo").map((r) => r.references.mappedBy)
             .concat(this.regularColumnNames)
             .map((name) => `${this.tableName}.${name}`);
+
+        this.provideForeignKeyColumnsToRelatedMappings();
     }
 
     static getOptionOrDefault(configProperty, defaultValue) {
         return configProperty || defaultValue;
+    }
+
+    provideForeignKeyColumnsToRelatedMappings() {
+        this.relations.filter((r) => r.type === "hasMany" || r.type === "hasOne").forEach((r) => {
+            r.references.mapping.qualifiedRegularColumnNames.push(r.references.mappedBy);
+        });
     }
 
     createModel() {
@@ -57,7 +68,7 @@ class BookshelfMapping {
     }
 
     addRelation(prototype, relation) {
-        var relationName = BookshelfMapping.toUnderscoreSpace(relation.name);
+        var relationName = StringUtils.camelToSnakeCase(relation.name);
         var fkName = relation.references.mappedBy = relation.references.mappedBy || relationName + "_id";
 
         prototype["relation_" + relation.name] = function () {
@@ -67,10 +78,6 @@ class BookshelfMapping {
 
             return this[relation.type](relation.references.mapping.Model, fkName);
         };
-    }
-
-    static toUnderscoreSpace(string) {
-        return string.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase();
     }
 
     createQuery(item, options) {
