@@ -15,7 +15,6 @@
         "beforeOpeningRoundBrace": true
     },
     "requireBlocksOnNewline": 1,
-    "disallowEmptyBlocks": true,
     "disallowSpacesInsideParentheses": true,
     "requireSpacesInsideObjectBrackets": "all",
     "disallowQuotedKeysInObjects": true,
