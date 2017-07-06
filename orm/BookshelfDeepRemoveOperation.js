@@ -13,8 +13,17 @@ class BookshelfDeepRemoveOperation extends BookshelfDeepOperation {
 
     remove(item) {
         return this.dropRelations(this.relationsWhereKeyIsOnRelated, item)
-            .then(() => item.destroy(this.options))
-            .then((item) => this.dropRelations(this.relationsWhereKeyIsOnItem, item).then(() => item));
+            .then(() => this.executeRemoveOperation(item))
+            .then(() => this.dropRelations(this.relationsWhereKeyIsOnItem, item))
+            .then(() => item);
+    }
+
+    executeRemoveOperation(item) {
+        if (this.Mapping.onDelete) {
+            return this.Mapping.createQuery(item, this.option).update(this.Mapping.onDelete);
+        } else {
+            return item.destroy(this.options);
+        }
     }
 
     dropRelations(collection, item) {

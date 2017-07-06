@@ -168,17 +168,21 @@ registry.register("PlanetDBMapping", "test", {
     tableName: "datadictionary.planet",
     columns: ["id", "name", "distance_to_star"],
 
+    onDelete: { is_deleted: true },
+    discriminator: { is_deleted: false },
+
     relations: [{
         name: "moons",
         type: "hasMany",
         references: {
             mapping: "MoonDBMapping",
+            mappedBy: "planet_id",
             cascade: true,
             orphanRemoval: true
         }
     }, {
         name: "composition",
-        type: "hasOne",
+        type: "belongsTo",
         references: {
             mapping: "CompositionDBMapping",
             cascade: true,
@@ -186,9 +190,10 @@ registry.register("PlanetDBMapping", "test", {
         }
     }, {
         name: "atmosphere",
-        type: "belongsTo",
+        type: "hasOne",
         references: {
             mapping: "AtmosphereDBMapping",
+            mappedBy: "planet_id",
             cascade: true,
             orphanRemoval: true
         }
@@ -199,9 +204,12 @@ registry.register("MoonDBMapping", "test", {
     tableName: "datadictionary.moon",
     columns: ["id", "name", "distance_to_planet"],
 
+    onDelete: { is_deleted: true },
+    discriminator: { is_deleted: false },
+
     relations: [{
         name: "composition",
-        type: "hasOne",
+        type: "belongsTo",
         references: {
             mapping: "CompositionDBMapping",
             cascade: true,
@@ -214,9 +222,12 @@ registry.register("AtmosphereDBMapping", "test", {
     tableName: "datadictionary.atmosphere",
     columns: ["id", "description"],
 
+    onDelete: { is_deleted: true },
+    discriminator: { is_deleted: false },
+
     relations: [{
         name: "composition",
-        type: "hasOne",
+        type: "belongsTo",
         references: {
             mapping: "CompositionDBMapping",
             cascade: true,
@@ -227,5 +238,7 @@ registry.register("AtmosphereDBMapping", "test", {
 
 registry.register("CompositionDBMapping", "test", {
     tableName: "datadictionary.composition",
-    columns: ["id", "description"]
+    columns: ["id", "description"],
+    onDelete: { is_deleted: true },
+    discriminator: { is_deleted: false }
 });

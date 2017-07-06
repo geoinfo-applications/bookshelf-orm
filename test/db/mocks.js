@@ -73,5 +73,5 @@ module.exports = {
     PlanetRepository,
     MoonRepository,
     AtmosphereRepository,
-    CompositionRepository,
+    CompositionRepository
 };

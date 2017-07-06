@@ -59,6 +59,7 @@ module.exports = function () {
     // soft delete and history sample
     const planet = knex.schema.createTable("datadictionary.planet", (table) => {
         table.increments();
+        table.boolean("is_deleted").default(false);
         table.string("name");
         table.integer("distance_to_star");
         table.integer("composition_id");
@@ -66,6 +67,7 @@ module.exports = function () {
 
     const moon = knex.schema.createTable("datadictionary.moon", (table) => {
         table.increments();
+        table.boolean("is_deleted").default(false);
         table.integer("planet_id");
         table.integer("distance_to_planet");
         table.string("name");
@@ -74,6 +76,7 @@ module.exports = function () {
 
     const atmosphere = knex.schema.createTable("datadictionary.atmosphere", (table) => {
         table.increments();
+        table.boolean("is_deleted").default(false);
         table.integer("planet_id");
         table.text("description");
         table.integer("composition_id");
@@ -81,6 +84,7 @@ module.exports = function () {
 
     const composition = knex.schema.createTable("datadictionary.composition", (table) => {
         table.increments();
+        table.boolean("is_deleted").default(false);
         table.text("description");
     });
 

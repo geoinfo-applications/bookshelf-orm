@@ -9,6 +9,7 @@ const StringUtils = require("./StringUtils");
  * @property {string} [identifiedBy = "id"] - Primary key column
  * @property {Array<String | ColumnDescriptor>} [columns] - columns to fetch. 'underscore_space' will be converted to 'lowerCamelCase' in Entity
  * @property {Object | Function} [discriminator] - Fetch only Entities which match a given query, Knex where condition
+ * @property {Object | Function} [onDelete] - Execute instead of regular delete statement, Knex update statement
  * @property {Array<RelationDescriptor>} [relations] - Managed relations of this Entity.
  *                                                     There will be a getter and setter for n:1 relations
  *                                                     There will be a getter and modifiers ("add"/"remove" + relation.name) for m:n relations
@@ -23,6 +24,7 @@ class BookshelfMapping {
         this.relationNames = BookshelfMapping.getOptionOrDefault(this.relations, []).map((r) => r.name);
         this.columns = BookshelfMapping.getOptionOrDefault(config.columns, []);
         this.discriminator = config.discriminator;
+        this.onDelete = config.onDelete;
         this.Model = this.createModel();
         this.Collection = this.createCollection();
         this.startTransaction = dbContext.transaction.bind(dbContext);
