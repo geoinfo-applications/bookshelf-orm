@@ -11,9 +11,10 @@ const RETURNING_PROPERTY_DESCRIPTOR = {
 
 class BookshelfDeepSaveOperationHistoryBehavior {
 
-    executeSaveOperation(item, options) {
-        item.set("parent_id", item.get("revision_id"));
-        item.unset("revision_id");
+    executeSaveOperation(item, options, mapping) {
+        const { revisionId, parentId } = mapping.historyColumns;
+        item.set(parentId, item.get(revisionId));
+        item.unset(revisionId);
 
         this.addListenersForFixingReturningStatement(item);
 

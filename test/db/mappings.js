@@ -225,6 +225,7 @@ registry.register("AtmosphereDBMapping", "test", {
     columns: ["id", "description"],
 
     keepHistory: true,
+    historyColumns: { revisionId: "the_revision_id", parentId: "the_parent_id" },
     onDelete: { is_deleted: true },
     discriminator: { is_deleted: false },
 

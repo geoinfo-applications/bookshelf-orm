@@ -215,7 +215,7 @@ describe("Entity Repository Soft Delete Test", function () {
 
             var promise = planetRepository.save(jupiter);
 
-            return promise.then(() => knex.select().from(AtmosphereDBMapping.tableName).orderBy("revision_id")).then((rows) => {
+            return promise.then(() => knex.select().from(AtmosphereDBMapping.tableName).orderBy("the_revision_id")).then((rows) => {
                 expect(rows.length).to.be.eql(2);
                 expect(rows[0].description).to.be.eql("Red and stormy");
                 expect(rows[1].description).to.be.eql("Red, white and stormy");

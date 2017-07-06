@@ -80,8 +80,8 @@ module.exports = function () {
 
     const atmosphere = knex.schema.createTable("datadictionary.atmosphere", (table) => {
         table.specificType("id", "serial");
-        table.increments("revision_id");
-        table.integer("parent_id");
+        table.increments("the_revision_id");
+        table.integer("the_parent_id");
         table.boolean("is_deleted").default(false);
         table.integer("planet_id");
         table.text("description");

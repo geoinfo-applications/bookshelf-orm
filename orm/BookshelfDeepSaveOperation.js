@@ -29,7 +29,7 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
     }
 
     executeSaveOperation(item) {
-        return this.saveBehavior.executeSaveOperation(item, this.options);
+        return this.saveBehavior.executeSaveOperation(item, this.options, this.Mapping);
     }
 
     prepareRawUpdates(item) {

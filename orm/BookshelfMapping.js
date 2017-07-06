@@ -17,6 +17,8 @@ const StringUtils = require("./StringUtils");
  *                    'revision_id' must have a unique default value, is the Primary Key at best.
  *                    'identifiedBy' must not be the Primary Key, since many revisions with the same ID can exist.
  *
+ * @property {Boolean} [historyColumns = { revisionId: "revision_id", parentId: "parent_id" }] - Configure alias for history columns
+ *
  * @property {Array<RelationDescriptor>} [relations] - Managed relations of this Entity.
  *                    There will be a getter and setter for n:1 relations
  *                    There will be a getter and modifiers ("add"/"remove" + relation.name) for m:n relations
@@ -33,6 +35,7 @@ class BookshelfMapping {
         this.discriminator = config.discriminator;
         this.onDelete = config.onDelete;
         this.keepHistory = BookshelfMapping.getOptionOrDefault(config.keepHistory, false);
+        this.historyColumns = BookshelfMapping.getOptionOrDefault(config.historyColumns, { revisionId: "revision_id", parentId: "parent_id" });
 
         this.configureHistory();
 
@@ -52,15 +55,17 @@ class BookshelfMapping {
         if (this.keepHistory) {
             this.discriminator = this.addHistoryDiscriminator();
 
-            const columns = new Set(this.columns).add("revision_id").add("parent_id");
+            const columns = new Set(this.columns).add(this.historyColumns.revisionId).add(this.historyColumns.parentId);
             this.columns = [...columns];
         }
     }
 
     addHistoryDiscriminator() {
         const discriminator = this.discriminator;
+        const { revisionId, parentId } = this.historyColumns;
+
         return (q) => {
-            q.whereNotIn("revision_id", (q) => q.from(this.tableName).whereNotNull("parent_id").andWhere(discriminator).select("parent_id"));
+            q.whereNotIn(revisionId, (q) => q.from(this.tableName).whereNotNull(parentId).andWhere(discriminator).select(parentId));
             q.andWhere(discriminator);
         };
     }
