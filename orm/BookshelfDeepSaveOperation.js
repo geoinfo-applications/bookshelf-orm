@@ -3,12 +3,15 @@
 const Q = require("q");
 const _ = require("underscore");
 const BookshelfDeepOperation = require("./BookshelfDeepOperation");
+const DefaultBehavior = require("./BookshelfDeepSaveOperationDefaultBehavior");
+const HistoryBehavior = require("./BookshelfDeepSaveOperationHistoryBehavior");
 
 
 class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
 
     constructor(mapping, options) {
         super(mapping, options);
+        this.saveBehavior = this.Mapping.keepHistory ? new HistoryBehavior() : new DefaultBehavior();
     }
 
     save(item) {
@@ -16,13 +19,17 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
             var rawUpdates = this.prepareRawUpdates(item);
             var unsetValues = this.prepareSqlColumnsForSave(item);
 
-            return item.save(null, this.options).then((item) => {
+            return this.executeSaveOperation(item).then((item) => {
                 return Q.when(Object.keys(rawUpdates).length && this.Mapping.createQuery(item, this.options).update(rawUpdates)).then(() => item);
             }).then((item) => {
                 _.each(unsetValues, (value, key) => item.set(key, value));
                 return item;
             });
         }).then((item) => this.saveWhereKeyIsOnRelated(item).then(() => item));
+    }
+
+    executeSaveOperation(item) {
+        return this.saveBehavior.executeSaveOperation(item, this.options);
     }
 
     prepareRawUpdates(item) {

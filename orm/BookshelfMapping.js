@@ -5,14 +5,21 @@ const StringUtils = require("./StringUtils");
 
 /**
  * Describes a DB Mapping
+ *
  * @property {string} tableName - Fully qualified name of DB Table
  * @property {string} [identifiedBy = "id"] - Primary key column
  * @property {Array<String | ColumnDescriptor>} [columns] - columns to fetch. 'underscore_space' will be converted to 'lowerCamelCase' in Entity
  * @property {Object | Function} [discriminator] - Fetch only Entities which match a given query, Knex where condition
- * @property {Object | Function} [onDelete] - Execute instead of regular delete statement, Knex update statement
+ * @property {Object} [onDelete] - Execute instead of regular delete statement, Knex update statement
+ *
+ * @property {Boolean} [keepHistory = false] - Keep an History History in this table. New states are appended instead of updated.
+ *                    Columns 'revision_id' and 'parent_id' will be added to mapping, thus requires these columns in DB.
+ *                    'revision_id' must have a unique default value, is the Primary Key at best.
+ *                    'identifiedBy' must not be the Primary Key, since many revisions with the same ID can exist.
+ *
  * @property {Array<RelationDescriptor>} [relations] - Managed relations of this Entity.
- *                                                     There will be a getter and setter for n:1 relations
- *                                                     There will be a getter and modifiers ("add"/"remove" + relation.name) for m:n relations
+ *                    There will be a getter and setter for n:1 relations
+ *                    There will be a getter and modifiers ("add"/"remove" + relation.name) for m:n relations
  */
 class BookshelfMapping {
 
@@ -25,10 +32,40 @@ class BookshelfMapping {
         this.columns = BookshelfMapping.getOptionOrDefault(config.columns, []);
         this.discriminator = config.discriminator;
         this.onDelete = config.onDelete;
+        this.keepHistory = BookshelfMapping.getOptionOrDefault(config.keepHistory, false);
+
+        this.configureHistory();
+
         this.Model = this.createModel();
         this.Collection = this.createCollection();
         this.startTransaction = dbContext.transaction.bind(dbContext);
 
+        this.deriveColumnAccessors();
+        this.provideForeignKeyColumnsToRelatedMappings(this.relations);
+    }
+
+    static getOptionOrDefault(configProperty, defaultValue) {
+        return configProperty || defaultValue;
+    }
+
+    configureHistory() {
+        if (this.keepHistory) {
+            this.discriminator = this.addHistoryDiscriminator();
+
+            const columns = new Set(this.columns).add("revision_id").add("parent_id");
+            this.columns = [...columns];
+        }
+    }
+
+    addHistoryDiscriminator() {
+        const discriminator = this.discriminator;
+        return (q) => {
+            q.whereNotIn("revision_id", (q) => q.from(this.tableName).whereNotNull("parent_id").andWhere(discriminator).select("parent_id"));
+            q.andWhere(discriminator);
+        };
+    }
+
+    deriveColumnAccessors() {
         this.columnMappings = this.columns.map((column) => typeof column === "string" ? { name: column } : column);
         this.columnNames = this.columnMappings.map((column) => column.name);
         this.regularColumns = this.columnMappings.filter((c) => c.type !== "sql");
@@ -37,16 +74,11 @@ class BookshelfMapping {
         this.writeableSqlColumns = this.sqlColumns.filter((c) => c.set);
         this.readableSqlColumns = this.sqlColumns.filter((c) => c.get);
 
-        this.qualifiedRegularColumnNames =
-            this.relations.filter((r) => r.type === "belongsTo").map((r) => r.references.mappedBy)
+        this.qualifiedRegularColumnNames = this.relations
+            .filter((r) => r.type === "belongsTo")
+            .map((r) => r.references.mappedBy)
             .concat(this.regularColumnNames)
             .map((name) => `${this.tableName}.${name}`);
-
-        this.provideForeignKeyColumnsToRelatedMappings();
-    }
-
-    static getOptionOrDefault(configProperty, defaultValue) {
-        return configProperty || defaultValue;
     }
 
     provideForeignKeyColumnsToRelatedMappings() {
@@ -56,7 +88,7 @@ class BookshelfMapping {
     }
 
     createModel() {
-        var prototype = {
+        const prototype = {
             tableName: this.tableName,
             idAttribute: this.identifiedBy
         };
@@ -70,8 +102,8 @@ class BookshelfMapping {
     }
 
     addRelation(prototype, relation) {
-        var relationName = StringUtils.camelToSnakeCase(relation.name);
-        var fkName = relation.references.mappedBy = relation.references.mappedBy || relationName + "_id";
+        const relationName = StringUtils.camelToSnakeCase(relation.name);
+        const fkName = relation.references.mappedBy = relation.references.mappedBy || relationName + "_id";
 
         prototype["relation_" + relation.name] = function () {
             if (!(relation.type in this)) {
@@ -83,7 +115,7 @@ class BookshelfMapping {
     }
 
     createQuery(item, options) {
-        var query = this.dbContext.knex(this.tableName).where(this.identifiedBy, item.get(this.identifiedBy));
+        const query = this.dbContext.knex(this.tableName).where(this.identifiedBy, item.get(this.identifiedBy));
 
         if (this.discriminator) {
             query.andWhere(this.discriminator);

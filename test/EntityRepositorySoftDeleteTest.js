@@ -103,9 +103,9 @@ describe("Entity Repository Soft Delete Test", function () {
             var promise = planetRepository.save(jupiter);
 
             return promise.then(() => knex.select().from(MoonDBMapping.tableName)).then((rows) => {
-                expect(rows.length).to.be.eql(4);
+                expect(rows.length).to.be.eql(7);
                 expect(rows.filter((r) => r.name === europa.name)[0].is_deleted).to.be.eql(true);
-                expect(rows.filter((r) => r.name !== europa.name).map((r) => r.is_deleted)).to.be.eql([false, false, false]);
+                expect(rows.filter((r) => r.name !== europa.name).map((r) => r.is_deleted)).to.be.eql(new Array(6).fill(false));
             });
         });
 
@@ -121,15 +121,117 @@ describe("Entity Repository Soft Delete Test", function () {
         });
 
         it("should keep removed 'belongsTo' entity in table", () => {
-            var jupidersCompositionId = jupiter.composition.id;
+            var jupitersCompositionId = jupiter.composition.id;
             jupiter.composition = null;
 
             var promise = planetRepository.save(jupiter);
 
             return promise.then(() => knex.select().from(CompositionDBMapping.tableName)).then((rows) => {
-                expect(rows.length).to.be.eql(6);
-                expect(rows.filter((r) => r.id === jupidersCompositionId)[0].is_deleted).to.be.eql(true);
-                expect(rows.filter((r) => r.id !== jupidersCompositionId).map((r) => r.is_deleted)).to.be.eql([false, false, false, false, false]);
+                expect(rows.length).to.be.eql(11);
+                expect(rows.filter((r) => r.id === jupitersCompositionId)[0].is_deleted).to.be.eql(true);
+                expect(rows.filter((r) => r.id !== jupitersCompositionId).map((r) => r.is_deleted)).to.be.eql(new Array(10).fill(false));
+            });
+        });
+
+    });
+
+    describe("history", () => {
+
+        it("should only load newest state", () => {
+            jupiter.distanceToStar = 778000000;
+
+            var promise = planetRepository.save(jupiter);
+
+            return promise.then(() => planetRepository.findAll()).then((planets) => {
+                expect(planets.length).to.be.eql(1);
+                expect(planets[0].distanceToStar).to.be.eql(778000000);
+            });
+        });
+
+        it("should save every modified state to db", () => {
+            jupiter.distanceToStar = 778000000;
+
+            var promise = planetRepository.save(jupiter);
+
+            return promise.then(() => knex.select().from(PlanetDBMapping.tableName).orderBy("revision_id")).then((rows) => {
+                expect(rows.length).to.be.eql(2);
+                expect(rows[0].distance_to_star).to.be.eql(null);
+                expect(rows[1].distance_to_star).to.be.eql(778000000);
+                expect(rows[0].revision_id).to.be.eql(rows[1].parent_id);
+                expect(rows[0].parent_id).to.be.eql(null);
+            });
+        });
+
+        it("should only load newest state of 'hasMany' entity", () => {
+            europa.distanceToPlanet = 670900;
+
+            var promise = planetRepository.save(jupiter);
+
+            return promise.then(() => planetRepository.findAll()).then((planets) => {
+                expect(planets.length).to.be.eql(1);
+                expect(planets[0].moons.length).to.be.eql(4);
+                expect(planets[0].moons.filter((m) => m.name === europa.name).length).to.be.eql(1);
+                expect(planets[0].moons.filter((m) => m.name === europa.name)[0].distanceToPlanet).to.be.eql(670900);
+            });
+        });
+
+        it("should only load newest state of 'hasOne' entity", () => {
+            jupiter.atmosphere.description = "Red, white and stormy";
+
+            var promise = planetRepository.save(jupiter);
+
+            return promise.then(() => planetRepository.findAll()).then((planets) => {
+                expect(planets.length).to.be.eql(1);
+                expect(planets[0].atmosphere.description).to.be.eql("Red, white and stormy");
+            });
+        });
+
+        it("should only load newest state of 'belongsTo' entity", () => {
+            jupiter.composition.description = "Gas giant";
+
+            var promise = planetRepository.save(jupiter);
+
+            return promise.then(() => planetRepository.findAll()).then((planets) => {
+                expect(planets.length).to.be.eql(1);
+                expect(planets[0].composition.description).to.be.eql("Gas giant");
+            });
+        });
+
+        it("should save modified 'hasMany' entity in table", () => {
+            europa.distanceToPlanet = 670900;
+
+            var promise = planetRepository.save(jupiter);
+
+            return promise.then(() => knex.select().from(MoonDBMapping.tableName).orderBy("revision_id")).then((rows) => {
+                expect(rows.length).to.be.eql(8);
+                expect(rows.filter((r) => r.name === europa.name)[0].distance_to_planet).to.be.eql(null);
+                expect(rows.filter((r) => r.name === europa.name)[1].distance_to_planet).to.be.eql(670900);
+                expect(rows.filter((r) => r.name !== europa.name).length).to.be.eql(6);
+            });
+        });
+
+        it("should save modified 'hasOne' entity in table", () => {
+            jupiter.atmosphere.description = "Red, white and stormy";
+
+            var promise = planetRepository.save(jupiter);
+
+            return promise.then(() => knex.select().from(AtmosphereDBMapping.tableName).orderBy("revision_id")).then((rows) => {
+                expect(rows.length).to.be.eql(2);
+                expect(rows[0].description).to.be.eql("Red and stormy");
+                expect(rows[1].description).to.be.eql("Red, white and stormy");
+            });
+        });
+
+        it("should save modified 'belongsTo' entity in table", () => {
+            var jupitersCompositionId = jupiter.composition.id;
+            jupiter.composition.description = "Gas giant";
+
+            var promise = planetRepository.save(jupiter);
+
+            return promise.then(() => knex.select().from(CompositionDBMapping.tableName).orderBy("revision_id")).then((rows) => {
+                expect(rows.length).to.be.eql(12);
+                expect(rows.filter((r) => r.id === jupitersCompositionId)[0].description).to.be.eql("Gas Planet");
+                expect(rows.filter((r) => r.id === jupitersCompositionId)[1].description).to.be.eql("Gas giant");
             });
         });
 

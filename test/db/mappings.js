@@ -168,6 +168,7 @@ registry.register("PlanetDBMapping", "test", {
     tableName: "datadictionary.planet",
     columns: ["id", "name", "distance_to_star"],
 
+    keepHistory: true,
     onDelete: { is_deleted: true },
     discriminator: { is_deleted: false },
 
@@ -204,6 +205,7 @@ registry.register("MoonDBMapping", "test", {
     tableName: "datadictionary.moon",
     columns: ["id", "name", "distance_to_planet"],
 
+    keepHistory: true,
     onDelete: { is_deleted: true },
     discriminator: { is_deleted: false },
 
@@ -222,6 +224,7 @@ registry.register("AtmosphereDBMapping", "test", {
     tableName: "datadictionary.atmosphere",
     columns: ["id", "description"],
 
+    keepHistory: true,
     onDelete: { is_deleted: true },
     discriminator: { is_deleted: false },
 
@@ -239,6 +242,7 @@ registry.register("AtmosphereDBMapping", "test", {
 registry.register("CompositionDBMapping", "test", {
     tableName: "datadictionary.composition",
     columns: ["id", "description"],
+    keepHistory: true,
     onDelete: { is_deleted: true },
     discriminator: { is_deleted: false }
 });
