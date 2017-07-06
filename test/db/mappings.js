@@ -161,3 +161,71 @@ registry.register("InjectionDBMapping", "test", {
     tableName: "datadictionary.injection",
     columns: ["id", "name"]
 });
+
+
+
+registry.register("PlanetDBMapping", "test", {
+    tableName: "datadictionary.planet",
+    columns: ["id", "name", "distance_to_star"],
+
+    relations: [{
+        name: "moons",
+        type: "hasMany",
+        references: {
+            mapping: "MoonDBMapping",
+            cascade: true,
+            orphanRemoval: true
+        }
+    }, {
+        name: "composition",
+        type: "hasOne",
+        references: {
+            mapping: "CompositionDBMapping",
+            cascade: true,
+            orphanRemoval: true
+        }
+    }, {
+        name: "atmosphere",
+        type: "belongsTo",
+        references: {
+            mapping: "AtmosphereDBMapping",
+            cascade: true,
+            orphanRemoval: true
+        }
+    }]
+});
+
+registry.register("MoonDBMapping", "test", {
+    tableName: "datadictionary.moon",
+    columns: ["id", "name", "distance_to_planet"],
+
+    relations: [{
+        name: "composition",
+        type: "hasOne",
+        references: {
+            mapping: "CompositionDBMapping",
+            cascade: true,
+            orphanRemoval: true
+        }
+    }]
+});
+
+registry.register("AtmosphereDBMapping", "test", {
+    tableName: "datadictionary.atmosphere",
+    columns: ["id", "description"],
+
+    relations: [{
+        name: "composition",
+        type: "hasOne",
+        references: {
+            mapping: "CompositionDBMapping",
+            cascade: true,
+            orphanRemoval: true
+        }
+    }]
+});
+
+registry.register("CompositionDBMapping", "test", {
+    tableName: "datadictionary.composition",
+    columns: ["id", "description"]
+});
