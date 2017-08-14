@@ -147,7 +147,7 @@ class BookshelfRepository {
     }
 
     updateRaw(values, where, options) {
-        var query = this.Mapping.Collection.forge().query().where(where).update(values);
+        const query = this.Mapping.createQuery(null, options).where(where).update(values);
 
         if (options && options.transacting) {
             query.transacting(options.transacting);

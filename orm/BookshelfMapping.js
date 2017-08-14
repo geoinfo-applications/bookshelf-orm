@@ -120,7 +120,12 @@ class BookshelfMapping {
     }
 
     createQuery(item, options) {
-        const query = this.dbContext.knex(this.tableName).where(this.identifiedBy, item.get(this.identifiedBy));
+        // jshint maxcomplexity:false
+        const query = this.dbContext.knex(this.tableName);
+
+        if (item) {
+            query.where(this.identifiedBy, item.get(this.identifiedBy));
+        }
 
         if (this.discriminator) {
             query.andWhere(this.discriminator);
