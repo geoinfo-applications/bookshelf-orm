@@ -16,8 +16,8 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
 
     save(item) {
         return this.saveWhereKeyIsOnItem(item).then(() => {
-            var rawUpdates = this.prepareRawUpdates(item);
-            var unsetValues = this.prepareSqlColumnsForSave(item);
+            const rawUpdates = this.prepareRawUpdates(item);
+            const unsetValues = this.prepareSqlColumnsForSave(item);
 
             return this.executeSaveOperation(item).then((item) => {
                 return Q.when(Object.keys(rawUpdates).length && this.Mapping.createQuery(item, this.options).update(rawUpdates)).then(() => item);
@@ -33,10 +33,10 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
     }
 
     prepareRawUpdates(item) {
-        var rawUpdates = Object.create(null);
+        const rawUpdates = Object.create(null);
 
         this.Mapping.writeableSqlColumns.filter((column) => item.has(column.name)).map((column) => {
-            var setter = _.isFunction(column.set) ? column.set(item.get(column.name)) : column.set;
+            const setter = _.isFunction(column.set) ? column.set(item.get(column.name)) : column.set;
             rawUpdates[column.name] = this.Mapping.dbContext.knex.raw(setter);
         });
 
@@ -44,7 +44,7 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
     }
 
     prepareSqlColumnsForSave(item) {
-        var unsetValues = Object.create(null);
+        const unsetValues = Object.create(null);
 
         this.Mapping.sqlColumns.forEach((column) => {
             if (item.has(column.name)) {
@@ -78,11 +78,11 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
     }
 
     handleRelated(item, relation, saveFunction) {
-        var relationName = "relation_" + relation.name;
-        var value = item.relations[relationName];
-        var keyName = relation.references.mappedBy;
-        var operation = new BookshelfDeepSaveOperation(relation.references.mapping, this.options);
-        var curriedSaveFunction = saveFunction.bind(this, item, keyName, operation);
+        const relationName = "relation_" + relation.name;
+        const value = item.relations[relationName];
+        const keyName = relation.references.mappedBy;
+        const operation = new BookshelfDeepSaveOperation(relation.references.mapping, this.options);
+        const curriedSaveFunction = saveFunction.bind(this, item, keyName, operation);
 
         return Q.when(value && this.saveRelatedValue(value, curriedSaveFunction, relation.references.saveSequential)).then(() => {
             if (relation.references.orphanRemoval) {
@@ -102,11 +102,7 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
     }
 
     runSaveOperation(models, saveOperation, sequential) {
-        if (sequential === true) {
-            return this.doSequential(models, saveOperation);
-        } else {
-            return Q.all(models.map(saveOperation));
-        }
+        return sequential ? this.doSequential(models, saveOperation) : Q.all(models.map(saveOperation));
     }
 
     doSequential(list, callback) {
@@ -116,7 +112,7 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
     }
 
     removeOrphans(item, relation, value) {
-        var idColumn = relation.references.identifiedBy || "id";
+        const idColumn = relation.references.identifiedBy || "id";
 
         return this.isRelationWithKeyIsOnRelated(relation) ?
             this.removeOneToManyOrphans(item, relation, value, idColumn) :
@@ -124,8 +120,8 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
     }
 
     removeOneToManyOrphans(item, relation, value, idColumn) {
-        var ids = value && (Array.isArray(value.models) ? _.pluck(value.models, idColumn) : [value[idColumn]]);
-        var keyName = relation.references.mappedBy;
+        const ids = value && (Array.isArray(value.models) ? _.pluck(value.models, idColumn) : [value[idColumn]]);
+        const keyName = relation.references.mappedBy;
 
         function query() {
             return relation.references.mapping.Collection.forge().query().where((q) => {
@@ -150,7 +146,7 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
     }
 
     removeManyToOneOrphans(item, relation) {
-        var fkColumn = relation.references.mappedBy;
+        const fkColumn = relation.references.mappedBy;
 
         var query = () => {
             var query = item.Collection.forge().query().table(item.tableName).where(item.idAttribute, item[item.idAttribute]);

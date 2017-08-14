@@ -40,7 +40,7 @@ class BookshelfRepository {
     }
 
     findWhere(condition, options) {
-        var collection = this.Mapping.Collection.forge().query((q) => {
+        const collection = this.Mapping.Collection.forge().query((q) => {
             condition.call(this, q);
 
             if (this.Mapping.discriminator) {
@@ -67,14 +67,14 @@ class BookshelfRepository {
 
     joinRelations(q, relation, parentMapping) {
         this.mapToRelation(q, relation, parentMapping, relation.type === "belongsTo");
-        var mapping = relation.references.mapping;
+        const mapping = relation.references.mapping;
         mapping.relations.forEach((child) => this.joinRelations(q, child, mapping));
     }
 
     mapToRelation(q, relation, parentMapping, isBelongTo) {
-        var mappingTableName = relation.references.mapping.tableName;
-        var mappingDefaultArray = [mappingTableName, parentMapping.tableName];
-        var mappingArray = isBelongTo ? mappingDefaultArray : mappingDefaultArray.reverse();
+        const mappingTableName = relation.references.mapping.tableName;
+        const mappingDefaultArray = [mappingTableName, parentMapping.tableName];
+        const mappingArray = isBelongTo ? mappingDefaultArray : mappingDefaultArray.reverse();
 
         q.leftOuterJoin.apply(q,
             [
@@ -86,8 +86,8 @@ class BookshelfRepository {
     }
 
     findOne(id, options) {
-        var query = this.createIdQuery(id);
-        var model = this.Mapping.Model.forge(query);
+        const query = this.createIdQuery(id);
+        const model = this.Mapping.Model.forge(query);
 
         if (this.Mapping.discriminator) {
             model.where(this.Mapping.discriminator);
@@ -106,7 +106,7 @@ class BookshelfRepository {
         }
 
         this.stringifyJson(item);
-        var saveOperation = new SaveOperation(this.Mapping, options);
+        const saveOperation = new SaveOperation(this.Mapping, options);
         return saveOperation.save(item);
     }
 
@@ -131,8 +131,8 @@ class BookshelfRepository {
             return this.invokeOnCollection(item, this.remove, options);
         }
 
-        var id = item instanceof this.Mapping.Model ? item[this.idColumnName] : item;
-        var operation = new RemoveOperation(this.Mapping, options);
+        const id = item instanceof this.Mapping.Model ? item[this.idColumnName] : item;
+        const operation = new RemoveOperation(this.Mapping, options);
 
         return this.findOne(id).then((item) => item && operation.remove(item));
     }
@@ -142,7 +142,7 @@ class BookshelfRepository {
     }
 
     invokeOnCollection(collection, fn, options) {
-        var iterator = _.partial(fn, _, options).bind(this);
+        const iterator = _.partial(fn, _, options).bind(this);
         return _.isArray(collection) ? Q.all(collection.map(iterator)) :  collection.mapThen(iterator);
     }
 
@@ -157,7 +157,7 @@ class BookshelfRepository {
     }
 
     createIdQuery(id) {
-        var query = {};
+        const query = {};
         query[this.idColumnName] = id;
         return query;
     }
