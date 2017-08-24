@@ -3,20 +3,23 @@
 const Q = require("q");
 const _ = require("underscore");
 const BookshelfDeepOperation = require("./BookshelfDeepOperation");
+const DefaultBehavior = require("./BookshelfDeepSaveOperationDefaultBehavior");
+const HistoryBehavior = require("./BookshelfDeepSaveOperationHistoryBehavior");
 
 
 class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
 
     constructor(mapping, options) {
         super(mapping, options);
+        this.saveBehavior = this.Mapping.keepHistory ? new HistoryBehavior() : new DefaultBehavior();
     }
 
     save(item) {
         return this.saveWhereKeyIsOnItem(item).then(() => {
-            var rawUpdates = this.prepareRawUpdates(item);
-            var unsetValues = this.prepareSqlColumnsForSave(item);
+            const rawUpdates = this.prepareRawUpdates(item);
+            const unsetValues = this.prepareSqlColumnsForSave(item);
 
-            return item.save(null, this.options).then((item) => {
+            return this.executeSaveOperation(item).then((item) => {
                 return Q.when(Object.keys(rawUpdates).length && this.Mapping.createQuery(item, this.options).update(rawUpdates)).then(() => item);
             }).then((item) => {
                 _.each(unsetValues, (value, key) => item.set(key, value));
@@ -25,11 +28,15 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
         }).then((item) => this.saveWhereKeyIsOnRelated(item).then(() => item));
     }
 
+    executeSaveOperation(item) {
+        return this.saveBehavior.executeSaveOperation(item, this.options, this.Mapping);
+    }
+
     prepareRawUpdates(item) {
-        var rawUpdates = Object.create(null);
+        const rawUpdates = Object.create(null);
 
         this.Mapping.writeableSqlColumns.filter((column) => item.has(column.name)).map((column) => {
-            var setter = _.isFunction(column.set) ? column.set(item.get(column.name)) : column.set;
+            const setter = _.isFunction(column.set) ? column.set(item.get(column.name)) : column.set;
             rawUpdates[column.name] = this.Mapping.dbContext.knex.raw(setter);
         });
 
@@ -37,7 +44,7 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
     }
 
     prepareSqlColumnsForSave(item) {
-        var unsetValues = Object.create(null);
+        const unsetValues = Object.create(null);
 
         this.Mapping.sqlColumns.forEach((column) => {
             if (item.has(column.name)) {
@@ -71,11 +78,11 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
     }
 
     handleRelated(item, relation, saveFunction) {
-        var relationName = "relation_" + relation.name;
-        var value = item.relations[relationName];
-        var keyName = relation.references.mappedBy;
-        var operation = new BookshelfDeepSaveOperation(relation.references.mapping, this.options);
-        var curriedSaveFunction = saveFunction.bind(this, item, keyName, operation);
+        const relationName = "relation_" + relation.name;
+        const value = item.relations[relationName];
+        const keyName = relation.references.mappedBy;
+        const operation = new BookshelfDeepSaveOperation(relation.references.mapping, this.options);
+        const curriedSaveFunction = (related) => saveFunction.call(this, item, keyName, operation, related, relation);
 
         return Q.when(value && this.saveRelatedValue(value, curriedSaveFunction, relation.references.saveSequential)).then(() => {
             if (relation.references.orphanRemoval) {
@@ -95,11 +102,7 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
     }
 
     runSaveOperation(models, saveOperation, sequential) {
-        if (sequential === true) {
-            return this.doSequential(models, saveOperation);
-        } else {
-            return Q.all(models.map(saveOperation));
-        }
+        return sequential ? this.doSequential(models, saveOperation) : Q.all(models.map(saveOperation));
     }
 
     doSequential(list, callback) {
@@ -109,7 +112,7 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
     }
 
     removeOrphans(item, relation, value) {
-        var idColumn = relation.references.identifiedBy || "id";
+        const idColumn = relation.references.identifiedBy || "id";
 
         return this.isRelationWithKeyIsOnRelated(relation) ?
             this.removeOneToManyOrphans(item, relation, value, idColumn) :
@@ -117,51 +120,48 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
     }
 
     removeOneToManyOrphans(item, relation, value, idColumn) {
-        var ids = value && (Array.isArray(value.models) ? _.pluck(value.models, idColumn) : [value[idColumn]]);
-        var keyName = relation.references.mappedBy;
+        const ids = value && (Array.isArray(value.models) ? _.pluck(value.models, idColumn) : [value[idColumn]]);
+        const keyName = relation.references.mappedBy;
 
-        function query() {
-            return relation.references.mapping.Collection.forge().query().where((q) => {
-                if (ids && ids.length) {
-                    q.whereNotIn("id", ids);
-                    q.andWhere(keyName, item.id);
-                } else {
-                    q.where(keyName, item.id);
-                }
-                q.orWhereNull(keyName);
-            });
-        }
+        return relation.references.mapping.createQuery(null, this.options).where((q) => {
+            if (ids && ids.length) {
+                q.whereNotIn("id", ids);
+                q.andWhere(keyName, item.id);
+            } else {
+                q.where(keyName, item.id);
+            }
+            q.orWhereNull(keyName);
+        }).select(idColumn).then((results) => {
+            const BookshelfRepository = require("./BookshelfRepository");
 
-        return this.addTransactionToQuery(query()).select(idColumn).then((results) => {
-            return Q.all(_.map(results, (result) => {
-                if (result && result[idColumn]) {
-                    var BookshelfRepository = require("./BookshelfRepository");
-                    return new BookshelfRepository(relation.references.mapping).remove(result[idColumn], this.options);
-                }
+            return Q.all(_.filter(results, (result) => result && result[idColumn]).map((result) => {
+                return new BookshelfRepository(relation.references.mapping).remove(result[idColumn], this.options);
             }));
         });
     }
 
     removeManyToOneOrphans(item, relation) {
-        var fkColumn = relation.references.mappedBy;
+        const fkColumn = relation.references.mappedBy;
 
-        var query = () => {
-            var query = item.Collection.forge().query().table(item.tableName).where(item.idAttribute, item[item.idAttribute]);
-            return this.addTransactionToQuery(query);
-        };
+        if (item.get(fkColumn)) {
+            return;
+        }
 
-        return item.get(fkColumn) || query().select(fkColumn).then((results) => {
-            return Q.all(_.map(results, (result) => result && result[fkColumn] && query().update(fkColumn, null).then(() => {
-                var BookshelfRepository = require("./BookshelfRepository");
+        return this.Mapping.createQuery(item, this.options).select(fkColumn).then((results) => {
+            const BookshelfRepository = require("./BookshelfRepository");
+
+            return Q.all(_.filter(results, (result) => result && result[fkColumn]).map((result) => {
                 return new BookshelfRepository(relation.references.mapping).remove(result[fkColumn], this.options);
-            })));
+            })).then(() => {
+                return this.Mapping.createQuery(item, this.options).update(fkColumn, null);
+            });
         });
     }
 
-    saveRelatedKey(item, fkColumn, operation, related) {
-        var entityId = item.id;
+    saveRelatedKey(item, fkColumn, operation, related, relation) {
+        const entityId = item.id;
         related.set(fkColumn, entityId);
-        var query = related.Collection.forge().query().table(related.tableName).where(related.idAttribute, related[related.idAttribute]);
+        const query = relation.references.mapping.createQuery(null, this.options).where(related.idAttribute, related[related.idAttribute]);
         this.addTransactionToQuery(query);
         return query.update(fkColumn, entityId);
     }

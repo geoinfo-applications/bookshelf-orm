@@ -1,5 +1,4 @@
 {
-    "esnext": true,
     "requireCurlyBraces": [
         "if", "else", "for", "while", "do", "try", "catch"
     ],
@@ -16,7 +15,6 @@
         "beforeOpeningRoundBrace": true
     },
     "requireBlocksOnNewline": 1,
-    "disallowEmptyBlocks": true,
     "disallowSpacesInsideParentheses": true,
     "requireSpacesInsideObjectBrackets": "all",
     "disallowQuotedKeysInObjects": true,

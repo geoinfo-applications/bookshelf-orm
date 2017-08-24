@@ -13,8 +13,17 @@ class BookshelfDeepRemoveOperation extends BookshelfDeepOperation {
 
     remove(item) {
         return this.dropRelations(this.relationsWhereKeyIsOnRelated, item)
-            .then(() => item.destroy(this.options))
-            .then((item) => this.dropRelations(this.relationsWhereKeyIsOnItem, item).then(() => item));
+            .then(() => this.executeRemoveOperation(item))
+            .then(() => this.dropRelations(this.relationsWhereKeyIsOnItem, item))
+            .then(() => item);
+    }
+
+    executeRemoveOperation(item) {
+        if (this.Mapping.onDelete) {
+            return this.Mapping.createQuery(item, this.option).update(this.Mapping.onDelete);
+        } else {
+            return item.destroy(this.options);
+        }
     }
 
     dropRelations(collection, item) {
@@ -22,8 +31,8 @@ class BookshelfDeepRemoveOperation extends BookshelfDeepOperation {
     }
 
     dropRelated(item, relation) {
-        var relationName = "relation_" + relation.name;
-        var related = item.relations[relationName];
+        const relationName = "relation_" + relation.name;
+        const related = item.relations[relationName];
 
         return related && this.handleRelated(item, relation, related);
     }
@@ -37,12 +46,12 @@ class BookshelfDeepRemoveOperation extends BookshelfDeepOperation {
     }
 
     cascadeDropRelations(relation, related) {
-        var mapping = relation.references.mapping;
+        const mapping = relation.references.mapping;
         return this.cascadeDrop(related, mapping);
     }
 
     cascadeDrop(related, mapping) {
-        var operation = new BookshelfDeepRemoveOperation(mapping, this.options);
+        const operation = new BookshelfDeepRemoveOperation(mapping, this.options);
 
         if (_.isFunction(related.destroy)) {
             return operation.remove(related);
@@ -62,8 +71,8 @@ class BookshelfDeepRemoveOperation extends BookshelfDeepOperation {
     }
 
     removeForeignKey(item, relation, related) {
-        var fkColumn = relation.references.mappedBy;
-        var query = related.Collection.forge().query().table(related.tableName).where(related.idAttribute, related[related.idAttribute]);
+        const fkColumn = relation.references.mappedBy;
+        const query = relation.mapping.createQuery(null, this.options).where(related.idAttribute, related[related.idAttribute]);
         this.addTransactionToQuery(query);
 
         return query.update(fkColumn, null);

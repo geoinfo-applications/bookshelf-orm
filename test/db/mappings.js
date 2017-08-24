@@ -161,3 +161,89 @@ registry.register("InjectionDBMapping", "test", {
     tableName: "datadictionary.injection",
     columns: ["id", "name"]
 });
+
+
+
+registry.register("PlanetDBMapping", "test", {
+    tableName: "datadictionary.planet",
+    columns: ["id", "name", "distance_to_star"],
+
+    keepHistory: true,
+    onDelete: { is_deleted: true },
+    discriminator: { is_deleted: false },
+
+    relations: [{
+        name: "moons",
+        type: "hasMany",
+        references: {
+            mapping: "MoonDBMapping",
+            mappedBy: "planet_id",
+            cascade: true,
+            orphanRemoval: true
+        }
+    }, {
+        name: "composition",
+        type: "belongsTo",
+        references: {
+            mapping: "CompositionDBMapping",
+            cascade: true,
+            orphanRemoval: true
+        }
+    }, {
+        name: "atmosphere",
+        type: "hasOne",
+        references: {
+            mapping: "AtmosphereDBMapping",
+            mappedBy: "planet_id",
+            cascade: true,
+            orphanRemoval: true
+        }
+    }]
+});
+
+registry.register("MoonDBMapping", "test", {
+    tableName: "datadictionary.moon",
+    columns: ["id", "name", "distance_to_planet"],
+
+    keepHistory: true,
+    onDelete: { is_deleted: true },
+    discriminator: { is_deleted: false },
+
+    relations: [{
+        name: "composition",
+        type: "belongsTo",
+        references: {
+            mapping: "CompositionDBMapping",
+            cascade: true,
+            orphanRemoval: true
+        }
+    }]
+});
+
+registry.register("AtmosphereDBMapping", "test", {
+    tableName: "datadictionary.atmosphere",
+    columns: ["id", "description"],
+
+    keepHistory: true,
+    historyColumns: { revisionId: "the_revision_id", parentId: "the_parent_id" },
+    onDelete: { is_deleted: true },
+    discriminator: { is_deleted: false },
+
+    relations: [{
+        name: "composition",
+        type: "belongsTo",
+        references: {
+            mapping: "CompositionDBMapping",
+            cascade: true,
+            orphanRemoval: true
+        }
+    }]
+});
+
+registry.register("CompositionDBMapping", "test", {
+    tableName: "datadictionary.composition",
+    columns: ["id", "description"],
+    keepHistory: true,
+    onDelete: { is_deleted: true },
+    discriminator: { is_deleted: false }
+});

@@ -16,7 +16,4 @@ const bookshelf = require("bookshelf")(knex);
 
 require("../../orm/ModelFactory").registerContext("test", bookshelf);
 
-module.exports = {
-    bookshelf: bookshelf,
-    knex: knex
-};
+module.exports = { bookshelf, knex };

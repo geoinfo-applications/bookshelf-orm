@@ -22,7 +22,6 @@ class Owner {}
 class NamelessOwner {}
 class ParkingSpace {}
 
-
 const CarRepository = createRepository(Car, "Car");
 const PartRepository = createRepository(Part, "Part");
 const VeyronPartRepository = createRepository(VeyronPart, "VeyronPart");
@@ -33,24 +32,46 @@ const OwnerRepository = createRepository(Owner, "Owner");
 const NamelessOwnerRepository = createRepository(NamelessOwner, "NamelessOwner");
 const ParkingSpaceRepository = createRepository(ParkingSpace, "ParkingSpace");
 
-module.exports = {
-    Car: Car,
-    Part: Part,
-    VeyronPart: VeyronPart,
-    Engine: Engine,
-    VeyronEngine: VeyronEngine,
-    Wheel: Wheel,
-    Owner: Owner,
-    NamelessOwner: NamelessOwner,
-    ParkingSpace: ParkingSpace,
 
-    CarRepository: CarRepository,
-    PartRepository: PartRepository,
-    VeyronPartRepository: VeyronPartRepository,
-    EngineRepository: EngineRepository,
-    VeyronEngineRepository: VeyronEngineRepository,
-    WheelRepository: WheelRepository,
-    OwnerRepository: OwnerRepository,
-    NamelessOwnerRepository: NamelessOwnerRepository,
-    ParkingSpaceRepository: ParkingSpaceRepository
+class Planet {}
+class Moon {}
+class Atmosphere {}
+class Composition {}
+
+const PlanetRepository = createRepository(Planet, "Planet");
+const MoonRepository = createRepository(Moon, "Moon");
+const AtmosphereRepository = createRepository(Atmosphere, "Atmosphere");
+const CompositionRepository = createRepository(Composition, "Composition");
+
+module.exports = {
+    Car,
+    Part,
+    VeyronPart,
+    Engine,
+    VeyronEngine,
+    Wheel,
+    Owner,
+    NamelessOwner,
+    ParkingSpace,
+
+    CarRepository,
+    PartRepository,
+    VeyronPartRepository,
+    EngineRepository,
+    VeyronEngineRepository,
+    WheelRepository,
+    OwnerRepository,
+    NamelessOwnerRepository,
+    ParkingSpaceRepository,
+
+
+    Planet,
+    Moon,
+    Atmosphere,
+    Composition,
+
+    PlanetRepository,
+    MoonRepository,
+    AtmosphereRepository,
+    CompositionRepository
 };

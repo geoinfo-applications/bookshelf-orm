@@ -5,6 +5,7 @@ const knex = require("./connection").knex;
 
 module.exports = function () {
 
+    // car sample
     const car = knex.schema.createTable("datadictionary.car", (table) => {
         table.increments();
         table.string("name");
@@ -55,7 +56,49 @@ module.exports = function () {
         table.string("name");
     });
 
-    return Q.all([car, part, wheel, engine, owner, outlet, injection, parkingSpace]);
+    // soft delete and history sample
+    const planet = knex.schema.createTable("datadictionary.planet", (table) => {
+        table.specificType("id", "serial");
+        table.increments("revision_id");
+        table.integer("parent_id");
+        table.boolean("is_deleted").default(false);
+        table.string("name");
+        table.integer("distance_to_star");
+        table.integer("composition_id");
+    });
+
+    const moon = knex.schema.createTable("datadictionary.moon", (table) => {
+        table.specificType("id", "serial");
+        table.increments("revision_id");
+        table.integer("parent_id");
+        table.boolean("is_deleted").default(false);
+        table.integer("planet_id");
+        table.integer("distance_to_planet");
+        table.string("name");
+        table.integer("composition_id");
+    });
+
+    const atmosphere = knex.schema.createTable("datadictionary.atmosphere", (table) => {
+        table.specificType("id", "serial");
+        table.increments("the_revision_id");
+        table.integer("the_parent_id");
+        table.boolean("is_deleted").default(false);
+        table.integer("planet_id");
+        table.text("description");
+        table.integer("composition_id");
+    });
+
+    const composition = knex.schema.createTable("datadictionary.composition", (table) => {
+        table.specificType("id", "serial");
+        table.increments("revision_id");
+        table.integer("parent_id");
+        table.boolean("is_deleted").default(false);
+        table.text("description");
+    });
+
+    return Q.all([car, part, wheel, engine, owner, outlet, injection, parkingSpace,
+        planet, moon, atmosphere, composition
+    ]);
 };
 
 

@@ -12,7 +12,11 @@ module.exports = () => {
         "datadictionary.owner",
         "datadictionary.parking_space",
         "datadictionary.outlet",
-        "datadictionary.injection"
+        "datadictionary.injection",
+        "datadictionary.planet",
+        "datadictionary.moon",
+        "datadictionary.atmosphere",
+        "datadictionary.composition"
     ];
 
     return Q.all(tables.map((table) => knex.schema.dropTable(table)));
