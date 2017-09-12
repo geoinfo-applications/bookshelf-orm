@@ -56,12 +56,24 @@ class BookshelfRepository {
         const relations = options && this.getFilteredRelations(options) || this.Mapping.relations;
 
         return this.findWhere((q) => {
-            relations.forEach((relation) => {
-                this.joinRelations(q, relation, this.Mapping);
-            });
-            conditions.forEach((condition) => {
-                condition.query(q);
-            });
+            q.whereIn(this.Mapping.identifiedBy, (subQuery) => {
+                subQuery.select(`${this.Mapping.tableName}.${this.Mapping.identifiedBy}`).from(this.Mapping.tableName);
+
+                if (this.Mapping.discriminator) {
+                    subQuery.andWhere(this.Mapping.discriminator);
+                }
+
+                if (options && options.transacting) {
+                    subQuery.transacting(options.transacting);
+                }
+
+                relations.forEach((relation) => {
+                    this.joinRelations(subQuery, relation, this.Mapping);
+                });
+                conditions.forEach((condition) => {
+                    condition.query(subQuery);
+                });
+            })
 
         }, options);
     }
