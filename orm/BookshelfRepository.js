@@ -53,8 +53,10 @@ class BookshelfRepository {
     }
 
     findByConditions(conditions, options) {
+        const relations = options && this.getFilteredRelations(options) || this.Mapping.relations;
+
         return this.findWhere((q) => {
-            this.Mapping.relations.forEach((relation) => {
+            relations.forEach((relation) => {
                 this.joinRelations(q, relation, this.Mapping);
             });
             conditions.forEach((condition) => {
@@ -64,17 +66,23 @@ class BookshelfRepository {
         }, options);
     }
 
+    getFilteredRelations(options) {
+        return this.Mapping.relations.filter((relation) => {
+            return _.contains(options.exclude, relation.name);
+        });
+    }
+
 
     joinRelations(q, relation, parentMapping) {
-        this.mapToRelation(q, relation, parentMapping, relation.type === "belongsTo");
+        this.mapToRelation(q, relation, parentMapping);
         const mapping = relation.references.mapping;
         mapping.relations.forEach((child) => this.joinRelations(q, child, mapping));
     }
 
-    mapToRelation(q, relation, parentMapping, isBelongTo) {
+    mapToRelation(q, relation, parentMapping) {
         const mappingTableName = relation.references.mapping.tableName;
         const mappingDefaultArray = [mappingTableName, parentMapping.tableName];
-        const mappingArray = isBelongTo ? mappingDefaultArray : mappingDefaultArray.reverse();
+        const mappingArray = relation.type === "belongsTo" ? mappingDefaultArray : mappingDefaultArray.reverse();
 
         q.leftOuterJoin.apply(q,
             [

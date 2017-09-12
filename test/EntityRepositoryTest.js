@@ -771,8 +771,6 @@ describe("Entity Repository Test", function () {
             });
 
             return promise.then((cars) => {
-                console.log(JSON.stringify(cars, null, "  "));
-                console.log(cars);
                 expect(cars).to.contain.all.keys.apply(expect(cars).to.contain, allKeys);
                 expect(cars.name).to.be.eql("name");
                 expect(cars.description).to.be.eql("name::abc");
@@ -807,9 +805,7 @@ describe("Entity Repository Test", function () {
                 }
             ];
 
-            var promise = carRepository.save([car1Entity, car2Entity]);
-
-            promise = promise.then(() => {
+            var promise = carRepository.save([car1Entity, car2Entity]).then(() => {
                 return carRepository.findByConditions(condition, void 0);
             });
 
@@ -832,9 +828,7 @@ describe("Entity Repository Test", function () {
                 }
             ];
 
-            var promise = carRepository.save([car1Entity, car2Entity]);
-
-            promise = promise.then(() => {
+            var promise = carRepository.save([car1Entity, car2Entity]).then(() => {
                 return carRepository.findByConditions(condition, void 0);
             });
 
@@ -850,9 +844,7 @@ describe("Entity Repository Test", function () {
                 query: (q) => q.where("engine.serial_number", "asdf789")
             }];
 
-            var promise = carRepository.save([car1Entity, car2Entity]);
-
-            promise = promise.then(() => {
+            var promise = carRepository.save([car1Entity, car2Entity]).then(() => {
                 return carRepository.findByConditions(condition, void 0);
             });
 
@@ -874,15 +866,34 @@ describe("Entity Repository Test", function () {
                 }
             ];
 
-            var promise = carRepository.save([car1Entity, car2Entity, car3Entity]);
-
-            promise = promise.then(() => {
+            var promise = carRepository.save([car1Entity, car2Entity, car3Entity]).then(() => {
                 return carRepository.findByConditions(condition, void 0);
             });
 
             return promise.then((cars) => {
                 expect(cars.length).to.be.eql(1);
                 expect(cars[0].name).to.be.eql(car1.name);
+            });
+        });
+
+        it("should exclude relations from options.exclude", () => {
+            var condition = [
+                {
+                    name: "name",
+                    query: (q) => q.where("car.name", car1.name)
+                }
+            ];
+
+            var options = { exclude: ["parts"] };
+
+            var promise = carRepository.save([car1Entity, car2Entity]).then(() => {
+                return carRepository.findByConditions(condition, options);
+            });
+
+            return promise.then((cars) => {
+                expect(cars.length).to.be.eql(1);
+                expect(cars[0].name).to.be.eql(car1.name);
+                expect(cars[0].parts.length).to.be.eql(0);
             });
         });
     });
