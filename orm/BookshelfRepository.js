@@ -80,7 +80,7 @@ class BookshelfRepository {
 
     getFilteredRelations(options) {
         return this.Mapping.relations.filter((relation) => {
-            return _.contains(options.exclude, relation.name);
+            return !_.contains(options.exclude, relation.name);
         });
     }
 
