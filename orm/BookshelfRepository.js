@@ -53,28 +53,48 @@ class BookshelfRepository {
     }
 
     findByConditions(conditions, options) {
+        const relations = options && this.getFilteredRelations(options) || this.Mapping.relations;
+
         return this.findWhere((q) => {
-            this.Mapping.relations.forEach((relation) => {
-                this.joinRelations(q, relation, this.Mapping);
-            });
-            conditions.forEach((condition) => {
-                condition.query(q);
+            q.whereIn(this.Mapping.identifiedBy, (subQuery) => {
+                subQuery.select(`${this.Mapping.tableName}.${this.Mapping.identifiedBy}`).from(this.Mapping.tableName);
+
+                if (this.Mapping.discriminator) {
+                    subQuery.andWhere(this.Mapping.discriminator);
+                }
+
+                if (options && options.transacting) {
+                    subQuery.transacting(options.transacting);
+                }
+
+                relations.forEach((relation) => {
+                    this.joinRelations(subQuery, relation, this.Mapping);
+                });
+                conditions.forEach((condition) => {
+                    condition.query(subQuery);
+                });
             });
 
         }, options);
     }
 
+    getFilteredRelations(options) {
+        return _.reject(this.Mapping.relations, (relation) => {
+            return _.contains(options.exclude, relation.name);
+        });
+    }
+
 
     joinRelations(q, relation, parentMapping) {
-        this.mapToRelation(q, relation, parentMapping, relation.type === "belongsTo");
+        this.mapToRelation(q, relation, parentMapping);
         const mapping = relation.references.mapping;
         mapping.relations.forEach((child) => this.joinRelations(q, child, mapping));
     }
 
-    mapToRelation(q, relation, parentMapping, isBelongTo) {
+    mapToRelation(q, relation, parentMapping) {
         const mappingTableName = relation.references.mapping.tableName;
         const mappingDefaultArray = [mappingTableName, parentMapping.tableName];
-        const mappingArray = isBelongTo ? mappingDefaultArray : mappingDefaultArray.reverse();
+        const mappingArray = relation.type === "belongsTo" ? mappingDefaultArray : mappingDefaultArray.reverse();
 
         q.leftOuterJoin.apply(q,
             [
@@ -143,7 +163,7 @@ class BookshelfRepository {
 
     invokeOnCollection(collection, fn, options) {
         const iterator = _.partial(fn, _, options).bind(this);
-        return _.isArray(collection) ? Q.all(collection.map(iterator)) :  collection.mapThen(iterator);
+        return _.isArray(collection) ? Q.all(collection.map(iterator)) : collection.mapThen(iterator);
     }
 
     updateRaw(values, where, options) {

@@ -172,7 +172,7 @@ class EntityRepository {
         if (options && options.transactional && !options.transacting) {
             return this.Mapping.startTransaction((t) => {
                 options.transacting = t;
-                return operation();
+                return Q.try(operation).then(t.commit).catch(t.rollback);
             });
         } else {
             return Q.try(operation);
