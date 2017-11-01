@@ -73,7 +73,7 @@ class BookshelfRepository {
                 conditions.forEach((condition) => {
                     condition.query(subQuery);
                 });
-            })
+            });
 
         }, options);
     }
@@ -163,7 +163,7 @@ class BookshelfRepository {
 
     invokeOnCollection(collection, fn, options) {
         const iterator = _.partial(fn, _, options).bind(this);
-        return _.isArray(collection) ? Q.all(collection.map(iterator)) :  collection.mapThen(iterator);
+        return _.isArray(collection) ? Q.all(collection.map(iterator)) : collection.mapThen(iterator);
     }
 
     updateRaw(values, where, options) {
