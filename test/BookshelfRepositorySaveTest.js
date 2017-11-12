@@ -114,8 +114,24 @@ describe("Bookshelf Repository Save Test", function () {
         });
     });
 
-    it.skip("should not persist related items if cascade is false in 1:n relation", () => {
-        // TODO: Related Objects do not have to be saved, but key does
+    it("should not persist related items if cascade is false in 1:n relation", () => {
+        CarDBMapping.relations[0].references.cascade = false;
+        var part = PartDBMapping.Model.forge({ name: "originalName" });
+        var car = CarDBMapping.Model.forge({ name: "name1" });
+
+        return part.save().then((part) => car.save().then((car) => [car, part])).then(([part, car]) => {
+            part.set("name", "notToBeSaved" + Date.now());
+            car.relations.relation_parts = PartDBMapping.Collection.forge(part);
+
+            return carRepository.save(car).then((car) => {
+                return PartDBMapping.Collection.forge().fetch().then((parts) => {
+                    expect(parts.at(0).get("car_id")).to.be.eql(car.id);
+                    expect(parts.at(0).get("name")).to.be.eql("originalName");
+                });
+            });
+        }).finally(() => {
+            CarDBMapping.relations[0].references.cascade = true;
+        });
     });
 
     it("should persist related items where root is new", () => {
