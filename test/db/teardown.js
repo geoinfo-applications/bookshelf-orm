@@ -10,6 +10,7 @@ module.exports = () => {
         "datadictionary.wheel",
         "datadictionary.engine",
         "datadictionary.owner",
+        "datadictionary.make",
         "datadictionary.parking_space",
         "datadictionary.outlet",
         "datadictionary.injection",
