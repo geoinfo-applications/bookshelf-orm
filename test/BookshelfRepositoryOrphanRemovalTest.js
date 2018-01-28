@@ -18,6 +18,8 @@ describe("Bookshelf Repository Orphan Removal Test", function () {
     const CarDBMapping = registry.compile("CarDBMapping");
     const PartDBMapping = registry.compile("PartDBMapping");
     const EngineDBMapping = registry.compile("EngineDBMapping");
+    const WheelDBMapping = registry.compile("WheelDBMapping");
+    const MakeDBMapping = registry.compile("MakeDBMapping");
     const OutletDBMapping = registry.compile("OutletDBMapping");
     const InjectionDBMapping = registry.compile("InjectionDBMapping");
 
@@ -129,6 +131,38 @@ describe("Bookshelf Repository Orphan Removal Test", function () {
             });
         });
 
+    });
+
+    it("should save convoluted relations in transaction", () => {
+        return Promise.all([
+            CarDBMapping.Model.forge().save(),
+            MakeDBMapping.Model.forge().save()
+        ]).then(([car, make]) => {
+            return PartDBMapping.Model.forge({ car_id: car.id, name: "part1" }).save().then((part) => {
+                const wheel1 = WheelDBMapping.Model.forge({ part_id: part.id, make_id: make.id, index: 1 });
+                const wheel2 = WheelDBMapping.Model.forge({ part_id: part.id, make_id: make.id, index: 2 });
+                return Promise.all([wheel1.save(), wheel2.save()]);
+            }).then(() => carRepository.findOne(car.id));
+        }).then((car) => {
+            const parts = car.relations.relation_parts;
+            expect(parts.models.length).to.be.eql(1);
+            const wheels = parts.at(0).relations.relation_wheels;
+            expect(wheels.models.length).to.be.eql(2);
+            expect(wheels.at(0).relations.relation_make.id).to.be.eql(wheels.at(1).relations.relation_make.id);
+
+            wheels.remove(wheels.at(0));
+            car.set("description", "foo");
+
+            return CarDBMapping.startTransaction((t) => {
+                return carRepository.save(car, { transacting: t }).then(t.commit).catch(t.rollback);
+            }).then(carRepository.findOne(car.id));
+        }).then((car) => {
+            const parts = car.relations.relation_parts;
+            expect(parts.models.length).to.be.eql(1);
+            const wheels = parts.at(0).relations.relation_wheels;
+            expect(wheels.models.length).to.be.eql(1);
+            expect(wheels.at(0).relations.relation_make.id).to.be.gt(0);
+        });
     });
 
 

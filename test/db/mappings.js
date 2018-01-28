@@ -86,7 +86,20 @@ registry.register("PartDBMapping", "test", {
 
 registry.register("WheelDBMapping", "test", {
     tableName: "datadictionary.wheel",
-    columns: ["id", "index"]
+    columns: ["id", "index"],
+
+    relations: [
+        {
+            name: "make",
+            type: "belongsTo",
+            references: {
+                mapping: "MakeDBMapping",
+                orphanRemoval: true,
+                cascade: true
+            }
+        }
+    ]
+
 });
 
 registry.register("EngineDBMapping", "test", {
@@ -123,6 +136,11 @@ registry.register("VeyronEngineDBMapping", "test", {
 
 registry.register("OwnerDBMapping", "test", {
     tableName: "datadictionary.owner",
+    columns: ["id", "name"]
+});
+
+registry.register("MakeDBMapping", "test", {
+    tableName: "datadictionary.make",
     columns: ["id", "name"]
 });
 

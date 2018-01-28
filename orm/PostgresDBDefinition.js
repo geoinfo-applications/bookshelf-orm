@@ -3,6 +3,7 @@
 const knex = require("knex");
 const bookshelf = require("bookshelf");
 const _ = require("underscore");
+const os = require("os");
 
 
 class PostgresDBDefinition {
@@ -17,7 +18,7 @@ class PostgresDBDefinition {
 
             this.ModelFactory.registerContext(name, bookshelf(knex({
                 client: "pg",
-                connection: this.config.db[name],
+                connection: _.extend({ application_name: this.applicationName }, this.config.db[name]),
                 debug: this.config.debug || false,
                 pool: _.extend({
                     min: 0,
@@ -30,6 +31,11 @@ class PostgresDBDefinition {
             })));
         });
     }
+
+    get applicationName() {
+        return `${this.config.projectName}@${os.hostname()}`;
+    }
+
 }
 
 module.exports = PostgresDBDefinition;

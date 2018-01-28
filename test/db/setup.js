@@ -25,6 +25,7 @@ module.exports = function () {
         table.increments();
         table.integer("index");
         table.integer("part_id");
+        table.integer("make_id");
     });
 
     const engine = knex.schema.createTable("datadictionary.engine", (table) => {
@@ -35,6 +36,11 @@ module.exports = function () {
     });
 
     const owner = knex.schema.createTable("datadictionary.owner", (table) => {
+        table.increments();
+        table.string("name");
+    });
+
+    const make = knex.schema.createTable("datadictionary.make", (table) => {
         table.increments();
         table.string("name");
     });
@@ -96,7 +102,7 @@ module.exports = function () {
         table.text("description");
     });
 
-    return Q.all([car, part, wheel, engine, owner, outlet, injection, parkingSpace,
+    return Q.all([car, part, wheel, engine, owner, make, outlet, injection, parkingSpace,
         planet, moon, atmosphere, composition
     ]);
 };

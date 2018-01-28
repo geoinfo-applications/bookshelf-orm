@@ -121,22 +121,18 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
 
     removeOneToManyOrphans(item, relation, value, idColumn) {
         const ids = value && (Array.isArray(value.models) ? _.pluck(value.models, idColumn) : [value[idColumn]]);
-        const keyName = relation.references.mappedBy;
+        const fkColumn = relation.references.mappedBy;
 
         return relation.references.mapping.createQuery(null, this.options).where((q) => {
-            if (ids && ids.length) {
-                q.whereNotIn("id", ids);
-                q.andWhere(keyName, item.id);
+            if (_.isEmpty(ids)) {
+                q.where(fkColumn, item.id);
             } else {
-                q.where(keyName, item.id);
+                q.whereNotIn(idColumn, ids);
+                q.andWhere(fkColumn, item.id);
             }
-            q.orWhereNull(keyName);
+            q.orWhereNull(fkColumn);
         }).select(idColumn).then((results) => {
-            const BookshelfRepository = require("./BookshelfRepository");
-
-            return Q.all(_.filter(results, (result) => result && result[idColumn]).map((result) => {
-                return new BookshelfRepository(relation.references.mapping).remove(result[idColumn], this.options);
-            }));
+            return this.removeOrphanInRelatedRepository(relation, results, idColumn);
         });
     }
 
@@ -147,15 +143,17 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
             return;
         }
 
-        return this.Mapping.createQuery(item, this.options).select(fkColumn).then((results) => {
-            const BookshelfRepository = require("./BookshelfRepository");
+        return this.Mapping.createQuery(item, this.options).select(fkColumn)
+            .then((results) => this.removeOrphanInRelatedRepository(relation, results, fkColumn))
+            .then(() => this.Mapping.createQuery(item, this.options).update(fkColumn, null));
+    }
 
-            return Q.all(_.filter(results, (result) => result && result[fkColumn]).map((result) => {
-                return new BookshelfRepository(relation.references.mapping).remove(result[fkColumn], this.options);
-            })).then(() => {
-                return this.Mapping.createQuery(item, this.options).update(fkColumn, null);
-            });
-        });
+    removeOrphanInRelatedRepository(relation, results, fkColumn) {
+        const BookshelfRepository = require("./BookshelfRepository");
+        const repository = new BookshelfRepository(relation.references.mapping);
+
+        const ids = _.filter(results, (result) => result && result[fkColumn]).map((result) => result[fkColumn]);
+        return repository.remove(ids, this.options);
     }
 
     saveRelatedKey(item, fkColumn, operation, related, relation) {
