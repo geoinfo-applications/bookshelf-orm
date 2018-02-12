@@ -20,7 +20,7 @@ class BookshelfDeepRemoveOperation extends BookshelfDeepOperation {
 
     executeRemoveOperation(item) {
         if (this.Mapping.onDelete) {
-            return this.Mapping.createQuery(item, this.option).update(this.Mapping.onDelete);
+            return this.Mapping.createQuery(item, this.options).update(this.Mapping.onDelete);
         } else {
             return item.destroy(this.options);
         }
