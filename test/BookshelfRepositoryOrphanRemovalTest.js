@@ -40,9 +40,9 @@ describe("Bookshelf Repository Orphan Removal Test", function () {
                 });
                 item.relations.relation_parts = PartDBMapping.Collection.forge(part);
 
-                return carRepository.save(item).then((item) => {
+                return carRepository.save(item, {}).then((item) => {
                     item.relations.relation_parts.models = [];
-                    return carRepository.save(item).then(() => {
+                    return carRepository.save(item, {}).then(() => {
                         return PartDBMapping.Collection.forge().fetch().then((parts) => {
                             expect(parts.length).to.be.eql(0);
                         });
@@ -59,8 +59,8 @@ describe("Bookshelf Repository Orphan Removal Test", function () {
                 });
                 item.relations.relation_parts = PartDBMapping.Collection.forge(part);
 
-                return carRepository.save(item).then((item) => {
-                    return carRepository.save(item).then(() => {
+                return carRepository.save(item, {}).then((item) => {
+                    return carRepository.save(item, {}).then(() => {
                         return PartDBMapping.Collection.forge().fetch().then((parts) => {
                             expect(parts.length).to.be.eql(1);
                         });
@@ -142,7 +142,7 @@ describe("Bookshelf Repository Orphan Removal Test", function () {
                 const wheel1 = WheelDBMapping.Model.forge({ part_id: part.id, make_id: make.id, index: 1 });
                 const wheel2 = WheelDBMapping.Model.forge({ part_id: part.id, make_id: make.id, index: 2 });
                 return Promise.all([wheel1.save(), wheel2.save()]);
-            }).then(() => carRepository.findOne(car.id));
+            }).then(() => carRepository.findOne(car.id, {}));
         }).then((car) => {
             const parts = car.relations.relation_parts;
             expect(parts.models.length).to.be.eql(1);
@@ -155,7 +155,7 @@ describe("Bookshelf Repository Orphan Removal Test", function () {
 
             return CarDBMapping.startTransaction((t) => {
                 return carRepository.save(car, { transacting: t }).then(t.commit).catch(t.rollback);
-            }).then(carRepository.findOne(car.id));
+            }).then(carRepository.findOne(car.id, {}));
         }).then((car) => {
             const parts = car.relations.relation_parts;
             expect(parts.models.length).to.be.eql(1);

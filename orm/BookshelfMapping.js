@@ -1,6 +1,7 @@
 "use strict";
 
 const StringUtils = require("./StringUtils");
+const { required } = require("./Annotations");
 
 
 /**
@@ -119,7 +120,7 @@ class BookshelfMapping {
         };
     }
 
-    createQuery(item, options) {
+    createQuery(item, options = required("options")) {
         // jshint maxcomplexity:false
         const query = this.dbContext.knex(this.tableName);
 
@@ -131,7 +132,7 @@ class BookshelfMapping {
             query.andWhere(this.discriminator);
         }
 
-        if (options && options.transacting) {
+        if (options.transacting) {
             query.transacting(options.transacting);
         }
 

@@ -26,10 +26,10 @@ describe("Bookshelf Repository Raw Fields Test", function () {
             var name = "name" + Date.now();
             var modelName = "modelName" + Date.now();
             var car = CarDBMapping.Model.forge({ name: name, model_name: modelName });
-            var promise = carRepository.save(car);
+            var promise = carRepository.save(car, {});
 
             promise = promise.then(() => {
-                return carRepository.findAll();
+                return carRepository.findAll(null, {});
             });
 
             return promise.then((cars) => {
@@ -42,10 +42,10 @@ describe("Bookshelf Repository Raw Fields Test", function () {
             var name = "name" + Date.now();
             var modelName = "modelName" + Date.now();
             var car = CarDBMapping.Model.forge({ name: name, model_name: modelName });
-            var promise = carRepository.save(car);
+            var promise = carRepository.save(car, {});
 
             promise = promise.then(() => {
-                return carRepository.findAll({ exclude: ["description"] });
+                return carRepository.findAll(null, { exclude: ["description"] });
             });
 
             return promise.then((cars) => {
@@ -58,10 +58,10 @@ describe("Bookshelf Repository Raw Fields Test", function () {
             var name = "name" + Date.now();
             var modelName = "modelName" + Date.now();
             var car = CarDBMapping.Model.forge({ name: name, model_name: modelName });
-            var promise = carRepository.save(car);
+            var promise = carRepository.save(car, {});
 
             promise = promise.then(() => {
-                return carRepository.findAll({ exclude: ["*"] });
+                return carRepository.findAll(null, { exclude: ["*"] });
             });
 
             return promise.then((cars) => {
@@ -77,10 +77,10 @@ describe("Bookshelf Repository Raw Fields Test", function () {
         it("should restore calculated field from DB", () => {
             var serialNumber = "sN" + Date.now();
             var car = CarDBMapping.Model.forge({ serial_number: serialNumber });
-            var promise = carRepository.save(car);
+            var promise = carRepository.save(car, {});
 
             promise = promise.then((car) => {
-                return carRepository.findOne(car.id);
+                return carRepository.findOne(car.id, {});
             });
 
             return promise.then((car) => {
@@ -91,7 +91,7 @@ describe("Bookshelf Repository Raw Fields Test", function () {
         it("should not restore calculated field from DB if excluded", () => {
             var serialNumber = "sN" + Date.now();
             var car = CarDBMapping.Model.forge({ serial_number: serialNumber });
-            var promise = carRepository.save(car);
+            var promise = carRepository.save(car, {});
 
             promise = promise.then((car) => {
                 return carRepository.findOne(car.id, { exclude: ["serialNumber"] });
@@ -105,7 +105,7 @@ describe("Bookshelf Repository Raw Fields Test", function () {
         it("should not restore calculated field from DB if all excluded", () => {
             var serialNumber = "sN" + Date.now();
             var car = CarDBMapping.Model.forge({ serial_number: serialNumber });
-            var promise = carRepository.save(car);
+            var promise = carRepository.save(car, {});
 
             promise = promise.then((car) => {
                 return carRepository.findOne(car.id, { exclude: ["*"] });
@@ -123,7 +123,7 @@ describe("Bookshelf Repository Raw Fields Test", function () {
         it("should not fail on non-writable column", () => {
             var car = CarDBMapping.Model.forge({ description: "asdf" });
 
-            var promise = carRepository.save(car);
+            var promise = carRepository.save(car, {});
 
             return promise.then((car) => {
                 expect(car.get("description")).to.be.eql("asdf");
@@ -134,7 +134,7 @@ describe("Bookshelf Repository Raw Fields Test", function () {
             var serialNumber = "sN" + Date.now();
             var car = CarDBMapping.Model.forge({ serial_number: serialNumber });
 
-            var promise = carRepository.save(car);
+            var promise = carRepository.save(car, {});
 
             return promise.then(() => {
                 return CarDBMapping.Collection.forge().query().select();

@@ -2,15 +2,16 @@
 
 const BookshelfDeepOperation = require("./BookshelfDeepOperation");
 const MappingRelationsIterator = require("./MappingRelationsIterator");
+const { required } = require("./Annotations");
 
 
 class BookshelfDeepFetchOperation extends BookshelfDeepOperation {
 
-    constructor(mapping, options) {
+    constructor(mapping, options = required("options")) {
         super(mapping, options);
     }
 
-    fetch(model, fetchOptions) {
+    fetch(model, fetchOptions = required("fetchOptions")) {
         return model.fetch(fetchOptions)
             .then((model) => this.stripEmptyRelations(model));
     }

@@ -3,11 +3,12 @@
 const Q = require("q");
 const _ = require("underscore");
 const BookshelfDeepOperation = require("./BookshelfDeepOperation");
+const { required } = require("./Annotations");
 
 
 class BookshelfDeepRemoveOperation extends BookshelfDeepOperation {
 
-    constructor(mapping, options) {
+    constructor(mapping, options = required("options")) {
         super(mapping, options);
     }
 

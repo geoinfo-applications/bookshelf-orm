@@ -5,11 +5,12 @@ const _ = require("underscore");
 const BookshelfDeepOperation = require("./BookshelfDeepOperation");
 const DefaultBehavior = require("./BookshelfDeepSaveOperationDefaultBehavior");
 const HistoryBehavior = require("./BookshelfDeepSaveOperationHistoryBehavior");
+const { required } = require("./Annotations");
 
 
 class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
 
-    constructor(mapping, options) {
+    constructor(mapping, options = required("options")) {
         super(mapping, options);
         this.saveBehavior = this.Mapping.keepHistory ? new HistoryBehavior() : new DefaultBehavior();
     }
@@ -29,7 +30,7 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
     }
 
     executeSaveOperation(item) {
-        return this.saveBehavior.executeSaveOperation(item, this.options, this.Mapping);
+        return this.saveBehavior.executeSaveOperation(item, this.Mapping, this.options);
     }
 
     prepareRawUpdates(item) {

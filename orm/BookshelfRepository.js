@@ -7,6 +7,7 @@ const RemoveOperation = require("./BookshelfDeepRemoveOperation");
 const FetchOperation = require("./BookshelfDeepFetchOperation");
 const BookshelfRelations = require("./BookshelfRelations");
 const MappingRelationsIterator = require("./MappingRelationsIterator");
+const { required } = require("./Annotations");
 
 
 class BookshelfRepository {
@@ -21,7 +22,7 @@ class BookshelfRepository {
         return this.Mapping.identifiedBy;
     }
 
-    findAll(ids, options) {
+    findAll(ids, options = required("options")) {
         if (ids && !_.isArray(ids)) {
             return this.findAll(null, ids);
         }
@@ -39,7 +40,7 @@ class BookshelfRepository {
         }, options);
     }
 
-    findWhere(condition, options) {
+    findWhere(condition, options = required("options")) {
         const collection = this.Mapping.Collection.forge().query((q) => {
             condition.call(this, q);
 
@@ -52,8 +53,8 @@ class BookshelfRepository {
         return this.fetchWithOptions(collection, options);
     }
 
-    findByConditions(conditions, options) {
-        const relations = options && this.getFilteredRelations(options) || this.Mapping.relations;
+    findByConditions(conditions, options = required("options")) {
+        const relations = this.getFilteredRelations(options) || this.Mapping.relations;
 
         return this.findWhere((q) => {
             q.whereIn(this.Mapping.identifiedBy, (subQuery) => {
@@ -63,7 +64,7 @@ class BookshelfRepository {
                     subQuery.andWhere(this.Mapping.discriminator);
                 }
 
-                if (options && options.transacting) {
+                if (options.transacting) {
                     subQuery.transacting(options.transacting);
                 }
 
@@ -78,7 +79,7 @@ class BookshelfRepository {
         }, options);
     }
 
-    getFilteredRelations(options) {
+    getFilteredRelations(options = required("options")) {
         return _.reject(this.Mapping.relations, (relation) => {
             return _.contains(options.exclude, relation.name);
         });
@@ -105,7 +106,7 @@ class BookshelfRepository {
         );
     }
 
-    findOne(id, options) {
+    findOne(id, options = required("options")) {
         const query = this.createIdQuery(id);
         const model = this.Mapping.Model.forge(query);
 
@@ -116,11 +117,11 @@ class BookshelfRepository {
         return this.fetchWithOptions(model, options);
     }
 
-    fetchWithOptions(model, options) {
+    fetchWithOptions(model, options = required("options")) {
         return new FetchOperation(this.Mapping, options).fetch(model, this.relations.getFetchOptions(options));
     }
 
-    save(item, options) {
+    save(item, options = required("options")) {
         if (this.isCollectionType(item)) {
             return this.invokeOnCollection(item, this.save, options);
         }
@@ -146,7 +147,7 @@ class BookshelfRepository {
         return new MappingRelationsIterator(stringifyJsonFields).traverse(this.Mapping, item);
     }
 
-    remove(item, options) {
+    remove(item, options = required("options")) {
         if (this.isCollectionType(item)) {
             return this.invokeOnCollection(item, this.remove, options);
         }
@@ -161,15 +162,15 @@ class BookshelfRepository {
         return Array.isArray(item) || item instanceof this.Mapping.Collection;
     }
 
-    invokeOnCollection(collection, fn, options) {
+    invokeOnCollection(collection, fn, options = required("options")) {
         const iterator = _.partial(fn, _, options).bind(this);
         return _.isArray(collection) ? Q.all(collection.map(iterator)) : collection.mapThen(iterator);
     }
 
-    updateRaw(values, where, options) {
+    updateRaw(values, where, options = required("options")) {
         const query = this.Mapping.createQuery(null, options).where(where).update(values);
 
-        if (options && options.transacting) {
+        if (options.transacting) {
             query.transacting(options.transacting);
         }
 
