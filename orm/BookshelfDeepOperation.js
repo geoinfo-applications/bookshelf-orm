@@ -32,7 +32,7 @@ class BookshelfDeepOperation {
     }
 
     static addTransactionToQuery(query, options = required("options")) {
-        if (options.transacting) {
+        if (options && options.transacting) {
             query.transacting(options.transacting);
         }
 

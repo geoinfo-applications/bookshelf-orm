@@ -37,7 +37,7 @@ class BookshelfRelations {
     }
 
     manageReadableSqlColumns(options, fetchProperties) {
-        fetchProperties.exclude = options.exclude;
+        fetchProperties.exclude = options && options.exclude;
         fetchProperties.exclude = _.isArray(fetchProperties.exclude) &&
             fetchProperties.exclude.map((sqlColumnName) => StringUtils.camelToSnakeCase(sqlColumnName));
 

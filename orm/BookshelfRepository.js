@@ -54,7 +54,7 @@ class BookshelfRepository {
     }
 
     findByConditions(conditions, options = required("options")) {
-        const relations = this.getFilteredRelations(options) || this.Mapping.relations;
+        const relations = options && this.getFilteredRelations(options) || this.Mapping.relations;
 
         return this.findWhere((q) => {
             q.whereIn(this.Mapping.identifiedBy, (subQuery) => {
@@ -64,7 +64,7 @@ class BookshelfRepository {
                     subQuery.andWhere(this.Mapping.discriminator);
                 }
 
-                if (options.transacting) {
+                if (options && options.transacting) {
                     subQuery.transacting(options.transacting);
                 }
 
@@ -170,7 +170,7 @@ class BookshelfRepository {
     updateRaw(values, where, options = required("options")) {
         const query = this.Mapping.createQuery(null, options).where(where).update(values);
 
-        if (options.transacting) {
+        if (options && options.transacting) {
             query.transacting(options.transacting);
         }
 

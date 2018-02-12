@@ -42,7 +42,7 @@ class EntityRepository {
      * @param {Array<string>} [options.exclude] - Relation names to exclude, deep relations in dot notation. Specify wildcards using "*"
      * @returns {Promise<Entity|null>} - Returns Promise resolved with entity, or null if not found
      */
-    findOne(id, options = {}) {
+    findOne(id, options = null) {
         return this.repository.findOne(id, options).then((item) => this.wrapper.wrap(item));
     }
 
@@ -56,7 +56,7 @@ class EntityRepository {
      * @returns {Promise<Array<Entity>>} - Returns Promise resolved with array of entities, or empty list if not found.
      *                                If ids were specified, Entities are sorted statically by given ids
      */
-    findAll(ids, options = {}) {
+    findAll(ids, options = null) {
         return this.repository.findAll(ids, options).then((item) => this.wrapper.wrap(item));
     }
 
@@ -69,7 +69,7 @@ class EntityRepository {
      * @param {Array<string>} [options.exclude] - Relation names to exclude, deep relations in dot notation. Specify wildcards using "*"
      * @returns {Promise<Array<Entity>>} - Returns Promise resolved with array of entities, or empty list if not found.
      */
-    findAllWhere(q, options = {}) {
+    findAllWhere(q, options = null) {
         return this.repository.findWhere(q, options).then((items) => {
             return items.length ? this.wrapper.wrap(items) : [];
         });
@@ -84,7 +84,7 @@ class EntityRepository {
      * @param {Array<string>} [options.exclude] - Relation names to exclude, deep relations in dot notation. Specify wildcards using "*"
      * @returns {Promise<Entity|null>} - Returns Promise resolved with entity, or null if not found
      */
-    findWhere(q, options = {}) {
+    findWhere(q, options = null) {
         return this.repository.findWhere(q, options).then((items) => {
             if (items.length) {
                 return this.wrapper.wrap(items.pop());
@@ -94,7 +94,7 @@ class EntityRepository {
         });
     }
 
-    findByConditions(conditions, options = {}) {
+    findByConditions(conditions, options = null) {
         return this.repository.findByConditions(conditions, options).then((items) => {
             return items.length ? this.wrapper.wrap(items) : [];
         });
@@ -109,7 +109,7 @@ class EntityRepository {
      * @param {string} [options.method] - Specify "update" or "insert". Defaults to "update", or "insert" if Id is null
      * @returns {Promise<Entity | Array<Entity>>} - Returns Promise resolved with saved entity, or array of saved entities
      */
-    save(entity, options = {}) {
+    save(entity, options = null) {
         if (Array.isArray(entity)) {
             return Q.all(entity.map((entity) => this.save(entity, options)));
         }
@@ -136,7 +136,7 @@ class EntityRepository {
      * @param {boolean} [options.transactional] - Run in a transaction, start new one if not already transacting
      * @returns {Promise<Void>} - Returns Promise resolved after removal
      */
-    remove(entity, options = {}) {
+    remove(entity, options = null) {
         if (Array.isArray(entity)) {
             return Q.all(entity.map((entity) => this.remove(entity, options)));
         } else if (entity instanceof this.Entity) {
@@ -169,8 +169,8 @@ class EntityRepository {
      * @param {boolean} [options.transactional] - Run in a transaction, start new one if not already transacting
      * @returns {Promise<*>} - Promise resolved with result of operation. If operation fails, Promise is rejected
      */
-    executeTransactional(operation, options = {}) {
-        if (options.transactional && !options.transacting) {
+    executeTransactional(operation, options = null) {
+        if (options && options.transactional && !options.transacting) {
             return this.Mapping.startTransaction((t) => {
                 options.transacting = t;
                 return Q.try(operation).then(t.commit).catch(t.rollback);
@@ -201,7 +201,7 @@ class EntityRepository {
      * @param {boolean} [options.transactional] - Run in a transaction, start new one if not already transacting
      * @returns {Promise<boolean>} - Returns Promise resolved with flag indicating whether an Entity with the given Identifier exists
      */
-    exists(id, options = {}) {
+    exists(id, options = null) {
         if (!id) {
             return Q.when(false);
         }

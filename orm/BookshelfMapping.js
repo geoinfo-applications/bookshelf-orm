@@ -132,7 +132,7 @@ class BookshelfMapping {
             query.andWhere(this.discriminator);
         }
 
-        if (options.transacting) {
+        if (options && options.transacting) {
             query.transacting(options.transacting);
         }
 
