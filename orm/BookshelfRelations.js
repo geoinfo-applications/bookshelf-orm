@@ -2,6 +2,7 @@
 
 const _ = require("underscore");
 const StringUtils = require("./StringUtils");
+const { required } = require("./Annotations");
 
 
 class BookshelfRelations {
@@ -12,7 +13,7 @@ class BookshelfRelations {
         this.withRelatedFetchOptions = this.getWithRelatedFetchOptions();
     }
 
-    getFetchOptions(options) {
+    getFetchOptions(options = required("options")) {
         var fetchProperties = this.fetchProperties;
 
         if (options) {

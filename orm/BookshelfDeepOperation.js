@@ -1,8 +1,11 @@
 "use strict";
 
+const { required } = require("./Annotations");
+
+
 class BookshelfDeepOperation {
 
-    constructor(mapping, options) {
+    constructor(mapping, options = required("options")) {
         this.Mapping = mapping;
         this.relations = mapping.relations || [];
         this.options = options;
@@ -25,10 +28,10 @@ class BookshelfDeepOperation {
     }
 
     addTransactionToQuery(query) {
-        return BookshelfDeepOperation.addTransactionToQuery(this.options, query);
+        return BookshelfDeepOperation.addTransactionToQuery(query, this.options);
     }
 
-    static addTransactionToQuery(options, query) {
+    static addTransactionToQuery(query, options = required("options")) {
         if (options && options.transacting) {
             query.transacting(options.transacting);
         }

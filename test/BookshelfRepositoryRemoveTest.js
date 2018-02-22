@@ -28,8 +28,8 @@ describe("Bookshelf Repository Remove Test", function () {
 
     it("should drop item", () => {
         return createCar().then((item) => {
-            return carRepository.remove(item).then(() => {
-                return carRepository.findAll().then((items) => {
+            return carRepository.remove(item, {}).then(() => {
+                return carRepository.findAll(null, {}).then((items) => {
                     expect(items.length).to.be.eql(0);
                 });
             });
@@ -39,8 +39,8 @@ describe("Bookshelf Repository Remove Test", function () {
     it("should drop unsaved item", () => {
         var item =  CarDBMapping.Model.forge({ name: "car" + tableIndex++ });
 
-        return carRepository.remove(item).then(() => {
-            return carRepository.findAll().then((items) => {
+        return carRepository.remove(item, {}).then(() => {
+            return carRepository.findAll(null, {}).then((items) => {
                 expect(items.length).to.be.eql(0);
             });
         });
@@ -48,8 +48,8 @@ describe("Bookshelf Repository Remove Test", function () {
 
     it("should drop item specified by id", () => {
         return createCar().then((item) => {
-            return carRepository.remove(item.id).then(() => {
-                return carRepository.findAll().then((items) => {
+            return carRepository.remove(item.id, {}).then(() => {
+                return carRepository.findAll(null, {}).then((items) => {
                     expect(items.length).to.be.eql(0);
                 });
             });
@@ -60,9 +60,9 @@ describe("Bookshelf Repository Remove Test", function () {
         var item1 = CarDBMapping.Model.forge({ name: "item1" });
         var item2 = CarDBMapping.Model.forge({ name: "item2" });
 
-        return carRepository.save([item1, item2]).then(() => {
-            return carRepository.remove([item1, item2]).then(() => {
-                return carRepository.findAll().then((items) => {
+        return carRepository.save([item1, item2], {}).then(() => {
+            return carRepository.remove([item1, item2], {}).then(() => {
+                return carRepository.findAll(null, {}).then((items) => {
                     expect(items.length).to.be.eql(0);
                 });
             });
@@ -73,9 +73,9 @@ describe("Bookshelf Repository Remove Test", function () {
         var item1 = CarDBMapping.Model.forge({ name: "item1" });
         var item2 = CarDBMapping.Model.forge({ name: "item2" });
 
-        return carRepository.save([item1, item2]).then(() => {
-            return carRepository.remove([item1.id, item2.id]).then(() => {
-                return carRepository.findAll().then((items) => {
+        return carRepository.save([item1, item2], {}).then(() => {
+            return carRepository.remove([item1.id, item2.id], {}).then(() => {
+                return carRepository.findAll(null, {}).then((items) => {
                     expect(items.length).to.be.eql(0);
                 });
             });
@@ -87,9 +87,9 @@ describe("Bookshelf Repository Remove Test", function () {
         var item2 = CarDBMapping.Model.forge({ name: "item2" });
         var collection = CarDBMapping.Collection.forge([item1, item2]);
 
-        return carRepository.save(collection).then(() => {
-            return carRepository.remove(collection).then(() => {
-                return carRepository.findAll().then((items) => {
+        return carRepository.save(collection, {}).then(() => {
+            return carRepository.remove(collection, {}).then(() => {
+                return carRepository.findAll(null, {}).then((items) => {
                     expect(items.length).to.be.eql(0);
                 });
             });
@@ -104,9 +104,9 @@ describe("Bookshelf Repository Remove Test", function () {
             });
             item.relations.relation_parts = PartDBMapping.Collection.forge(part);
 
-            return carRepository.save(item).then(() => {
-                return carRepository.findOne(item.id).then((item) => {
-                    return carRepository.remove(item).then(() => {
+            return carRepository.save(item, {}).then(() => {
+                return carRepository.findOne(item.id, {}).then((item) => {
+                    return carRepository.remove(item, {}).then(() => {
                         return PartDBMapping.Collection.forge().fetch().then((attrs) => {
                             expect(attrs.length).to.be.eql(0);
                         });
@@ -124,8 +124,8 @@ describe("Bookshelf Repository Remove Test", function () {
             });
             item.relations.relation_parkingSpace = parkingSpace;
 
-            return carRepository.save(item).then((item) => {
-                return carRepository.remove(item).then(() => {
+            return carRepository.save(item, {}).then((item) => {
+                return carRepository.remove(item, {}).then(() => {
                     return ParkingSpaceDBMapping.Collection.forge().fetch().then((parkingSpaces) => {
                         expect(parkingSpaces.length).to.be.eql(0);
                     });
@@ -141,11 +141,11 @@ describe("Bookshelf Repository Remove Test", function () {
         var car = carRepository.newEntity({ parts: [{ wheels: [{ index: 1 }], engine: { serialNumber: serialNumber } }] });
 
         return carRepository.save(car).then((car) => {
-            return engineRepository.findAll().then((engines) => {
+            return engineRepository.findAll(null, {}).then((engines) => {
                 expect(engines.length).to.be.eql(1);
 
                 return carRepository.remove(car).then(() => {
-                    return engineRepository.findAll().then((engines) => {
+                    return engineRepository.findAll(null, {}).then((engines) => {
                         expect(engines.length).to.be.eql(0);
                     });
                 });
@@ -163,7 +163,7 @@ describe("Bookshelf Repository Remove Test", function () {
             car.removeParts(car.parts);
 
             return carRepository.remove(car).then(() => {
-                return engineRepository.findAll().then((engines) => {
+                return engineRepository.findAll(null, {}).then((engines) => {
                     expect(engines.length).to.be.eql(0);
                 });
             });
@@ -179,7 +179,7 @@ describe("Bookshelf Repository Remove Test", function () {
                 car.set("owner_id", owner.id);
                 return carRepository.save(car).then((car) => {
                     return carRepository.remove(car).then(() => {
-                        return ownerRepository.findAll().then((owners) => {
+                        return ownerRepository.findAll(null, {}).then((owners) => {
                             expect(owners.length).to.be.eql(1);
                         });
                     });

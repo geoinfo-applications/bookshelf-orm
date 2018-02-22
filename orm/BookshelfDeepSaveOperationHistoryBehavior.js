@@ -1,5 +1,8 @@
 "use strict";
 
+const { required } = require("./Annotations");
+
+
 const RETURNING_PROPERTY_DESCRIPTOR = {
     get: () => "*",
     set: () => "*",
@@ -8,10 +11,9 @@ const RETURNING_PROPERTY_DESCRIPTOR = {
 };
 
 
-
 class BookshelfDeepSaveOperationHistoryBehavior {
 
-    executeSaveOperation(item, options, mapping) {
+    executeSaveOperation(item, mapping, options = required("options")) {
         const { revisionId, parentId } = mapping.historyColumns;
         item.set(parentId, item.get(revisionId));
         item.unset(revisionId);

@@ -30,8 +30,8 @@ describe("Bookshelf Repository Save Test", function () {
     it("should persist item", () => {
         var item = CarDBMapping.Model.forge({ name: "" });
 
-        return carRepository.save(item).then(() => {
-            carRepository.findOne(item.id).then((fetchedItem) => {
+        return carRepository.save(item, {}).then(() => {
+            carRepository.findOne(item.id, {}).then((fetchedItem) => {
                 expect(item.id).to.be.eql(fetchedItem.id);
             });
         });
@@ -41,8 +41,8 @@ describe("Bookshelf Repository Save Test", function () {
         var car1 = CarDBMapping.Model.forge({ name: "item1" });
         var car2 = CarDBMapping.Model.forge({ name: "item2" });
 
-        return carRepository.save([car1, car2]).then(() => {
-            return carRepository.findAll([car1.id, car2.id]).then((cars) => {
+        return carRepository.save([car1, car2], {}).then(() => {
+            return carRepository.findAll([car1.id, car2.id], {}).then((cars) => {
                 expect(car1.id).to.be.eql(cars.at(0).id);
                 expect(car2.id).to.be.eql(cars.at(1).id);
             });
@@ -54,8 +54,8 @@ describe("Bookshelf Repository Save Test", function () {
         var item2 = CarDBMapping.Model.forge({ name: "item2" });
         var collection = CarDBMapping.Collection.forge([item1, item2]);
 
-        return carRepository.save(collection).then(() => {
-            carRepository.findAll([item1.id, item2.id]).then((items) => {
+        return carRepository.save(collection, {}).then(() => {
+            carRepository.findAll([item1.id, item2.id], {}).then((items) => {
                 expect(item1.id).to.be.eql(items.at(0).id);
                 expect(item2.id).to.be.eql(items.at(1).id);
             });
@@ -70,7 +70,7 @@ describe("Bookshelf Repository Save Test", function () {
             });
             item.relations.relation_parts = WheelDBMapping.Collection.forge(part);
 
-            return carRepository.save(item).then((item) => {
+            return carRepository.save(item, {}).then((item) => {
                 return PartDBMapping.Collection.forge().fetch().then((parts) => {
                     expect(parts.length).to.be.eql(1);
                     expect(parts.at(0).get("car_id")).to.be.eql(item.id);
@@ -88,7 +88,7 @@ describe("Bookshelf Repository Save Test", function () {
             });
             item.relations.relation_parkingSpace = parkingSpace;
 
-            return carRepository.save(item).then((item) => {
+            return carRepository.save(item, {}).then((item) => {
                 return ParkingSpaceDBMapping.Collection.forge().fetch().then((parkingSpaces) => {
                     expect(parkingSpaces.length).to.be.eql(1);
                     expect(parkingSpaces.at(0).get("car_id")).to.be.eql(item.id);
@@ -123,7 +123,7 @@ describe("Bookshelf Repository Save Test", function () {
             part.set("name", "notToBeSaved" + Date.now());
             car.relations.relation_parts = PartDBMapping.Collection.forge(part);
 
-            return carRepository.save(car).then((car) => {
+            return carRepository.save(car, {}).then((car) => {
                 return PartDBMapping.Collection.forge().fetch().then((parts) => {
                     expect(parts.at(0).get("car_id")).to.be.eql(car.id);
                     expect(parts.at(0).get("name")).to.be.eql("originalName");
@@ -143,8 +143,8 @@ describe("Bookshelf Repository Save Test", function () {
         });
         item.relations.relation_parts = PartDBMapping.Collection.forge(part);
 
-        return carRepository.save(item).then((item) => {
-            return carRepository.findOne(item.id).then((fetchedItem) => {
+        return carRepository.save(item, {}).then((item) => {
+            return carRepository.findOne(item.id, {}).then((fetchedItem) => {
                 expect(fetchedItem.get("name")).to.be.eql(item.get("name"));
 
                 var parts = fetchedItem.relations.relation_parts;
@@ -178,7 +178,7 @@ describe("Bookshelf Repository Save Test", function () {
         return createCar().then((item) => {
             item.relations.relation_parts = {};
 
-            return carRepository.save(item).then(() => {
+            return carRepository.save(item, {}).then(() => {
                 throw "fail";
             }).catch((error) => {
                 expect(error.message).to.match(/can not be saved/);

@@ -33,14 +33,14 @@ describe("Bookshelf Repository Test", function () {
     describe("findAll", () => {
 
         it("should return Collection of Cars", () => {
-            return carRepository.findAll().then((cars) => {
+            return carRepository.findAll(null, {}).then((cars) => {
                 expect(cars).to.be.instanceof(CarDBMapping.Collection);
             });
         });
 
         it("should return Collection of Cars with specified ids", () => {
             return createCar().then((model) => {
-                return carRepository.findAll([model.id]).then((cars) => {
+                return carRepository.findAll([model.id], {}).then((cars) => {
                     expect(cars.length).to.be.eql(1);
                     expect(cars.at(0).id).to.be.eql(model.id);
                 });
@@ -48,7 +48,7 @@ describe("Bookshelf Repository Test", function () {
         });
 
         it("should return empty Collection of Car if ids is an empty array", () => {
-            return carRepository.findAll([]).then((cars) => {
+            return carRepository.findAll([], {}).then((cars) => {
                 expect(cars).to.be.instanceof(CarDBMapping.Collection);
                 expect(cars.length).to.be.eql(0);
             });
@@ -57,7 +57,7 @@ describe("Bookshelf Repository Test", function () {
         it("should return all Cars", () => {
             return createCar().then((model1) => {
                 return createCar().then((model2) => {
-                    return carRepository.findAll().then((cars) => {
+                    return carRepository.findAll(null, {}).then((cars) => {
                         expect(cars.length).to.be.eql(2);
                         expect(cars.at(0).id).to.be.eql(model1.id);
                         expect(cars.at(1).id).to.be.eql(model2.id);
@@ -91,7 +91,7 @@ describe("Bookshelf Repository Test", function () {
         });
 
         it("should return empty list if no importcars exist", () => {
-            return carRepository.findAll().then((cars) => {
+            return carRepository.findAll(null, {}).then((cars) => {
                 expect(cars.length).to.be.eql(0);
             });
         });
@@ -99,7 +99,7 @@ describe("Bookshelf Repository Test", function () {
         it("should return empty list if no importcars with given ids exist", () => {
             return createCar().then(() => {
                 return createCar().then(() => {
-                    return carRepository.findAll([-1, -2, -3]).then((cars) => {
+                    return carRepository.findAll([-1, -2, -3], {}).then((cars) => {
                         expect(cars.length).to.be.eql(0);
                     });
                 });
@@ -112,7 +112,7 @@ describe("Bookshelf Repository Test", function () {
 
         it("should return instance of Car with specified id", () => {
             return createCar().then((model) => {
-                return carRepository.findOne(model.id).then((fetchedModel) => {
+                return carRepository.findOne(model.id, {}).then((fetchedModel) => {
                     expect(fetchedModel).to.be.instanceof(CarDBMapping.Model);
                     expect(fetchedModel.id).to.be.eql(model.id);
                 });
@@ -125,7 +125,7 @@ describe("Bookshelf Repository Test", function () {
                     car_id: model.id,
                     name: ""
                 }).save().then((attribute) => {
-                    return carRepository.findOne(model.id).then((model) => {
+                    return carRepository.findOne(model.id, {}).then((model) => {
                         expect(model.related("relation_parts").length).to.be.eql(1);
                         expect(model.related("relation_parts").at(0).id).to.be.eql(attribute.id);
                     });
@@ -134,7 +134,7 @@ describe("Bookshelf Repository Test", function () {
         });
 
         it("should return null if item with given id doesn't exist", () => {
-            return carRepository.findOne(-1).then((fetchedModel) => {
+            return carRepository.findOne(-1, {}).then((fetchedModel) => {
                 expect(fetchedModel).to.be.eql(null);
             });
         });
