@@ -73,7 +73,7 @@ class BookshelfDeepRemoveOperation extends BookshelfDeepOperation {
 
     removeForeignKey(item, relation, related) {
         const fkColumn = relation.references.mappedBy;
-        const query = relation.mapping.createQuery(null, this.options).where(related.idAttribute, related[related.idAttribute]);
+        const query = relation.references.mapping.createQuery(null, this.options).where(related.idAttribute, related[related.idAttribute]);
         this.addTransactionToQuery(query);
 
         return query.update(fkColumn, null);
