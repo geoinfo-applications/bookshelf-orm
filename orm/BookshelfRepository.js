@@ -135,7 +135,7 @@ class BookshelfRepository {
         function stringifyJsonFields(mapping, node) {
             if (node.attributes) {
                 _.where(mapping.columns, { type: "json" }).forEach((column) => {
-                    var value = node.attributes[column.name];
+                    const value = node.attributes[column.name];
 
                     if (!_.isString(value)) {
                         node.attributes[column.name] = JSON.stringify(value);

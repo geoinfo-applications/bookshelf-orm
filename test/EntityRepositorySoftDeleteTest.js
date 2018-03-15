@@ -22,7 +22,7 @@ describe("Entity Repository Soft Delete Test", function () {
     const CompositionDBMapping = registry.compile("CompositionDBMapping");
 
     this.timeout(1000);
-    var planetRepository, jupiter, io, europa, ganymed, kallisto;
+    let planetRepository, jupiter, io, europa, ganymed, kallisto;
 
     beforeEach(() => {
         planetRepository = new PlanetRepository();
@@ -49,7 +49,7 @@ describe("Entity Repository Soft Delete Test", function () {
 
         it("should not find removed entity again", () => {
 
-            var promise = planetRepository.remove(jupiter);
+            const promise = planetRepository.remove(jupiter);
 
             return promise.then(() => planetRepository.findAll()).then((planets) => {
                 expect(planets).to.be.eql([]);
@@ -59,7 +59,7 @@ describe("Entity Repository Soft Delete Test", function () {
         it("should not find removed 'hasMany' entity again", () => {
             jupiter.removeMoons(europa);
 
-            var promise = planetRepository.save(jupiter);
+            const promise = planetRepository.save(jupiter);
 
             return promise.then(() => planetRepository.findOne(jupiter.id)).then((jupiter) => {
                 expect(jupiter.moons).to.have.length(3);
@@ -70,7 +70,7 @@ describe("Entity Repository Soft Delete Test", function () {
         it("should not find removed 'hasOne' entity again", () => {
             jupiter.atmosphere = null;
 
-            var promise = planetRepository.save(jupiter);
+            const promise = planetRepository.save(jupiter);
 
             return promise.then(() => planetRepository.findOne(jupiter.id)).then((jupiter) => {
                 expect(jupiter.atmosphere).to.be.equal(null);
@@ -80,7 +80,7 @@ describe("Entity Repository Soft Delete Test", function () {
         it("should not find removed 'belongsTo' entity again", () => {
             jupiter.composition = null;
 
-            var promise = planetRepository.save(jupiter);
+            const promise = planetRepository.save(jupiter);
 
             return promise.then(() => planetRepository.findOne(jupiter.id)).then((jupiter) => {
                 expect(jupiter.composition).to.be.equal(null);
@@ -89,7 +89,7 @@ describe("Entity Repository Soft Delete Test", function () {
 
         it("should keep removed entity in table", () => {
 
-            var promise = planetRepository.remove(jupiter);
+            const promise = planetRepository.remove(jupiter);
 
             return promise.then(() => knex.select().from(PlanetDBMapping.tableName)).then((rows) => {
                 expect(rows.length).to.be.eql(1);
@@ -100,7 +100,7 @@ describe("Entity Repository Soft Delete Test", function () {
         it("should keep removed 'hasMany' entity in table", () => {
             jupiter.removeMoons(europa);
 
-            var promise = planetRepository.save(jupiter);
+            const promise = planetRepository.save(jupiter);
 
             return promise.then(() => knex.select().from(MoonDBMapping.tableName)).then((rows) => {
                 expect(rows.length).to.be.eql(7);
@@ -112,7 +112,7 @@ describe("Entity Repository Soft Delete Test", function () {
         it("should keep removed 'hasOne' entity in table", () => {
             jupiter.atmosphere = null;
 
-            var promise = planetRepository.save(jupiter);
+            const promise = planetRepository.save(jupiter);
 
             return promise.then(() => knex.select().from(AtmosphereDBMapping.tableName)).then((rows) => {
                 expect(rows.length).to.be.eql(1);
@@ -121,10 +121,10 @@ describe("Entity Repository Soft Delete Test", function () {
         });
 
         it("should keep removed 'belongsTo' entity in table", () => {
-            var jupitersCompositionId = jupiter.composition.id;
+            const jupitersCompositionId = jupiter.composition.id;
             jupiter.composition = null;
 
-            var promise = planetRepository.save(jupiter);
+            const promise = planetRepository.save(jupiter);
 
             return promise.then(() => knex.select().from(CompositionDBMapping.tableName)).then((rows) => {
                 expect(rows.length).to.be.eql(11);
@@ -140,7 +140,7 @@ describe("Entity Repository Soft Delete Test", function () {
         it("should only load newest state", () => {
             jupiter.distanceToStar = 778000000;
 
-            var promise = planetRepository.save(jupiter);
+            const promise = planetRepository.save(jupiter);
 
             return promise.then(() => planetRepository.findAll()).then((planets) => {
                 expect(planets.length).to.be.eql(1);
@@ -151,7 +151,7 @@ describe("Entity Repository Soft Delete Test", function () {
         it("should save every modified state to db", () => {
             jupiter.distanceToStar = 778000000;
 
-            var promise = planetRepository.save(jupiter);
+            const promise = planetRepository.save(jupiter);
 
             return promise.then(() => knex.select().from(PlanetDBMapping.tableName).orderBy("revision_id")).then((rows) => {
                 expect(rows.length).to.be.eql(2);
@@ -165,7 +165,7 @@ describe("Entity Repository Soft Delete Test", function () {
         it("should only load newest state of 'hasMany' entity", () => {
             europa.distanceToPlanet = 670900;
 
-            var promise = planetRepository.save(jupiter);
+            const promise = planetRepository.save(jupiter);
 
             return promise.then(() => planetRepository.findAll()).then((planets) => {
                 expect(planets.length).to.be.eql(1);
@@ -178,7 +178,7 @@ describe("Entity Repository Soft Delete Test", function () {
         it("should only load newest state of 'hasOne' entity", () => {
             jupiter.atmosphere.description = "Red, white and stormy";
 
-            var promise = planetRepository.save(jupiter);
+            const promise = planetRepository.save(jupiter);
 
             return promise.then(() => planetRepository.findAll()).then((planets) => {
                 expect(planets.length).to.be.eql(1);
@@ -189,7 +189,7 @@ describe("Entity Repository Soft Delete Test", function () {
         it("should only load newest state of 'belongsTo' entity", () => {
             jupiter.composition.description = "Gas giant";
 
-            var promise = planetRepository.save(jupiter);
+            const promise = planetRepository.save(jupiter);
 
             return promise.then(() => planetRepository.findAll()).then((planets) => {
                 expect(planets.length).to.be.eql(1);
@@ -200,7 +200,7 @@ describe("Entity Repository Soft Delete Test", function () {
         it("should save modified 'hasMany' entity in table", () => {
             europa.distanceToPlanet = 670900;
 
-            var promise = planetRepository.save(jupiter);
+            const promise = planetRepository.save(jupiter);
 
             return promise.then(() => knex.select().from(MoonDBMapping.tableName).orderBy("revision_id")).then((rows) => {
                 expect(rows.length).to.be.eql(8);
@@ -213,7 +213,7 @@ describe("Entity Repository Soft Delete Test", function () {
         it("should save modified 'hasOne' entity in table", () => {
             jupiter.atmosphere.description = "Red, white and stormy";
 
-            var promise = planetRepository.save(jupiter);
+            const promise = planetRepository.save(jupiter);
 
             return promise.then(() => knex.select().from(AtmosphereDBMapping.tableName).orderBy("the_revision_id")).then((rows) => {
                 expect(rows.length).to.be.eql(2);
@@ -223,10 +223,10 @@ describe("Entity Repository Soft Delete Test", function () {
         });
 
         it("should save modified 'belongsTo' entity in table", () => {
-            var jupitersCompositionId = jupiter.composition.id;
+            const jupitersCompositionId = jupiter.composition.id;
             jupiter.composition.description = "Gas giant";
 
-            var promise = planetRepository.save(jupiter);
+            const promise = planetRepository.save(jupiter);
 
             return promise.then(() => knex.select().from(CompositionDBMapping.tableName).orderBy("revision_id")).then((rows) => {
                 expect(rows.length).to.be.eql(12);

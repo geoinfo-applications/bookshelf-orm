@@ -34,8 +34,8 @@ class MappingRelationsIterator {
     }
 
     traverseRelation(node, relation) {
-        var key = "relation_" + relation.name;
-        var relatedNode = node.relations[key];
+        const key = "relation_" + relation.name;
+        const relatedNode = node.relations[key];
 
         if (relatedNode) {
             if (relatedNode.models) {

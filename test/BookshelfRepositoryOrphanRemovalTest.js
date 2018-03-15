@@ -24,7 +24,7 @@ describe("Bookshelf Repository Orphan Removal Test", function () {
     const InjectionDBMapping = registry.compile("InjectionDBMapping");
 
     this.timeout(1000);
-    var carRepository;
+    let carRepository;
 
     beforeEach(() => {
         carRepository = new CarRepository().repository;
@@ -34,7 +34,7 @@ describe("Bookshelf Repository Orphan Removal Test", function () {
 
         it("should remove orphans", () => {
             return createCar().then((item) => {
-                var part = PartDBMapping.Model.forge({
+                const part = PartDBMapping.Model.forge({
                     car_id: item.id,
                     name: "name" + Date.now()
                 });
@@ -53,7 +53,7 @@ describe("Bookshelf Repository Orphan Removal Test", function () {
 
         it("should not remove still attached relations", () => {
             return createCar().then((item) => {
-                var part = PartDBMapping.Model.forge({
+                const part = PartDBMapping.Model.forge({
                     car_id: item.id,
                     name: "name" + Date.now()
                 });
@@ -74,10 +74,10 @@ describe("Bookshelf Repository Orphan Removal Test", function () {
     describe("n:1 relations", () => {
 
         it("should remove orphans", () => {
-            var partRepository = new PartRepository();
-            var engineRepository = new EngineRepository();
-            var engine = engineRepository.newEntity();
-            var part = partRepository.newEntity();
+            const partRepository = new PartRepository();
+            const engineRepository = new EngineRepository();
+            const engine = engineRepository.newEntity();
+            const part = partRepository.newEntity();
             part.engine = engine;
 
             return partRepository.save(part).then(() => {
@@ -91,10 +91,10 @@ describe("Bookshelf Repository Orphan Removal Test", function () {
         });
 
         it("should not remove still attached relations", () => {
-            var partRepository = new PartRepository();
-            var engineRepository = new EngineRepository();
-            var engine = engineRepository.newEntity();
-            var part = partRepository.newEntity();
+            const partRepository = new PartRepository();
+            const engineRepository = new EngineRepository();
+            const engine = engineRepository.newEntity();
+            const part = partRepository.newEntity();
             part.engine = engine;
 
             return partRepository.save(part).then(() => {
@@ -107,10 +107,10 @@ describe("Bookshelf Repository Orphan Removal Test", function () {
         });
 
         it("should remove orphans deeply", () => {
-            var partRepository = new PartRepository();
-            var engineRepository = new EngineRepository();
-            var engine = engineRepository.newEntity();
-            var part = partRepository.newEntity();
+            const partRepository = new PartRepository();
+            const engineRepository = new EngineRepository();
+            const engine = engineRepository.newEntity();
+            const part = partRepository.newEntity();
             part.engine = engine;
             engine.injection = engine.newInjection();
             engine.addOutlets(engine.newOutlets());
@@ -166,7 +166,7 @@ describe("Bookshelf Repository Orphan Removal Test", function () {
     });
 
 
-    var tableIndex = 0;
+    let tableIndex = 0;
 
     function createCar() {
         return CarDBMapping.Model.forge({ name: "car" + tableIndex++ }).save();

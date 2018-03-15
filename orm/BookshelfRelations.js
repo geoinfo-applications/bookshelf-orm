@@ -14,7 +14,7 @@ class BookshelfRelations {
     }
 
     getFetchOptions(options = required("options")) {
-        var fetchProperties = this.fetchProperties;
+        const fetchProperties = this.fetchProperties;
 
         if (options) {
             this.addOptionalFetchOptions(options, fetchProperties);
@@ -25,7 +25,7 @@ class BookshelfRelations {
     }
 
     addOptionalFetchOptions(options, fetchProperties) {
-        var optionalOptions = {
+        const optionalOptions = {
             exclude: () => this.applyExcludesToFetchProperties(fetchProperties, options.exclude),
             columns: () => {
                 fetchProperties.columns = options.columns;
@@ -56,8 +56,8 @@ class BookshelfRelations {
     }
 
     addReadableSqlColumnsToFetchProperties(fetchProperties) {
-        let selectedReadableSqlColumnNames = this.getSelectedReadableColumnNames(fetchProperties);
-        var selectedReadableSqlColumns = selectedReadableSqlColumnNames.map((name) => _.findWhere(this.Mapping.readableSqlColumns, { name }));
+        const selectedReadableSqlColumnNames = this.getSelectedReadableColumnNames(fetchProperties);
+        const selectedReadableSqlColumns = selectedReadableSqlColumnNames.map((name) => _.findWhere(this.Mapping.readableSqlColumns, { name }));
 
         return this.addSqlColumnsToFetchPropertiesColumnsAsSqlQuery(fetchProperties, selectedReadableSqlColumns);
     }
@@ -109,8 +109,8 @@ class BookshelfRelations {
             return;
         }
 
-        var wildcardExcludes = exclude.filter((e) => e.endsWith("*"));
-        var excludes = _.difference(exclude, wildcardExcludes);
+        const wildcardExcludes = exclude.filter((e) => e.endsWith("*"));
+        let excludes = _.difference(exclude, wildcardExcludes);
         excludes = this.addWildcardExcludes(excludes, wildcardExcludes);
         excludes = excludes.map(this.renameRelationProperty, this);
 
@@ -130,7 +130,7 @@ class BookshelfRelations {
     }
 
     renameRelationProperty(propertyName) {
-        var isRelationName = _.contains(this.relationNamesDeep, propertyName);
+        const isRelationName = _.contains(this.relationNamesDeep, propertyName);
 
         if (isRelationName) {
             return propertyName.split(".").map((name) => "relation_" + name).join(".");
@@ -145,7 +145,7 @@ class BookshelfRelations {
 
     getRelationNamesDeep() {
         function extractName(parent, relation) {
-            var name = _.compact([parent, relation.name]).join(".");
+            const name = _.compact([parent, relation.name]).join(".");
             return [name].concat(_.map(relation.references.mapping.relations, _.partial(extractName, name)));
         }
 

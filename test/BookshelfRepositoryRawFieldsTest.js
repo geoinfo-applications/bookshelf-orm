@@ -14,7 +14,7 @@ describe("Bookshelf Repository Raw Fields Test", function () {
     const CarDBMapping = registry.compile("CarDBMapping");
 
     this.timeout(1000);
-    var carRepository;
+    let carRepository;
 
     beforeEach(() => {
         carRepository = new CarRepository().repository;
@@ -23,10 +23,10 @@ describe("Bookshelf Repository Raw Fields Test", function () {
     describe("findAll", () => {
 
         it("should return calculated field from DB", () => {
-            var name = "name" + Date.now();
-            var modelName = "modelName" + Date.now();
-            var car = CarDBMapping.Model.forge({ name: name, model_name: modelName });
-            var promise = carRepository.save(car, {});
+            const name = "name" + Date.now();
+            const modelName = "modelName" + Date.now();
+            const car = CarDBMapping.Model.forge({ name: name, model_name: modelName });
+            let promise = carRepository.save(car, {});
 
             promise = promise.then(() => {
                 return carRepository.findAll(null, {});
@@ -39,10 +39,10 @@ describe("Bookshelf Repository Raw Fields Test", function () {
         });
 
         it("should not return calculated field from DB if excluded", () => {
-            var name = "name" + Date.now();
-            var modelName = "modelName" + Date.now();
-            var car = CarDBMapping.Model.forge({ name: name, model_name: modelName });
-            var promise = carRepository.save(car, {});
+            const name = "name" + Date.now();
+            const modelName = "modelName" + Date.now();
+            const car = CarDBMapping.Model.forge({ name: name, model_name: modelName });
+            let promise = carRepository.save(car, {});
 
             promise = promise.then(() => {
                 return carRepository.findAll(null, { exclude: ["description"] });
@@ -55,10 +55,10 @@ describe("Bookshelf Repository Raw Fields Test", function () {
         });
 
         it("should not return calculated field from DB if all excluded", () => {
-            var name = "name" + Date.now();
-            var modelName = "modelName" + Date.now();
-            var car = CarDBMapping.Model.forge({ name: name, model_name: modelName });
-            var promise = carRepository.save(car, {});
+            const name = "name" + Date.now();
+            const modelName = "modelName" + Date.now();
+            const car = CarDBMapping.Model.forge({ name: name, model_name: modelName });
+            let promise = carRepository.save(car, {});
 
             promise = promise.then(() => {
                 return carRepository.findAll(null, { exclude: ["*"] });
@@ -75,9 +75,9 @@ describe("Bookshelf Repository Raw Fields Test", function () {
     describe("findOne", () => {
 
         it("should restore calculated field from DB", () => {
-            var serialNumber = "sN" + Date.now();
-            var car = CarDBMapping.Model.forge({ serial_number: serialNumber });
-            var promise = carRepository.save(car, {});
+            const serialNumber = "sN" + Date.now();
+            const car = CarDBMapping.Model.forge({ serial_number: serialNumber });
+            let promise = carRepository.save(car, {});
 
             promise = promise.then((car) => {
                 return carRepository.findOne(car.id, {});
@@ -89,9 +89,9 @@ describe("Bookshelf Repository Raw Fields Test", function () {
         });
 
         it("should not restore calculated field from DB if excluded", () => {
-            var serialNumber = "sN" + Date.now();
-            var car = CarDBMapping.Model.forge({ serial_number: serialNumber });
-            var promise = carRepository.save(car, {});
+            const serialNumber = "sN" + Date.now();
+            const car = CarDBMapping.Model.forge({ serial_number: serialNumber });
+            let promise = carRepository.save(car, {});
 
             promise = promise.then((car) => {
                 return carRepository.findOne(car.id, { exclude: ["serialNumber"] });
@@ -103,9 +103,9 @@ describe("Bookshelf Repository Raw Fields Test", function () {
         });
 
         it("should not restore calculated field from DB if all excluded", () => {
-            var serialNumber = "sN" + Date.now();
-            var car = CarDBMapping.Model.forge({ serial_number: serialNumber });
-            var promise = carRepository.save(car, {});
+            const serialNumber = "sN" + Date.now();
+            const car = CarDBMapping.Model.forge({ serial_number: serialNumber });
+            let promise = carRepository.save(car, {});
 
             promise = promise.then((car) => {
                 return carRepository.findOne(car.id, { exclude: ["*"] });
@@ -121,9 +121,9 @@ describe("Bookshelf Repository Raw Fields Test", function () {
     describe("save", () => {
 
         it("should not fail on non-writable column", () => {
-            var car = CarDBMapping.Model.forge({ description: "asdf" });
+            const car = CarDBMapping.Model.forge({ description: "asdf" });
 
-            var promise = carRepository.save(car, {});
+            const promise = carRepository.save(car, {});
 
             return promise.then((car) => {
                 expect(car.get("description")).to.be.eql("asdf");
@@ -131,10 +131,10 @@ describe("Bookshelf Repository Raw Fields Test", function () {
         });
 
         it("should save calculated field to DB", () => {
-            var serialNumber = "sN" + Date.now();
-            var car = CarDBMapping.Model.forge({ serial_number: serialNumber });
+            const serialNumber = "sN" + Date.now();
+            const car = CarDBMapping.Model.forge({ serial_number: serialNumber });
 
-            var promise = carRepository.save(car, {});
+            const promise = carRepository.save(car, {});
 
             return promise.then(() => {
                 return CarDBMapping.Collection.forge().query().select();
