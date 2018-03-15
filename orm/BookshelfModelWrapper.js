@@ -10,6 +10,7 @@ class BookshelfModelWrapper {
     constructor(Mapping, Entity) {
         this.Mapping = Mapping;
         this.Entity = Entity || Object;
+        this.modelMap = new WeakMap();
     }
 
     get columnMappings() {
@@ -21,6 +22,10 @@ class BookshelfModelWrapper {
     }
 
     wrap(item) {
+        if (this.modelMap.has(item)) {
+            return this.modelMap.get(item);
+        }
+
         return item && (this.wrapCollectionTypes(item) || this.createWrappedInstance(item));
     }
 
@@ -40,6 +45,7 @@ class BookshelfModelWrapper {
         Object.setPrototypeOf(wrapped, wrappedPrototype);
         this.localizeProperties(wrapped, wrappedPrototype);
 
+        this.modelMap.set(item, wrapped);
         return wrapped;
     }
 
