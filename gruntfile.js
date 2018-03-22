@@ -108,7 +108,6 @@ module.exports = function (grunt) {
         release: {
             options: {
                 npm: true,
-                remote: "--no-verify",
                 tagName: "release-<%= version %>",
                 commitMessage: "[grunt release plugin] release <%= version %>",
                 tagMessage: "[grunt release plugin] version <%= version %>"
