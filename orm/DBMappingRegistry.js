@@ -1,7 +1,7 @@
 "use strict";
 
 const ModelFactory = require("./ModelFactory");
-var instance;
+let instance;
 
 /**
  * Holds all Mappings and converts them to Bookshelf Models
@@ -65,12 +65,12 @@ class DBMappingRegistry {
             throw new Error(name + " is not a registered mapping");
         }
 
-        var factory = this.ModelFactory.context[this.mappings[name].dbContextName];
-        var mapping = Object.create(this.get(name));
+        const factory = this.ModelFactory.context[this.mappings[name].dbContextName];
+        const mapping = Object.create(this.get(name));
 
         if (mapping.relations) {
             mapping.relations.forEach((relation) => {
-                var getCompiled = this.compile.bind(this, relation.references.mapping);
+                const getCompiled = this.compile.bind(this, relation.references.mapping);
 
                 Object.defineProperty(relation.references, "mapping", {
 

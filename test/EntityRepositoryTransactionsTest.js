@@ -20,7 +20,7 @@ describe("Entity Repository Transactions Test", function () {
     const CarDBMapping = registry.compile("CarDBMapping");
 
     this.timeout(1000);
-    var carRepository;
+    let carRepository;
 
     beforeEach(() => {
         carRepository = new CarRepository();
@@ -34,10 +34,10 @@ describe("Entity Repository Transactions Test", function () {
     });
 
     it("should save in transaction", () => {
-        var car = carRepository.newEntity();
-        var options = { transactional: true };
+        const car = carRepository.newEntity();
+        const options = { transactional: true };
 
-        var promise = carRepository.save(car, options);
+        const promise = carRepository.save(car, options);
 
         return promise.then(() => {
             expect("transacting" in options).to.be.eql(true);
@@ -47,12 +47,12 @@ describe("Entity Repository Transactions Test", function () {
     });
 
     it("should save in given transaction", () => {
-        var car = carRepository.newEntity();
+        const car = carRepository.newEntity();
 
         return CarDBMapping.startTransaction((transaction) => {
-            var options = { transacting: transaction };
+            const options = { transacting: transaction };
 
-            var promise = carRepository.save(car, options);
+            const promise = carRepository.save(car, options);
 
             return promise.then(() => {
                 expect(options.transacting).to.be.equal(transaction);
@@ -62,9 +62,9 @@ describe("Entity Repository Transactions Test", function () {
     });
 
     it("should remove in transaction", () => {
-        var car = carRepository.newEntity();
-        var promise = carRepository.save(car);
-        var options = { transactional: true };
+        const car = carRepository.newEntity();
+        const options = { transactional: true };
+        let promise = carRepository.save(car);
 
         promise = promise.then(() => {
             return carRepository.remove(car, options);
@@ -78,13 +78,13 @@ describe("Entity Repository Transactions Test", function () {
     });
 
     it("should remove in given transaction", () => {
-        var car = carRepository.newEntity();
+        const car = carRepository.newEntity();
 
         return carRepository.save(car).then(() => {
             return CarDBMapping.startTransaction((transaction) => {
-                var options = { transactional: transaction };
+                const options = { transactional: transaction };
 
-                var promise = carRepository.remove(car, options);
+                const promise = carRepository.remove(car, options);
 
                 return promise.then(() => {
                     expect("transacting" in options).to.be.eql(true);
@@ -96,12 +96,12 @@ describe("Entity Repository Transactions Test", function () {
     });
 
     it("should not start new transaction if transaction object is provided", () => {
-        var car = carRepository.newEntity();
+        const car = carRepository.newEntity();
 
         return CarDBMapping.startTransaction((transaction) => {
-            var options = { transacting: transaction };
+            const options = { transacting: transaction };
 
-            var promise = carRepository.save(car, options);
+            const promise = carRepository.save(car, options);
 
             return promise.then(() => {
                 expect(CarDBMapping.startTransaction).to.have.callCount(1);
@@ -111,13 +111,13 @@ describe("Entity Repository Transactions Test", function () {
     });
 
     it("should not commit transaction if transaction object is provided", () => {
-        var car = carRepository.newEntity();
+        const car = carRepository.newEntity();
 
         return CarDBMapping.startTransaction((transaction) => {
             sinon.spy(transaction, "commit");
-            var options = { transacting: transaction };
+            const options = { transacting: transaction };
 
-            var promise = carRepository.save(car, options);
+            const promise = carRepository.save(car, options);
 
             return promise.then(() => {
                 expect(transaction.commit).to.not.have.been.callCount(1);
@@ -126,14 +126,14 @@ describe("Entity Repository Transactions Test", function () {
     });
 
     it("should rollback if save failed", () => {
-        var transaction;
-        var car = carRepository.newEntity();
+        let transaction;
+        const car = carRepository.newEntity();
 
-        var promise = CarDBMapping.startTransaction((t) => {
+        const promise = CarDBMapping.startTransaction((t) => {
             transaction = t;
             sinon.spy(transaction, "commit");
             sinon.spy(transaction, "rollback");
-            var options = { transactional: transaction };
+            const options = { transactional: transaction };
             carRepository.repository.save = sinon.stub().returns(Q.reject(new Error()));
 
             return carRepository.save(car, options);
@@ -148,14 +148,14 @@ describe("Entity Repository Transactions Test", function () {
     });
 
     it("should rollback if remove failed", () => {
-        var transaction;
-        var car = carRepository.newEntity();
+        let transaction;
+        const car = carRepository.newEntity();
 
-        var promise = CarDBMapping.startTransaction((t) => {
+        const promise = CarDBMapping.startTransaction((t) => {
             transaction = t;
             sinon.spy(transaction, "commit");
             sinon.spy(transaction, "rollback");
-            var options = { transactional: transaction };
+            const options = { transactional: transaction };
             carRepository.repository.remove = sinon.stub().returns(Q.reject(new Error()));
 
             return carRepository.remove(car, options);
@@ -170,17 +170,17 @@ describe("Entity Repository Transactions Test", function () {
     });
 
     it("should not rollback if save failed and transaction was passed in", () => {
-        var transaction;
-        var car = carRepository.newEntity();
+        let transaction;
+        const car = carRepository.newEntity();
 
         return CarDBMapping.startTransaction((t) => {
             transaction = t;
             sinon.spy(transaction, "commit");
             sinon.spy(transaction, "rollback");
-            var options = { transactional: transaction };
+            const options = { transactional: transaction };
             carRepository.repository.save = sinon.stub().returns(Q.reject(new Error()));
 
-            var promise = carRepository.save(car, options);
+            const promise = carRepository.save(car, options);
 
             return promise.then(() => {
                 expect(promise.isRejected()).to.be.eql(true);
@@ -192,17 +192,17 @@ describe("Entity Repository Transactions Test", function () {
     });
 
     it("should not rollback if remove failed and transaction was passed in", () => {
-        var transaction;
-        var car = carRepository.newEntity();
+        let transaction;
+        const car = carRepository.newEntity();
 
         return CarDBMapping.startTransaction((t) => {
             transaction = t;
             sinon.spy(transaction, "commit");
             sinon.spy(transaction, "rollback");
-            var options = { transactional: transaction };
+            const options = { transactional: transaction };
             carRepository.repository.remove = sinon.stub().returns(Q.reject(new Error()));
 
-            var promise = carRepository.remove(car, options);
+            const promise = carRepository.remove(car, options);
 
             return promise.then(() => {
                 expect(promise.isRejected()).to.be.eql(true);
@@ -215,13 +215,13 @@ describe("Entity Repository Transactions Test", function () {
     });
 
     it("should commit transaction when save succeeded", () => {
-        var transaction;
-        var car = carRepository.newEntity();
+        let transaction;
+        const car = carRepository.newEntity();
 
         return CarDBMapping.startTransaction((t) => {
             transaction = t;
             sinon.spy(transaction, "commit");
-            var options = { transacting: transaction };
+            const options = { transacting: transaction };
 
             return carRepository.save(car, options);
         }).then(() => {
@@ -230,16 +230,16 @@ describe("Entity Repository Transactions Test", function () {
     });
 
     it("should commit transaction when remove succeeded", () => {
-        var transaction;
-        var car = carRepository.newEntity();
+        let transaction;
+        const car = carRepository.newEntity();
 
         return carRepository.save(car).then(() => {
             return CarDBMapping.startTransaction((t) => {
                 transaction = t;
                 sinon.spy(transaction, "commit");
-                var options = { transactional: transaction };
+                const options = { transactional: transaction };
 
-                var promise = carRepository.remove(car, options);
+                const promise = carRepository.remove(car, options);
 
                 return promise.then(() => {
                     expect("transacting" in options).to.be.eql(true);

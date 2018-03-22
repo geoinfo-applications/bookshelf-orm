@@ -20,7 +20,7 @@ describe("Entity Repository Test", function () {
     const CarDBMapping = registry.compile("CarDBMapping");
 
     this.timeout(1000);
-    var carRepository;
+    let carRepository;
 
     beforeEach(() => {
         carRepository = new CarRepository();
@@ -54,10 +54,10 @@ describe("Entity Repository Test", function () {
         });
 
         it("should not include excluded relations", () => {
-            var options = { exclude: ["parts"] };
-            var car = carRepository.newEntity({ name: "", label: "" });
+            const options = { exclude: ["parts"] };
+            const car = carRepository.newEntity({ name: "", label: "" });
             car.addParts(car.newParts({ name: "", label: "" }));
-            var promise = carRepository.save(car);
+            let promise = carRepository.save(car);
 
             promise = promise.then(() => {
                 return carRepository.findAll(options);
@@ -69,10 +69,10 @@ describe("Entity Repository Test", function () {
         });
 
         it("should not include excluded relations", () => {
-            var options = { exclude: ["parts"] };
-            var car = carRepository.newEntity({ name: "", label: "" });
+            const options = { exclude: ["parts"] };
+            const car = carRepository.newEntity({ name: "", label: "" });
             car.addParts(car.newParts({ name: "", label: "" }));
-            var promise = carRepository.save(car);
+            let promise = carRepository.save(car);
 
             promise = promise.then((car) => {
                 return carRepository.findAll([car.id], options);
@@ -97,7 +97,7 @@ describe("Entity Repository Test", function () {
         });
 
         it("should fetch relations deeply", () => {
-            var car = carRepository.newEntity({
+            const car = carRepository.newEntity({
                 parts: [{
                     wheels: [{ index: 0 }, { index: 1 }]
                 }
@@ -115,10 +115,10 @@ describe("Entity Repository Test", function () {
         });
 
         it("should not include excluded relations", () => {
-            var options = { exclude: ["parts"] };
-            var car = carRepository.newEntity({ name: "", label: "" });
+            const options = { exclude: ["parts"] };
+            const car = carRepository.newEntity({ name: "", label: "" });
             car.addParts(car.newParts({ name: "", label: "" }));
-            var promise = carRepository.save(car);
+            let promise = carRepository.save(car);
 
             promise = promise.then((car) => {
                 return carRepository.findOne(car.id, options);
@@ -167,7 +167,7 @@ describe("Entity Repository Test", function () {
     describe("save", () => {
 
         it("should return EntityClass", () => {
-            var item = createCar();
+            const item = createCar();
 
             return carRepository.save(item).then((saved) => {
                 expect(saved).to.be.instanceof(Car);
@@ -175,8 +175,8 @@ describe("Entity Repository Test", function () {
         });
 
         it("should return array of EntityClass", () => {
-            var item1 = createCar();
-            var item2 = createCar();
+            const item1 = createCar();
+            const item2 = createCar();
 
             return carRepository.save([item1, item2]).then((saved) => {
                 expect(saved).to.be.an("array");
@@ -187,7 +187,7 @@ describe("Entity Repository Test", function () {
         });
 
         it("should persist item", () => {
-            var item = createCar();
+            const item = createCar();
 
             return carRepository.save(item).then((item) => {
                 return carRepository.findOne(item.id).then((fetchedItem) => {
@@ -197,8 +197,8 @@ describe("Entity Repository Test", function () {
         });
 
         it("should persist array of item", () => {
-            var item1 = createCar();
-            var item2 = createCar();
+            const item1 = createCar();
+            const item2 = createCar();
 
             return carRepository.save([item1, item2]).then((savedItems) => {
                 carRepository.findAll([savedItems[0].id, savedItems[1].id]).then((items) => {
@@ -209,8 +209,8 @@ describe("Entity Repository Test", function () {
         });
 
         it("should persist related items", () => {
-            var name = "partname" + Date.now();
-            var car = carRepository.newEntity({
+            const name = "partname" + Date.now();
+            const car = carRepository.newEntity({
                 parts: [{
                     name: name,
                     wheels: [{ index: 0 }, { index: 1 }]
@@ -230,10 +230,10 @@ describe("Entity Repository Test", function () {
     describe("hooks", () => {
 
         it("should call afterSave, with saved entity id", () => {
-            var car = carRepository.newEntity();
+            const car = carRepository.newEntity();
             carRepository.afterSave = sinon.stub();
 
-            var promise = carRepository.save(car);
+            const promise = carRepository.save(car);
 
             return promise.then(() => {
                 expect(carRepository.afterSave).to.have.been.calledWith(car.id);
@@ -241,11 +241,11 @@ describe("Entity Repository Test", function () {
         });
 
         it("should call afterSave, with saved array of entity id", () => {
-            var car1 = carRepository.newEntity();
-            var car2 = carRepository.newEntity();
+            const car1 = carRepository.newEntity();
+            const car2 = carRepository.newEntity();
             carRepository.afterSave = sinon.stub();
 
-            var promise = carRepository.save([car1, car2]);
+            const promise = carRepository.save([car1, car2]);
 
             return promise.then(() => {
                 expect(carRepository.afterSave).to.have.callCount(2);
@@ -255,9 +255,9 @@ describe("Entity Repository Test", function () {
         });
 
         it("should call afterRemove, with removed entity id", () => {
-            var car = carRepository.newEntity();
+            const car = carRepository.newEntity();
             carRepository.afterRemove = sinon.stub();
-            var promise = carRepository.save(car);
+            let promise = carRepository.save(car);
 
             promise = promise.then((car) => {
                 return carRepository.remove(car);
@@ -269,9 +269,9 @@ describe("Entity Repository Test", function () {
         });
 
         it("should call afterRemove, with removed id", () => {
-            var car = carRepository.newEntity();
+            const car = carRepository.newEntity();
             carRepository.afterRemove = sinon.stub();
-            var promise = carRepository.save(car);
+            let promise = carRepository.save(car);
 
             promise = promise.then((car) => {
                 return carRepository.remove(car.id);
@@ -283,10 +283,10 @@ describe("Entity Repository Test", function () {
         });
 
         it("should call afterRemove, with removed array of id", () => {
-            var car1 = carRepository.newEntity();
-            var car2 = carRepository.newEntity();
+            const car1 = carRepository.newEntity();
+            const car2 = carRepository.newEntity();
             carRepository.afterRemove = sinon.stub();
-            var promise = carRepository.save([car1, car2]);
+            let promise = carRepository.save([car1, car2]);
 
             promise = promise.then(() => {
                 return carRepository.remove([car1.id, car2.id]);
@@ -300,10 +300,10 @@ describe("Entity Repository Test", function () {
         });
 
         it("should call afterRemove, with removed array of entity", () => {
-            var car1 = carRepository.newEntity();
-            var car2 = carRepository.newEntity();
+            const car1 = carRepository.newEntity();
+            const car2 = carRepository.newEntity();
             carRepository.afterRemove = sinon.stub();
-            var promise = carRepository.save([car1, car2]);
+            let promise = carRepository.save([car1, car2]);
 
             promise = promise.then(() => {
                 return carRepository.remove([car1, car2]);
@@ -317,10 +317,10 @@ describe("Entity Repository Test", function () {
         });
 
         it("should not call afterRemove, if entity was unsaved", () => {
-            var car = carRepository.newEntity();
+            const car = carRepository.newEntity();
             carRepository.afterRemove = sinon.stub();
 
-            var promise = carRepository.remove(car.id);
+            const promise = carRepository.remove(car.id);
 
             return promise.then(() => {
                 expect(carRepository.afterRemove).to.have.callCount(0);
@@ -352,8 +352,8 @@ describe("Entity Repository Test", function () {
         });
 
         it("should drop array of item", () => {
-            var item1 = createCar();
-            var item2 = createCar();
+            const item1 = createCar();
+            const item2 = createCar();
 
             return carRepository.save([item1, item2]).then((items) => {
                 return carRepository.remove(items).then(() => {
@@ -365,8 +365,8 @@ describe("Entity Repository Test", function () {
         });
 
         it("should drop array of items specified by id", () => {
-            var item1 = createCar();
-            var item2 = createCar();
+            const item1 = createCar();
+            const item2 = createCar();
 
             return carRepository.save([item1, item2]).then((items) => {
                 return carRepository.remove([items[0].id, items[1].id]).then(() => {
@@ -378,7 +378,7 @@ describe("Entity Repository Test", function () {
         });
 
         it("should drop unsaved item", () => {
-            var item = createCar();
+            const item = createCar();
 
             return carRepository.remove(item).then(() => {
                 return carRepository.findAll().then((items) => {
@@ -392,9 +392,9 @@ describe("Entity Repository Test", function () {
     describe("wrap", () => {
 
         it("should wrap Model in EntityClass", () => {
-            var item = CarDBMapping.Model.forge({ name: "", label: "", srid: 1 });
+            const item = CarDBMapping.Model.forge({ name: "", label: "", srid: 1 });
 
-            var entity = carRepository.wrapper.wrap(item);
+            const entity = carRepository.wrapper.wrap(item);
 
             expect(entity).to.be.instanceof(Car);
         });
@@ -404,10 +404,10 @@ describe("Entity Repository Test", function () {
     describe("unwrap", () => {
 
         it("should return Model for EntityClass", () => {
-            var item = CarDBMapping.Model.forge({ name: "", label: "", srid: 1 });
-            var entity = carRepository.wrapper.wrap(item);
+            const item = CarDBMapping.Model.forge({ name: "", label: "", srid: 1 });
+            const entity = carRepository.wrapper.wrap(item);
 
-            var unwrappedItem = carRepository.wrapper.unwrap(entity);
+            const unwrappedItem = carRepository.wrapper.unwrap(entity);
 
             expect(item).to.be.equal(unwrappedItem);
         });
@@ -417,22 +417,22 @@ describe("Entity Repository Test", function () {
     describe("newEntity", () => {
 
         it("should return new Entity", () => {
-            var entity = carRepository.newEntity();
+            const entity = carRepository.newEntity();
 
             expect(entity).to.be.instanceof(Car);
         });
 
         it("should return wrapped and initialized Entity", () => {
-            var entity = carRepository.newEntity();
+            const entity = carRepository.newEntity();
 
-            var model = carRepository.wrapper.unwrap(entity);
+            const model = carRepository.wrapper.unwrap(entity);
             model.set("name", "name " + Date.now());
 
             expect(entity.name).to.be.eql(model.get("name"));
         });
 
         it("should call constructor with given arguments", () => {
-            var args = [{}, "a", 0];
+            const args = [{}, "a", 0];
             carRepository.Entity = function () {
                 expect(args).to.be.eql([].slice.call(arguments));
             };
@@ -450,24 +450,24 @@ describe("Entity Repository Test", function () {
         });
 
         it("should call model.forge with given argument", () => {
-            var forgeArgument = {
+            const forgeArgument = {
                 name: "thename" + Date.now(),
                 modelName: "theLabel" + Date.now()
             };
 
-            var entity = carRepository.newEntity(forgeArgument);
+            const entity = carRepository.newEntity(forgeArgument);
 
             expect(carRepository.wrapper.unwrap(entity).get("name")).to.be.eql(forgeArgument.name);
             expect(carRepository.wrapper.unwrap(entity).get("model_name")).to.be.eql(forgeArgument.modelName);
         });
 
         it("should reconstruct relations", () => {
-            var entity = carRepository.newEntity({
+            const entity = carRepository.newEntity({
                 name: "tablename",
                 parts: [{ name: "attr1name" }, { name: "attr2name" }]
             });
 
-            var item = carRepository.wrapper.unwrap(entity);
+            const item = carRepository.wrapper.unwrap(entity);
 
             expect(item.get("parts")).to.be.eql(void 0);
             expect(item.related("relation_parts").length).to.be.eql(2);
@@ -480,9 +480,9 @@ describe("Entity Repository Test", function () {
     describe("findAllWhere", () => {
 
         it("should fetch entities matched by query", () => {
-            var car1 = carRepository.newEntity({ name: "abc" });
-            var car2 = carRepository.newEntity({ name: "efg" });
-            var promise = carRepository.save([car1, car2]);
+            const car1 = carRepository.newEntity({ name: "abc" });
+            const car2 = carRepository.newEntity({ name: "efg" });
+            let promise = carRepository.save([car1, car2]);
 
             promise = promise.then(() => {
                 return carRepository.findAllWhere((q) => {
@@ -497,8 +497,8 @@ describe("Entity Repository Test", function () {
         });
 
         it("should wrap entity", () => {
-            var car1 = carRepository.newEntity({ name: "abc" });
-            var promise = carRepository.save(car1);
+            const car1 = carRepository.newEntity({ name: "abc" });
+            let promise = carRepository.save(car1);
 
             promise = promise.then(() => {
                 return carRepository.findAllWhere((q) => {
@@ -513,7 +513,7 @@ describe("Entity Repository Test", function () {
 
         it("should return an empty array if no item was found", () => {
 
-            var promise = carRepository.findAllWhere((q) => {
+            const promise = carRepository.findAllWhere((q) => {
                 q.where("name", "abc");
             });
 
@@ -524,10 +524,10 @@ describe("Entity Repository Test", function () {
         });
 
         it("should not include excluded relations", () => {
-            var options = { exclude: ["parts"] };
-            var car = carRepository.newEntity({ name: "name", label: "abc" });
+            const options = { exclude: ["parts"] };
+            const car = carRepository.newEntity({ name: "name", label: "abc" });
             car.addParts(car.newParts({ name: "", label: "" }));
-            var promise = carRepository.save(car);
+            let promise = carRepository.save(car);
 
             promise = promise.then(() => {
                 return carRepository.findAllWhere((q) => {
@@ -545,9 +545,9 @@ describe("Entity Repository Test", function () {
     describe("findWhere", () => {
 
         it("should fetch entities matched by query", () => {
-            var car1 = carRepository.newEntity({ name: "abc" });
-            var car2 = carRepository.newEntity({ name: "efg" });
-            var promise = carRepository.save([car1, car2]);
+            const car1 = carRepository.newEntity({ name: "abc" });
+            const car2 = carRepository.newEntity({ name: "efg" });
+            let promise = carRepository.save([car1, car2]);
 
             promise = promise.then(() => {
                 return carRepository.findWhere((q) => {
@@ -561,8 +561,8 @@ describe("Entity Repository Test", function () {
         });
 
         it("should wrap entity", () => {
-            var car1 = carRepository.newEntity({ name: "abc" });
-            var promise = carRepository.save(car1);
+            const car1 = carRepository.newEntity({ name: "abc" });
+            let promise = carRepository.save(car1);
 
             promise = promise.then(() => {
                 return carRepository.findWhere((q) => {
@@ -577,7 +577,7 @@ describe("Entity Repository Test", function () {
 
         it("should return null if no item was found", () => {
 
-            var promise = carRepository.findWhere((q) => {
+            const promise = carRepository.findWhere((q) => {
                 q.where("name", "abc");
             });
 
@@ -587,9 +587,9 @@ describe("Entity Repository Test", function () {
         });
 
         it("should return last match if multiple items were found", () => {
-            var car1 = carRepository.newEntity({ name: "abc" });
-            var car2 = carRepository.newEntity({ name: "efg" });
-            var promise = carRepository.save([car1, car2]);
+            const car1 = carRepository.newEntity({ name: "abc" });
+            const car2 = carRepository.newEntity({ name: "efg" });
+            let promise = carRepository.save([car1, car2]);
 
             promise = promise.then(() => {
                 return carRepository.findWhere((q) => {
@@ -604,10 +604,10 @@ describe("Entity Repository Test", function () {
         });
 
         it("should not include excluded relations", () => {
-            var options = { exclude: ["parts"] };
-            var car = carRepository.newEntity({ name: "name", label: "abc" });
+            const options = { exclude: ["parts"] };
+            const car = carRepository.newEntity({ name: "name", label: "abc" });
             car.addParts(car.newParts({ name: "", label: "" }));
-            var promise = carRepository.save(car);
+            let promise = carRepository.save(car);
 
             promise = promise.then(() => {
                 return carRepository.findWhere((q) => {
@@ -622,8 +622,7 @@ describe("Entity Repository Test", function () {
     });
 
     describe("findByConditions", () => {
-        var car1, car2, car3, car1Entity, car2Entity, car3Entity;
-
+        let car1, car2, car3, car1Entity, car2Entity, car3Entity;
 
         beforeEach(() => {
 
@@ -637,14 +636,14 @@ describe("Entity Repository Test", function () {
         });
 
         it("should return object with all properties", () => {
-            var condition = [
+            const condition = [
                 {
                     name: "name",
                     query: (q) => q.where("car.name", car1.name)
                 }
             ];
 
-            var promise = carRepository.save([car1Entity, car2Entity]).then(() => {
+            const promise = carRepository.save([car1Entity, car2Entity]).then(() => {
                 return carRepository.findByConditions(condition, void 0);
             });
 
@@ -660,14 +659,14 @@ describe("Entity Repository Test", function () {
         });
 
         it("should return item by condition name", () => {
-            var condition = [
+            const condition = [
                 {
                     name: "name",
                     query: (q) => q.where("car.name", car1.name)
                 }
             ];
 
-            var promise = carRepository.save([car1Entity, car2Entity]).then(() => {
+            const promise = carRepository.save([car1Entity, car2Entity]).then(() => {
                 return carRepository.findByConditions(condition, void 0);
             });
 
@@ -678,12 +677,12 @@ describe("Entity Repository Test", function () {
         });
 
         it("should return item by condition in mapped relation table", () => {
-            var condition = [{
+            const condition = [{
                 name: "wheels",
                 query: (q) => q.where("engine.serial_number", "asdf789")
             }];
 
-            var promise = carRepository.save([car1Entity, car2Entity]).then(() => {
+            const promise = carRepository.save([car1Entity, car2Entity]).then(() => {
                 return carRepository.findByConditions(condition, void 0);
             });
 
@@ -694,7 +693,7 @@ describe("Entity Repository Test", function () {
         });
 
         it("should return items that satisfy all conditions (AND clause)", () => {
-            var condition = [
+            const condition = [
                 {
                     name: "wheels",
                     query: (q) => q.where("index", 1)
@@ -705,7 +704,7 @@ describe("Entity Repository Test", function () {
                 }
             ];
 
-            var promise = carRepository.save([car1Entity, car2Entity, car3Entity]).then(() => {
+            const promise = carRepository.save([car1Entity, car2Entity, car3Entity]).then(() => {
                 return carRepository.findByConditions(condition, void 0);
             });
 
@@ -716,16 +715,16 @@ describe("Entity Repository Test", function () {
         });
 
         it("should exclude relations from options.exclude", () => {
-            var condition = [
+            const condition = [
                 {
                     name: "name",
                     query: (q) => q.where("car.name", car1.name)
                 }
             ];
 
-            var options = { exclude: ["parts"] };
+            const options = { exclude: ["parts"] };
 
-            var promise = carRepository.save([car1Entity, car2Entity]).then(() => {
+            const promise = carRepository.save([car1Entity, car2Entity]).then(() => {
                 return carRepository.findByConditions(condition, options);
             });
 
@@ -737,7 +736,7 @@ describe("Entity Repository Test", function () {
         });
     });
 
-    var tableIndex = 0;
+    let tableIndex = 0;
 
     function createCar() {
         return carRepository.newEntity({ name: "car" + tableIndex++ });

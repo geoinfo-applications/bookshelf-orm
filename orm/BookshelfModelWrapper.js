@@ -10,6 +10,7 @@ class BookshelfModelWrapper {
     constructor(Mapping, Entity) {
         this.Mapping = Mapping;
         this.Entity = Entity || Object;
+        this.modelMap = new WeakMap();
     }
 
     get columnMappings() {
@@ -21,6 +22,10 @@ class BookshelfModelWrapper {
     }
 
     wrap(item) {
+        if (this.modelMap.has(item)) {
+            return this.modelMap.get(item);
+        }
+
         return item && (this.wrapCollectionTypes(item) || this.createWrappedInstance(item));
     }
 
@@ -33,13 +38,14 @@ class BookshelfModelWrapper {
     }
 
     createWrappedInstance(item) {
-        var wrapped = new this.Entity();
+        const wrapped = new this.Entity();
         this.addItemGetter(wrapped, item);
 
-        var wrappedPrototype = this.getWrappedPrototype();
+        const wrappedPrototype = this.getWrappedPrototype();
         Object.setPrototypeOf(wrapped, wrappedPrototype);
         this.localizeProperties(wrapped, wrappedPrototype);
 
+        this.modelMap.set(item, wrapped);
         return wrapped;
     }
 
@@ -61,7 +67,7 @@ class BookshelfModelWrapper {
     }
 
     createWrappedPrototype() {
-        var wrappedPrototype = Object.create(this.Entity.prototype);
+        const wrappedPrototype = Object.create(this.Entity.prototype);
         this.defineProperties(wrappedPrototype);
 
         Object.defineProperty(wrappedPrototype, "toJSON", {
@@ -86,7 +92,7 @@ class BookshelfModelWrapper {
     defineColumnProperty(wrapped, property) {
         Object.defineProperty(wrapped, StringUtils.snakeToCamelCase(property.name), {
             get() {
-                var value = this.item.get(property.name);
+                const value = this.item.get(property.name);
                 return (property.type === "json" && _.isString(value)) ? JSON.parse(value) : value;
             },
             set(value) {
@@ -102,8 +108,8 @@ class BookshelfModelWrapper {
 
     defineRelationalProperties(wrapped) {
         this.Mapping.relations.forEach((relation) => {
-            var wrapper = new BookshelfModelWrapper(relation.references.mapping, relation.references.type);
-            var bookshelfModelRelation = new BookshelfModelRelation(wrapped, wrapper, relation);
+            const wrapper = new BookshelfModelWrapper(relation.references.mapping, relation.references.type);
+            const bookshelfModelRelation = new BookshelfModelRelation(wrapped, wrapper, relation);
 
             wrapped["new" + StringUtils.firstLetterUp(relation.name)] = (model) => wrapper.createNew(model);
 
@@ -130,7 +136,7 @@ class BookshelfModelWrapper {
         }
 
         this.columnMappings.filter((property) => property.type === "json").forEach((property) => {
-            var propertyName = StringUtils.snakeToCamelCase(property.name);
+            const propertyName = StringUtils.snakeToCamelCase(property.name);
             entity[propertyName] = entity[propertyName];
         });
 
@@ -138,8 +144,8 @@ class BookshelfModelWrapper {
     }
 
     createNew(flatModel) {
-        var item = this.Mapping.Model.forge();
-        var wrapped = this.wrap(item);
+        const item = this.Mapping.Model.forge();
+        const wrapped = this.wrap(item);
 
         this.applyFlatModel(wrapped, flatModel);
 
@@ -148,7 +154,7 @@ class BookshelfModelWrapper {
 
     applyFlatModel(wrapped, flatModel) {
         if (flatModel) {
-            var relationNames = this.Mapping.relationNames.filter((name) => name in flatModel);
+            const relationNames = this.Mapping.relationNames.filter((name) => name in flatModel);
 
             this.applyFlatModelValues(wrapped, _.omit(flatModel, relationNames));
             this.applyFlatModelRelations(wrapped, flatModel, relationNames);
@@ -156,7 +162,7 @@ class BookshelfModelWrapper {
     }
 
     applyFlatModelValues(wrapped, model) {
-        for (var name of this.columnNames) {
+        for (let name of this.columnNames) {
             name = StringUtils.snakeToCamelCase(name);
             if (name in model) {
                 wrapped[name] = model[name];
@@ -170,8 +176,8 @@ class BookshelfModelWrapper {
         }
 
         relationNames.forEach((relationName) => {
-            var relatedData = model[relationName];
-            var pascalCasedName = StringUtils.firstLetterUp(relationName);
+            const relatedData = model[relationName];
+            const pascalCasedName = StringUtils.firstLetterUp(relationName);
 
             if (Array.isArray(relatedData)) {
                 wrapped["add" + pascalCasedName](relatedData.map((data) => {

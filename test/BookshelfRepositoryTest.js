@@ -20,7 +20,7 @@ describe("Bookshelf Repository Test", function () {
     const PartDBMapping = registry.compile("PartDBMapping");
 
     this.timeout(1000);
-    var carRepository;
+    let carRepository;
 
     beforeEach(() => {
         carRepository = new CarRepository().repository;
@@ -142,7 +142,7 @@ describe("Bookshelf Repository Test", function () {
     });
 
     describe("discriminator", () => {
-        var engineRepository, veyronEngineRepository, engine1, engine2;
+        let engineRepository, veyronEngineRepository, engine1, engine2;
 
         beforeEach(() => {
             engineRepository = new EngineRepository();
@@ -176,7 +176,7 @@ describe("Bookshelf Repository Test", function () {
     });
 
     describe("null discriminator", () => {
-        var ownerRepository, namelessOwnerRepository, owner, namelessOwner;
+        let ownerRepository, namelessOwnerRepository, owner, namelessOwner;
 
         beforeEach(() => {
             ownerRepository = new OwnerRepository();
@@ -210,8 +210,8 @@ describe("Bookshelf Repository Test", function () {
     });
 
     describe("related discriminator", () => {
-        var veyronPartRepository, engineRepository;
-        var engine, veyronEngine, veyronPart;
+        let veyronPartRepository, engineRepository;
+        let engine, veyronEngine, veyronPart;
 
         beforeEach(() => {
             veyronPartRepository = new VeyronPartRepository();
@@ -228,7 +228,7 @@ describe("Bookshelf Repository Test", function () {
 
         it("should findOne related item if discriminator matches", () => {
             veyronPart.engine = veyronEngine;
-            var promise = veyronPartRepository.save(veyronPart);
+            let promise = veyronPartRepository.save(veyronPart);
 
             promise = promise.then(() => veyronPartRepository.findOne(veyronPart.id));
 
@@ -239,7 +239,7 @@ describe("Bookshelf Repository Test", function () {
 
         it("should not findOne related item if discriminator does not match", () => {
             veyronPart.engine = engine;
-            var promise = veyronPartRepository.save(veyronPart);
+            let promise = veyronPartRepository.save(veyronPart);
 
             promise = promise.then(() => veyronPartRepository.findOne(veyronPart.id));
 
@@ -250,7 +250,7 @@ describe("Bookshelf Repository Test", function () {
 
         it("should findAll related item if discriminator matches", () => {
             veyronPart.engine = veyronEngine;
-            var promise = veyronPartRepository.save(veyronPart);
+            let promise = veyronPartRepository.save(veyronPart);
 
             promise = promise.then(() => veyronPartRepository.findAll());
 
@@ -261,7 +261,7 @@ describe("Bookshelf Repository Test", function () {
 
         it("should not findAll related item if discriminator does not match", () => {
             veyronPart.engine = engine;
-            var promise = veyronPartRepository.save(veyronPart);
+            let promise = veyronPartRepository.save(veyronPart);
 
             promise = promise.then(() => veyronPartRepository.findAll());
 
@@ -274,7 +274,7 @@ describe("Bookshelf Repository Test", function () {
 
     });
 
-    var tableIndex = 0;
+    let tableIndex = 0;
 
     function createCar() {
         return CarDBMapping.Model.forge({ name: "car" + tableIndex++ }).save();

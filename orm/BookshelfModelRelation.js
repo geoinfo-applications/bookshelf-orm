@@ -9,18 +9,12 @@ class BookshelfModelRelation {
         this.wrapped = wrapped;
         this.wrapper = wrapper;
         this.relation = relation;
-    }
-
-    get relationName() {
-        return "relation_" + this.relation.name;
-    }
-
-    get pascalCasedName() {
-        return StringUtils.firstLetterUp(this.relation.name);
+        this.relationName = "relation_" + this.relation.name;
+        this.pascalCasedName = StringUtils.firstLetterUp(this.relation.name);
     }
 
     hasMany() {
-        var self = this;
+        const self = this;
 
         this.defineProperty({
             get() {
@@ -38,7 +32,7 @@ class BookshelfModelRelation {
     }
 
     belongsTo() {
-        var self = this;
+        const self = this;
 
         this.defineProperty({
             get() {
@@ -51,7 +45,7 @@ class BookshelfModelRelation {
     }
 
     hasOne() {
-        var self = this;
+        const self = this;
 
         this.defineProperty({
             get() {
@@ -73,13 +67,13 @@ class BookshelfModelRelation {
     }
 
     oneToOneGetter(item) {
-        var related = item.relations[this.relationName];
+        const related = item.relations[this.relationName];
         return related ? this.wrapper.wrap(related) : null;
     }
 
     oneToOneSetter(item, entity) {
-        var unwrapped = null;
-        var id = null;
+        let unwrapped = null;
+        let id = null;
 
         if (entity) {
             unwrapped = this.wrapper.unwrap(entity);
@@ -91,7 +85,7 @@ class BookshelfModelRelation {
     }
 
     oneToManySetter(item, entity) {
-        var unwrapped = null;
+        let unwrapped = null;
 
         if (entity) {
             unwrapped = this.wrapper.unwrap(entity);
@@ -106,7 +100,7 @@ class BookshelfModelRelation {
             return entity.map(this.addRelated.bind(this, item));
         }
 
-        var model = this.wrapper.unwrap(entity);
+        const model = this.wrapper.unwrap(entity);
         model.set(this.relation.references.mappedBy, item.id);
         item.related(this.relationName).add(model);
     }
@@ -116,7 +110,7 @@ class BookshelfModelRelation {
             return entity.map(this.removeRelated.bind(this, item));
         }
 
-        var model = this.wrapper.unwrap(entity);
+        const model = this.wrapper.unwrap(entity);
         model.set(this.relation.references.mappedBy, null);
         item.related(this.relationName).remove(model);
     }

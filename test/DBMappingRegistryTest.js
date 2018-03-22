@@ -8,14 +8,14 @@ describe("DB-Mapping Registry Test", () => {
     const ModelFactory = require("../orm/ModelFactory");
     const DBMappingRegistry = require("../orm/DBMappingRegistry");
 
-    var registry;
+    let registry;
 
     beforeEach(() => {
         registry = new DBMappingRegistry(ModelFactory);
     });
 
     it("should hold registered Mapping", () => {
-        var testModel = {};
+        const testModel = {};
 
         registry.register("model", "dbContext", testModel);
 
@@ -33,7 +33,7 @@ describe("DB-Mapping Registry Test", () => {
                     };
                 }
             };
-            var fooMapping = {
+            const fooMapping = {
                 tableName: "footbl",
                 relations: [{
                     name: "bar",
@@ -42,7 +42,7 @@ describe("DB-Mapping Registry Test", () => {
                     }
                 }]
             };
-            var barMapping = {
+            const barMapping = {
                 tableName: "bartbl",
                 relations: [{
                     name: "foo",
@@ -55,8 +55,8 @@ describe("DB-Mapping Registry Test", () => {
             registry.register("FooMapping", "ctx", fooMapping);
             registry.register("BarMapping", "ctx", barMapping);
 
-            var foo = registry.compile("FooMapping");
-            var bar = registry.compile("BarMapping");
+            const foo = registry.compile("FooMapping");
+            const bar = registry.compile("BarMapping");
 
             expect(foo.relations[0].references.mapping).to.be.equal(bar);
             expect(bar.relations[0].references.mapping).to.be.equal(foo);
@@ -69,7 +69,7 @@ describe("DB-Mapping Registry Test", () => {
     });
 
     it("should throw if two mappings with same name are registered", () => {
-        var testModel = {};
+        const testModel = {};
 
         registry.register("model", "dbContext", testModel);
 

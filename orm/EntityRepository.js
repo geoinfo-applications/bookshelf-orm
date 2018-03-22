@@ -146,7 +146,7 @@ class EntityRepository {
         return this.executeTransactional(() => {
             return this.repository.remove(entity, options);
         }, options).tap(() => {
-            var id  = _.isObject(entity) ? entity[this.Mapping.identifiedBy] : +entity;
+            const id  = _.isObject(entity) ? entity[this.Mapping.identifiedBy] : +entity;
 
             if (id) {
                 this.afterRemove(id);

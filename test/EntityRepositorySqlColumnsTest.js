@@ -14,7 +14,7 @@ describe("Entity Repository SQL Columns Test", function () {
     require("./db/mappings");
 
     this.timeout(1000);
-    var carRepository, car, serialNumber;
+    let carRepository, car, serialNumber;
 
     beforeEach(() => {
         carRepository = new CarRepository();
@@ -145,7 +145,7 @@ describe("Entity Repository SQL Columns Test", function () {
     });
 
     it("should include included columns", () => {
-        var options = {
+        const options = {
             columns: ["name", "description"]
         };
 
@@ -153,7 +153,7 @@ describe("Entity Repository SQL Columns Test", function () {
         let undefinedKeys = ["modelName", "serialNumber", "owner", "parkingSpace"];
         let allKeys = _.union(definedKeys, undefinedKeys);
 
-        var promise = carRepository.save(car);
+        let promise = carRepository.save(car);
 
         promise = promise.then(() => {
             return carRepository.findWhere((q) => {

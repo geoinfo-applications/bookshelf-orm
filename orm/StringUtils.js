@@ -4,8 +4,8 @@
 class StringUtils {
 
     static snakeToCamelCase(string) {
-        var out = "";
-        for (var i = 0; i < string.length; i++) {
+        let out = "";
+        for (let i = 0; i < string.length; i++) {
             if (string[i] === "_") {
                 i = i + 1;
                 out = out + string[i].toUpperCase();

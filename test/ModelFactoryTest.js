@@ -13,10 +13,10 @@ describe("Model Factory Test", function () {
     describe("Context Registration", () => {
 
         it("should hold context for key", () => {
-            var context = {};
+            const context = {};
 
             ModelFactory.registerContext("thatContext", context);
-            var instance = ModelFactory.context.thatContext;
+            const instance = ModelFactory.context.thatContext;
 
             expect(instance.dbContext).to.be.equal(context);
         });
@@ -24,7 +24,7 @@ describe("Model Factory Test", function () {
     });
 
     describe("createModel", () => {
-        var factory;
+        let factory;
 
         beforeEach(function () {
             ModelFactory.registerContext("testContext", connection.bookshelf);
@@ -32,36 +32,36 @@ describe("Model Factory Test", function () {
         });
 
         it("should return Model", () => {
-            var mapping = factory.createModel({});
+            const mapping = factory.createModel({});
 
             expect("Model" in mapping).to.be.eql(true);
         });
 
         it("should return Collection", () => {
-            var mapping = factory.createModel({});
+            const mapping = factory.createModel({});
 
             expect("Collection" in mapping).to.be.eql(true);
         });
 
         it("should return columns", () => {
-            var columns = [];
+            const columns = [];
 
-            var mapping = factory.createModel({ columns: columns });
+            const mapping = factory.createModel({ columns: columns });
 
             expect(mapping.columns).to.be.eql(columns);
 
         });
 
         it("should return relations", () => {
-            var relations = [];
+            const relations = [];
 
-            var mapping = factory.createModel({ relations: relations });
+            const mapping = factory.createModel({ relations: relations });
 
             expect(mapping.relations).to.be.eql(relations);
         });
 
         it("should initialize relations on Model", () => {
-            var mapping = factory.createModel({
+            const mapping = factory.createModel({
                 relations: [{
                     name: "theName",
                     type: "hasOne",
@@ -76,13 +76,13 @@ describe("Model Factory Test", function () {
                 }]
             });
 
-            var model = mapping.Model.forge();
+            const model = mapping.Model.forge();
 
             expect("relation_theName" in model).to.be.eql(true);
         });
 
         it("should throw if relation type doesn't exits", () => {
-            var mapping = factory.createModel({
+            const mapping = factory.createModel({
                 relations: [{
                     name: "theName",
                     type: "someSillyType",
@@ -94,7 +94,7 @@ describe("Model Factory Test", function () {
                 }]
             });
 
-            var prototype = mapping.Model.prototype;
+            const prototype = mapping.Model.prototype;
 
             expect(prototype.relation_theName.bind(prototype)).to.throw(/Relation of type 'someSillyType' doesn't exist/);
         });

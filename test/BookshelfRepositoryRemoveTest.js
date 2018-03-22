@@ -20,7 +20,7 @@ describe("Bookshelf Repository Remove Test", function () {
     const ParkingSpaceDBMapping = registry.compile("ParkingSpaceDBMapping");
 
     this.timeout(1000);
-    var carRepository;
+    let carRepository;
 
     beforeEach(() => {
         carRepository = new CarRepository().repository;
@@ -37,7 +37,7 @@ describe("Bookshelf Repository Remove Test", function () {
     });
 
     it("should drop unsaved item", () => {
-        var item =  CarDBMapping.Model.forge({ name: "car" + tableIndex++ });
+        const item =  CarDBMapping.Model.forge({ name: "car" + tableIndex++ });
 
         return carRepository.remove(item, {}).then(() => {
             return carRepository.findAll(null, {}).then((items) => {
@@ -57,8 +57,8 @@ describe("Bookshelf Repository Remove Test", function () {
     });
 
     it("should drop array of item", () => {
-        var item1 = CarDBMapping.Model.forge({ name: "item1" });
-        var item2 = CarDBMapping.Model.forge({ name: "item2" });
+        const item1 = CarDBMapping.Model.forge({ name: "item1" });
+        const item2 = CarDBMapping.Model.forge({ name: "item2" });
 
         return carRepository.save([item1, item2], {}).then(() => {
             return carRepository.remove([item1, item2], {}).then(() => {
@@ -70,8 +70,8 @@ describe("Bookshelf Repository Remove Test", function () {
     });
 
     it("should drop array of items specified by id", () => {
-        var item1 = CarDBMapping.Model.forge({ name: "item1" });
-        var item2 = CarDBMapping.Model.forge({ name: "item2" });
+        const item1 = CarDBMapping.Model.forge({ name: "item1" });
+        const item2 = CarDBMapping.Model.forge({ name: "item2" });
 
         return carRepository.save([item1, item2], {}).then(() => {
             return carRepository.remove([item1.id, item2.id], {}).then(() => {
@@ -83,9 +83,9 @@ describe("Bookshelf Repository Remove Test", function () {
     });
 
     it("should drop Collection of item", () => {
-        var item1 = CarDBMapping.Model.forge({ name: "item1" });
-        var item2 = CarDBMapping.Model.forge({ name: "item2" });
-        var collection = CarDBMapping.Collection.forge([item1, item2]);
+        const item1 = CarDBMapping.Model.forge({ name: "item1" });
+        const item2 = CarDBMapping.Model.forge({ name: "item2" });
+        const collection = CarDBMapping.Collection.forge([item1, item2]);
 
         return carRepository.save(collection, {}).then(() => {
             return carRepository.remove(collection, {}).then(() => {
@@ -98,7 +98,7 @@ describe("Bookshelf Repository Remove Test", function () {
 
     it("should drop related items if cascade is set", () => {
         return createCar().then((item) => {
-            var part = PartDBMapping.Model.forge({
+            const part = PartDBMapping.Model.forge({
                 car_id: item.id,
                 name: "name" + Date.now()
             });
@@ -118,7 +118,7 @@ describe("Bookshelf Repository Remove Test", function () {
 
     it("should drop related hasOne items", () => {
         return createCar().then((item) => {
-            var parkingSpace = ParkingSpaceDBMapping.Model.forge({
+            const parkingSpace = ParkingSpaceDBMapping.Model.forge({
                 car_id: item.id,
                 name: "name" + Date.now()
             });
@@ -136,9 +136,9 @@ describe("Bookshelf Repository Remove Test", function () {
 
     it("should cascade drop deeply", () => {
         carRepository = new CarRepository();
-        var engineRepository = new EngineRepository();
-        var serialNumber = "SN" + Date.now();
-        var car = carRepository.newEntity({ parts: [{ wheels: [{ index: 1 }], engine: { serialNumber: serialNumber } }] });
+        const engineRepository = new EngineRepository();
+        const serialNumber = "SN" + Date.now();
+        const car = carRepository.newEntity({ parts: [{ wheels: [{ index: 1 }], engine: { serialNumber: serialNumber } }] });
 
         return carRepository.save(car).then((car) => {
             return engineRepository.findAll(null, {}).then((engines) => {
@@ -155,9 +155,9 @@ describe("Bookshelf Repository Remove Test", function () {
 
     it("should cascade drop nodes in graph", () => {
         carRepository = new CarRepository();
-        var engineRepository = new EngineRepository();
-        var serialNumber = "SN" + Date.now();
-        var car = carRepository.newEntity({ parts: [{ wheels: [{ index: 1 }], engine: { serialNumber: serialNumber } }] });
+        const engineRepository = new EngineRepository();
+        const serialNumber = "SN" + Date.now();
+        const car = carRepository.newEntity({ parts: [{ wheels: [{ index: 1 }], engine: { serialNumber: serialNumber } }] });
 
         return carRepository.save(car).then((car) => {
             car.removeParts(car.parts);
@@ -171,8 +171,8 @@ describe("Bookshelf Repository Remove Test", function () {
     });
 
     it("should not drop non-cascaded entities", () => {
-        var ownerRepository = new OwnerRepository();
-        var owner = ownerRepository.newEntity();
+        const ownerRepository = new OwnerRepository();
+        const owner = ownerRepository.newEntity();
 
         return ownerRepository.save(owner).then((owner) => {
             createCar().then((car) => {
@@ -188,7 +188,7 @@ describe("Bookshelf Repository Remove Test", function () {
         });
     });
 
-    var tableIndex = 0;
+    let tableIndex = 0;
 
     function createCar() {
         return CarDBMapping.Model.forge({ name: "car" + tableIndex++ }).save();
