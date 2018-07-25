@@ -152,7 +152,7 @@ class BookshelfRepository {
             return this.invokeOnCollection(item, this.remove, options);
         }
 
-        const id = item instanceof this.Mapping.Model ? item[this.idColumnName] : item;
+        const id = item instanceof this.Mapping.Model ? item.get(this.idColumnName) : item;
         const operation = new RemoveOperation(this.Mapping, options);
 
         return this.findOne(id, options).then((item) => item && operation.remove(item));
