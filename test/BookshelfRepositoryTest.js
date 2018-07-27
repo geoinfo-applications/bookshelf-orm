@@ -11,6 +11,7 @@ describe("Bookshelf Repository Test", function () {
     const VeyronPartRepository = require("./db/mocks").VeyronPartRepository;
     const OwnerRepository = require("./db/mocks").OwnerRepository;
     const NamelessOwnerRepository = require("./db/mocks").NamelessOwnerRepository;
+    const PersonRepository = require("./db/mocks").PersonRepository;
 
     require("./db/connection");
     const registry = require("./db/registry");
@@ -18,6 +19,7 @@ describe("Bookshelf Repository Test", function () {
 
     const CarDBMapping = registry.compile("CarDBMapping");
     const PartDBMapping = registry.compile("PartDBMapping");
+    const PersonDBMapping = registry.compile("PersonDBMapping");
 
     this.timeout(1000);
     let carRepository;
@@ -136,6 +138,26 @@ describe("Bookshelf Repository Test", function () {
         it("should return null if item with given id doesn't exist", () => {
             return carRepository.findOne(-1, {}).then((fetchedModel) => {
                 expect(fetchedModel).to.be.eql(null);
+            });
+        });
+
+    });
+
+    describe("remove", () => {
+
+        let personRepository;
+
+        beforeEach(() => {
+            personRepository = new PersonRepository().repository;
+        });
+
+        it("should drop item which is identified by a column other than id", () => {
+            return PersonDBMapping.Model.forge({ name: "Gandalf" }).save(null, { method: "insert" }).then((item) => {
+                return personRepository.remove(item, {}).then(() => {
+                    return personRepository.findOne("Gandalf", {}).then((item) => {
+                        expect(item).to.be.eql(null);
+                    });
+                });
             });
         });
 

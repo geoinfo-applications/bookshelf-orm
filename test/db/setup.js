@@ -102,8 +102,13 @@ module.exports = function () {
         table.text("description");
     });
 
+    const person = knex.schema.createTable("datadictionary.person", (table) => {
+        table.string("name");
+        table.integer("age");
+    });
+
     return Q.all([car, part, wheel, engine, owner, make, outlet, injection, parkingSpace,
-        planet, moon, atmosphere, composition
+        planet, moon, atmosphere, composition, person
     ]);
 };
 

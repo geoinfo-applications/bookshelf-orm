@@ -43,6 +43,10 @@ const MoonRepository = createRepository(Moon, "Moon");
 const AtmosphereRepository = createRepository(Atmosphere, "Atmosphere");
 const CompositionRepository = createRepository(Composition, "Composition");
 
+
+class Person {}
+const PersonRepository = createRepository(Person, "Person");
+
 module.exports = {
     Car,
     Part,
@@ -73,5 +77,9 @@ module.exports = {
     PlanetRepository,
     MoonRepository,
     AtmosphereRepository,
-    CompositionRepository
+    CompositionRepository,
+
+
+    Person,
+    PersonRepository
 };

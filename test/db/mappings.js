@@ -265,3 +265,9 @@ registry.register("CompositionDBMapping", "test", {
     onDelete: { is_deleted: true },
     discriminator: { is_deleted: false }
 });
+
+registry.register("PersonDBMapping", "test", {
+    tableName: "datadictionary.person",
+    identifiedBy: "name",
+    columns: ["name", "age"]
+});
