@@ -17,7 +17,8 @@ module.exports = () => {
         "datadictionary.planet",
         "datadictionary.moon",
         "datadictionary.atmosphere",
-        "datadictionary.composition"
+        "datadictionary.composition",
+        "datadictionary.person"
     ];
 
     return Q.all(tables.map((table) => knex.schema.dropTable(table)));
