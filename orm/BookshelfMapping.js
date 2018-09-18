@@ -139,6 +139,10 @@ class BookshelfMapping {
         return query;
     }
 
+    raw(...args) {
+        return this.dbContext.knex.raw(...args);
+    }
+
 }
 
 module.exports = BookshelfMapping;
