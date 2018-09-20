@@ -1,6 +1,6 @@
 {
   "name": "@geolib/bookshelf-orm",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "OR-Mapping based on Bookshelf.js",
   "main": "index.js",
   "repository": {
