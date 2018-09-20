@@ -107,6 +107,7 @@ module.exports = function (grunt) {
 
         release: {
             options: {
+                additionalFiles: ["package-lock.json"],
                 npm: true,
                 tagName: "release-<%= version %>",
                 commitMessage: "[grunt release plugin] release <%= version %>",
