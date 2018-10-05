@@ -2,7 +2,7 @@
 
 
 describe("Bookshelf Repository Orphan Removal Test", function () {
-    // jshint maxstatements:false
+    /* eslint max-statements: 0, camelcase: 0 */
 
     const chai = require("chai");
     const expect = chai.expect;

@@ -2,7 +2,7 @@
 
 
 describe("Bookshelf Repository Test", function () {
-    // jshint maxstatements:false
+    /* eslint max-statements: 0, camelcase: 0 */
 
     const expect = require("chai").expect;
     const CarRepository = require("./db/mocks").CarRepository;

@@ -2,7 +2,7 @@
 
 
 describe("Bookshelf Model Wrapper Test", function () {
-    // jshint maxstatements:false
+    /* eslint max-statements: 0, camelcase: 0 */
 
     const Q = require("q");
     const chai = require("chai");

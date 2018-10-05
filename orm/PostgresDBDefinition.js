@@ -18,7 +18,9 @@ class PostgresDBDefinition {
 
             this.ModelFactory.registerContext(name, bookshelf(knex({
                 client: "pg",
-                connection: _.extend({ application_name: this.applicationName }, this.config.db[name]),
+                connection: _.extend({
+                    application_name: this.applicationName // eslint-disable-line camelcase
+                }, this.config.db[name]),
                 debug: this.config.debug || false,
                 pool: _.extend({
                     min: 0,

@@ -2,12 +2,11 @@
 
 
 describe("Bookshelf Repository Save Test", function () {
-    // jshint maxstatements:false
+    /* eslint max-statements: 0, camelcase: 0 */
 
     const expect = require("chai").expect;
 
     const CarRepository = require("./db/mocks").CarRepository;
-    const EngineRepository = require("./db/mocks").EngineRepository;
     const PartRepository = require("./db/mocks").PartRepository;
 
     require("./db/connection");
@@ -20,11 +19,10 @@ describe("Bookshelf Repository Save Test", function () {
     const WheelDBMapping = registry.compile("WheelDBMapping");
 
     this.timeout(1000);
-    let carRepository, engineRepository;
+    let carRepository;
 
     beforeEach(() => {
         carRepository = new CarRepository().repository;
-        engineRepository = new EngineRepository();
     });
 
     it("should persist item", () => {

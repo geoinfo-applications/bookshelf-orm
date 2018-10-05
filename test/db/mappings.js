@@ -6,7 +6,7 @@ const Part = require("./mocks").Part;
 const Owner = require("./mocks").Owner;
 const ParkingSpace = require("./mocks").ParkingSpace;
 const registry = require("./registry");
-
+/* eslint camelcase: 0 */
 
 registry.register("CarDBMapping", "test", {
     tableName: "datadictionary.car",

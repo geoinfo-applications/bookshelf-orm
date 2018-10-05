@@ -2,7 +2,7 @@
 
 
 describe("Bookshelf Relations Test", function () {
-    // jshint maxstatements:false
+    /* eslint max-statements: 0 */
     const _ = require("underscore");
     const expect = require("chai").expect;
     const BookshelfRelations = require("../orm/BookshelfRelations");

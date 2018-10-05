@@ -4,7 +4,7 @@ const registry = require("./registry");
 const EntityRepository = require("../../orm/EntityRepository");
 
 function createRepository(Entity, name) {
-    return class extends EntityRepository{
+    return class extends EntityRepository {
         constructor() {
             super(Entity, registry.compile(name + "DBMapping"));
         }

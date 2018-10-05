@@ -2,7 +2,7 @@
 
 
 describe("Entity Repository SQL Columns Test", function () {
-    // jshint maxstatements:false
+    /* eslint max-statements: 0 */
 
     const _ = require("underscore");
     const chai = require("chai");

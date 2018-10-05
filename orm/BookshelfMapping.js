@@ -121,7 +121,7 @@ class BookshelfMapping {
     }
 
     createQuery(item, options = required("options")) {
-        // jshint maxcomplexity:false
+        /* eslint complexity: 0 */
         const query = this.dbContext.knex(this.tableName);
 
         if (item) {
