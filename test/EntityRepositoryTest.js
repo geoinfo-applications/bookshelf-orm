@@ -2,7 +2,7 @@
 
 
 describe("Entity Repository Test", function () {
-    // jshint maxstatements:false
+    /* eslint max-statements: 0 */
 
     const chai = require("chai");
     const expect = chai.expect;

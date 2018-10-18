@@ -2,7 +2,7 @@
 
 
 describe("Entity Repository Transactions Test", function () {
-    // jshint maxstatements:false
+    /* eslint max-statements: 0 */
 
     const Q = require("q");
     const chai = require("chai");

@@ -2,7 +2,7 @@
 
 
 describe("Model Factory Test", function () {
-    // jshint maxstatements:false
+    /* eslint max-statements: 0 */
 
     const expect = require("chai").expect;
     const ModelFactory = require("../orm/ModelFactory");

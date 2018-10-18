@@ -1,6 +1,7 @@
 "use strict";
 
 module.exports = function (grunt) {
+    /* eslint camelcase: 0 */
     require("time-grunt")(grunt);
 
     var jsFiles = [
@@ -12,20 +13,8 @@ module.exports = function (grunt) {
 
     grunt.initConfig({
 
-        jshint: {
-            all: {
-                src: jsFiles
-            },
-            options: {
-                jshintrc: true
-            }
-        },
-
-        jscs: {
-            src: jsFiles,
-            options: {
-                config: "./.jscsrc"
-            }
+        eslint: {
+            src: jsFiles
         },
 
         plato: {
@@ -119,7 +108,7 @@ module.exports = function (grunt) {
 
     require("load-grunt-tasks")(grunt);
 
-    grunt.registerTask("code-check", ["jshint", "jscs", "todo"]);
+    grunt.registerTask("code-check", ["eslint", "todo"]);
     grunt.registerTask("update", ["npm-install", "clean", "david"]);
     grunt.registerTask("update-development", ["env:unit_test", "update", "env:development"]);
     grunt.registerTask("test", ["env:unit_test", "code-check", "mochaTest"]);

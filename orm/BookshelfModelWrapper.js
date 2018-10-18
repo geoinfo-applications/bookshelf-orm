@@ -137,7 +137,7 @@ class BookshelfModelWrapper {
 
         this.columnMappings.filter((property) => property.type === "json").forEach((property) => {
             const propertyName = StringUtils.snakeToCamelCase(property.name);
-            entity[propertyName] = entity[propertyName];
+            entity[propertyName] = entity[propertyName]; // eslint-disable-line no-self-assign
         });
 
         return entity.item;
