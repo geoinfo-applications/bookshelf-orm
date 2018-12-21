@@ -269,5 +269,8 @@ registry.register("CompositionDBMapping", "test", {
 registry.register("PersonDBMapping", "test", {
     tableName: "datadictionary.person",
     identifiedBy: "name",
-    columns: ["name", "age"]
+    columns: ["name", "age", {
+        name: "things",
+        type: "json"
+    }]
 });

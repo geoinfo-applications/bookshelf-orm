@@ -97,7 +97,7 @@ class BookshelfModelWrapper {
             },
             set(value) {
                 if (property.type === "json") {
-                    value = JSON.stringify(value);
+                    value = value === null ? null : JSON.stringify(value);
                 }
 
                 this.item.set(property.name, value);

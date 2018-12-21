@@ -138,7 +138,7 @@ class BookshelfRepository {
                     const value = node.attributes[column.name];
 
                     if (!_.isString(value)) {
-                        node.attributes[column.name] = JSON.stringify(value);
+                        node.attributes[column.name] = value === null ? null : JSON.stringify(value);
                     }
                 });
             }
