@@ -162,6 +162,15 @@ describe("Entity Repository Soft Delete Test", function () {
             });
         });
 
+        it("should return new revisionId after save", async () => {
+            const oldRevisionId = jupiter.revisionId;
+
+            const newJupiter = await planetRepository.save(jupiter);
+
+            expect(newJupiter.revisionId).to.be.a("number");
+            expect(newJupiter.revisionId).to.not.be.eql(oldRevisionId);
+        });
+
         it("should only load newest state of 'hasMany' entity", () => {
             europa.distanceToPlanet = 670900;
 
