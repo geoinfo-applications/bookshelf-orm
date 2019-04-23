@@ -105,6 +105,7 @@ module.exports = function () {
     const person = knex.schema.createTable("datadictionary.person", (table) => {
         table.string("name");
         table.integer("age");
+        table.json("things");
     });
 
     return Q.all([car, part, wheel, engine, owner, make, outlet, injection, parkingSpace,

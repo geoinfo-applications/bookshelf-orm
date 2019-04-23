@@ -163,6 +163,25 @@ describe("Bookshelf Repository Test", function () {
 
     });
 
+    describe("stringifyJson", () => {
+        let personRepository;
+        let personRepositoryBookshelf;
+
+        beforeEach(() => {
+            personRepository = new PersonRepository();
+            personRepositoryBookshelf = new PersonRepository().repository;
+        });
+
+        it("shouldn't stringify null values", () => {
+            const entity = personRepository.newEntity({ name: "Gandalf", things: null });
+            const unwrapedEntity = personRepository.wrapper.unwrap(entity);
+            personRepositoryBookshelf.stringifyJson(unwrapedEntity);
+
+            expect(unwrapedEntity.attributes.things).to.be.eql(null);
+        });
+
+    });
+
     describe("discriminator", () => {
         let engineRepository, veyronEngineRepository, engine1, engine2;
 

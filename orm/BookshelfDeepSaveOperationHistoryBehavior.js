@@ -32,8 +32,8 @@ class BookshelfDeepSaveOperationHistoryBehavior {
             Object.defineProperty(options.query._single, "returning", RETURNING_PROPERTY_DESCRIPTOR);
         });
 
-        item.once("saved", () => {
-            item.set(item.parse(item.id));
+        item.once("saved", (item, [attributes]) => {
+            item.set(attributes);
         });
     }
 

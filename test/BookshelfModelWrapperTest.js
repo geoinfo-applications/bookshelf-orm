@@ -449,6 +449,34 @@ describe("Bookshelf Model Wrapper Test", function () {
 
     });
 
+    describe("defineColumnProperty", () => {
+
+        it("shouldn't stringify null values", () => {
+            const mapping = {
+                columnMappings: [{
+                    name: "thing",
+                    type: "json"
+                }],
+                relations: [],
+                Collection: sinon.stub(),
+                identifiedBy: "id"
+            };
+            const wrapper = new BookshelfModelWrapper(mapping, sinon.stub().returnsThis());
+            const item = {
+                get: () => {
+                    return this._value;
+                },
+                set: (name, value) => {
+                    this._value = value;
+                }
+            };
+            const entity = wrapper.wrap(item);
+            entity.thing = null;
+            expect(item.get()).to.be.eql(null);
+        });
+
+    });
+
     function createCar() {
         return carWrapper.wrap(CarDBMapping.Model.forge({ name: "", model_name: "" }));
     }
