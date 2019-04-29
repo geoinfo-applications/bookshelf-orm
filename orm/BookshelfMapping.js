@@ -66,7 +66,7 @@ class BookshelfMapping {
         const { revisionId, parentId } = this.historyColumns;
 
         return (q) => {
-            q.whereNotIn(revisionId, (q) => q.from(this.tableName).whereNotNull(parentId).andWhere(discriminator).select(parentId));
+            q.whereNotIn(revisionId, (q) => q.from(this.tableName).whereNotNull(parentId).select(parentId));
             q.andWhere(discriminator);
         };
     }

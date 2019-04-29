@@ -243,7 +243,30 @@ describe("Entity Repository Soft Delete Test", function () {
                 expect(rows.filter((r) => r.id === jupitersCompositionId)[1].description).to.be.eql("Gas giant");
             });
         });
-
     });
 
+    describe("Combination of soft delete and history", () => {
+        beforeEach(() => {
+            jupiter.distanceToStar = 1;
+            return planetRepository.save(jupiter).then((result) => {
+                jupiter = result;
+                jupiter.distanceToStar = 2;
+                return planetRepository.save(jupiter);
+            });
+        });
+
+        it("should check initial conditions", () => {
+            return planetRepository.findOne(jupiter.id).then((jupiter) => {
+                expect(jupiter.distanceToStar).to.be.eql(2);
+            });
+        });
+
+        it("should not return a planet even if it has multiple revisions", () => {
+            const findAfterDeletePromise = planetRepository.remove(jupiter.id).then(() => planetRepository.findAll());
+            return findAfterDeletePromise.then((result) => {
+                expect(result).to.be.an("array");
+                expect(result.length).to.be.eql(0);
+            });
+        });
+    });
 });
