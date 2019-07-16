@@ -160,15 +160,14 @@ class BookshelfRelations {
         return this.relationNamesDeep.map((relationName) => {
             const relationNamePath = relationName.split(".");
             const prefixedRelationName = relationNamePath.map((name) => "relation_" + name).join(".");
-            const mapping = relationNamePath.reduce(this.lookupReferencedMapping, this.Mapping);
-
+            const mapping = relationNamePath.reduce(BookshelfRelations.lookupReferencedMapping, this.Mapping);
+            const mainRelationName = relationNamePath[0];
 
             const relatedQuery = Object.create(null);
             relatedQuery[prefixedRelationName] = (query) => {
-                if (mapping.discriminator) {
+                if (mapping.discriminator && !this.skipDiscriminator(mapping, mainRelationName)) {
                     query.where(mapping.discriminator);
                 }
-
                 const regularColumns = mapping.qualifiedRegularColumnNames;
                 const sqlColumns = this.getRawColumnSelectStatements(mapping.readableSqlColumns);
                 const columns = regularColumns.concat(sqlColumns);
@@ -180,10 +179,18 @@ class BookshelfRelations {
         });
     }
 
-    lookupReferencedMapping(mapping, name) {
-        return _.findWhere(mapping.relations, { name: name }).references.mapping;
+    static lookupReferencedMapping(mapping, name) {
+        return BookshelfRelations.lookupReference(mapping, name).references.mapping;
     }
 
+    static lookupReference(mapping, name) {
+        return mapping.relations.find((relation) => relation.name === name);
+    }
+
+    skipDiscriminator(referencedMapping, relationName) {
+        const lookupReference = BookshelfRelations.lookupReference(this.Mapping, relationName);
+        return lookupReference && lookupReference.references.identifies && lookupReference.references.identifies !== referencedMapping.identifiedBy;
+    }
 }
 
 module.exports = BookshelfRelations;

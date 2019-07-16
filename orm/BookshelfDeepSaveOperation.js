@@ -73,8 +73,9 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
         }));
     }
 
-    saveWithKeyOnRelated(item, keyName, operation, related) {
-        related.set(keyName, item.id);
+    saveWithKeyOnRelated(item, keyName, operation, related, relation) {
+        const columnName = relation.references.identifies || "id";
+        related.set(keyName, item.attributes[columnName]);
         return operation.save(related);
     }
 
@@ -158,7 +159,8 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
     }
 
     saveRelatedKey(item, fkColumn, operation, related, relation) {
-        const entityId = item.id;
+        const columnName = relation.references.identifies || "id";
+        const entityId = item.attributes[columnName];
         related.set(fkColumn, entityId);
         const query = relation.references.mapping.createQuery(null, this.options).where(related.idAttribute, related[related.idAttribute]);
         this.addTransactionToQuery(query);

@@ -44,7 +44,7 @@ class BookshelfRepository {
         const collection = this.Mapping.Collection.forge().query((q) => {
             condition.call(this, q);
 
-            if (this.Mapping.discriminator) {
+            if (this.Mapping.discriminator && !this.omitDiscriminator(options)) {
                 q.andWhere(this.Mapping.discriminator);
             }
 
@@ -60,7 +60,7 @@ class BookshelfRepository {
             q.whereIn(this.Mapping.identifiedBy, (subQuery) => {
                 subQuery.select(`${this.Mapping.tableName}.${this.Mapping.identifiedBy}`).from(this.Mapping.tableName);
 
-                if (this.Mapping.discriminator) {
+                if (this.Mapping.discriminator && !this.omitDiscriminator(options)) {
                     subQuery.andWhere(this.Mapping.discriminator);
                 }
 
@@ -110,7 +110,7 @@ class BookshelfRepository {
         const query = this.createIdQuery(id);
         const model = this.Mapping.Model.forge(query);
 
-        if (this.Mapping.discriminator) {
+        if (this.Mapping.discriminator && !this.omitDiscriminator(options)) {
             model.where(this.Mapping.discriminator);
         }
 
@@ -183,6 +183,9 @@ class BookshelfRepository {
         return query;
     }
 
+    omitDiscriminator(options) {
+        return options && options.omitDiscriminator;
+    }
 }
 
 module.exports = BookshelfRepository;

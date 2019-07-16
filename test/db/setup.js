@@ -3,6 +3,7 @@
 const Q = require("q");
 const knex = require("./connection").knex;
 
+/* eslint max-statements: 0 */
 module.exports = function () {
 
     // car sample
@@ -108,8 +109,66 @@ module.exports = function () {
         table.json("things");
     });
 
+    const horn = knex.schema.createTable("datadictionary.horn", (table) => {
+        table.specificType("id", "serial");
+        table.increments("revision_id");
+        table.integer("parent_id");
+        table.string("type");
+        table.specificType("death", "timestamp").default(null);
+    });
+
+    const unicorn = knex.schema.createTable("datadictionary.unicorn", (table) => {
+        table.specificType("id", "serial");
+        table.increments("revision_id");
+        table.integer("parent_id");
+        table.string("name");
+        table.specificType("death", "timestamp").default(null);
+        table.integer("horn_type_id");
+    });
+
+    const instrument = knex.schema.createTable("datadictionary.instrument", (table) => {
+        table.specificType("id", "serial");
+        table.increments("revision_id");
+        table.integer("parent_id");
+        table.string("player");
+        table.string("instrument");
+        table.specificType("death", "timestamp").default(null);
+    });
+
+    const album = knex.schema.createTable("datadictionary.album", (table) => {
+        table.specificType("id", "serial");
+        table.increments("revision_id");
+        table.integer("parent_id");
+        table.string("name");
+        table.specificType("death", "timestamp").default(null);
+    });
+
+    const albumInstrument = knex.schema.createTable("datadictionary.album_instrument", (table) => {
+        table.specificType("id", "serial");
+        table.integer("album_id");
+        table.integer("instrument_id");
+    });
+
+
+    const cat = knex.schema.createTable("datadictionary.cat", (table) => {
+        table.specificType("id", "serial");
+        table.increments("revision_id");
+        table.integer("parent_id");
+        table.string("name");
+        table.specificType("death", "timestamp").default(null);
+    });
+
+    const kitten = knex.schema.createTable("datadictionary.kitten", (table) => {
+        table.specificType("id", "serial");
+        table.increments("revision_id");
+        table.integer("cat_id");
+        table.integer("parent_id");
+        table.string("name");
+        table.specificType("death", "timestamp").default(null);
+    });
+
     return Q.all([car, part, wheel, engine, owner, make, outlet, injection, parkingSpace,
-        planet, moon, atmosphere, composition, person
+        planet, moon, atmosphere, composition, person, horn, unicorn, instrument, album, albumInstrument, cat, kitten
     ]);
 };
 
