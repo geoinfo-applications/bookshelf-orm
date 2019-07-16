@@ -116,7 +116,8 @@ class BookshelfMapping {
                 throw new Error("Relation of type '" + relation.type + "' doesn't exist");
             }
 
-            return this[relation.type](relation.references.mapping.Model, fkName);
+            const referencedColumnName = relation.references.identifies || relation.references.mapping.Model.identifiedBy;
+            return this[relation.type](relation.references.mapping.Model, fkName, referencedColumnName);
         };
     }
 

@@ -22,7 +22,7 @@
   },
   "engine-strict": true,
   "dependencies": {
-    "bookshelf": "^0.9.5",
+    "bookshelf": "^0.10.3",
     "grunt": "^1.0.3",
     "grunt-cli": "^1.2.0",
     "grunt-contrib-clean": "^2.0.0",

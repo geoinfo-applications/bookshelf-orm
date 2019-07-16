@@ -72,12 +72,13 @@ class BookshelfModelRelation {
     }
 
     oneToOneSetter(item, entity) {
+        const referencedColumn = this.relation.references.identifies || "id";
         let unwrapped = null;
         let id = null;
 
         if (entity) {
             unwrapped = this.wrapper.unwrap(entity);
-            id = unwrapped.id;
+            id = unwrapped.attributes[referencedColumn];
         }
 
         item.set(this.relation.references.mappedBy, id);

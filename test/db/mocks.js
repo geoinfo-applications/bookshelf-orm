@@ -47,6 +47,23 @@ const CompositionRepository = createRepository(Composition, "Composition");
 class Person {}
 const PersonRepository = createRepository(Person, "Person");
 
+class Horn {}
+class Unicorn {}
+const HornRepository = createRepository(Horn, "Horn");
+const UnicornRepository = createRepository(Unicorn, "Unicorn");
+
+class Instrument {}
+class Album {}
+const InstrumentRepository = createRepository(Instrument, "Instrument");
+const AlbumRepository = createRepository(Album, "Album");
+
+class Cat {}
+class Kitten {}
+const CatRepository = createRepository(Cat, "Cat");
+const KittenRepository = createRepository(Kitten, "Kitten");
+const SampleCatRepository = createRepository(Cat, "SampleCat");
+const SampleKittenRepository = createRepository(Kitten, "SampleKitten");
+
 module.exports = {
     Car,
     Part,
@@ -81,5 +98,23 @@ module.exports = {
 
 
     Person,
-    PersonRepository
+    PersonRepository,
+
+    Horn,
+    HornRepository,
+    Unicorn,
+    UnicornRepository,
+
+    Instrument,
+    InstrumentRepository,
+    Album,
+    AlbumRepository,
+
+    Cat,
+    CatRepository,
+    Kitten,
+    KittenRepository,
+
+    SampleCatRepository,
+    SampleKittenRepository
 };

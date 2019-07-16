@@ -274,3 +274,123 @@ registry.register("PersonDBMapping", "test", {
         type: "json"
     }]
 });
+
+registry.register("HornDBMapping", "test", {
+    tableName: "datadictionary.horn",
+    columns: ["id", "type", "revision_id", "parent_id", "death"],
+    keepHistory: true,
+    onDelete: { death: new Date() },
+    discriminator: (q) => q.whereNull("death")
+});
+
+registry.register("UnicornDBMapping", "test", {
+    tableName: "datadictionary.unicorn",
+    columns: ["id", "name", "revision_id", "parent_id", "death"],
+    keepHistory: true,
+    onDelete: { death: new Date() },
+    discriminator: (q) => q.whereNull("death"),
+    relations: [{
+        name: "hornType",
+        type: "belongsTo",
+        references: {
+            mapping: "HornDBMapping",
+            mappedBy: "horn_type_id",
+            identifies: "revision_id"
+        }
+    }]
+});
+
+registry.register("InstrumentDBMapping", "test", {
+    tableName: "datadictionary.instrument",
+    columns: ["id", "player", "instrument", "revision_id", "parent_id", "death"],
+    keepHistory: true,
+    onDelete: { death: new Date() },
+    discriminator: (q) => q.whereNull("death")
+});
+
+registry.register("AlbumDBMapping", "test", {
+    tableName: "datadictionary.album",
+    columns: ["id", "name", "revision_id", "parent_id", "death"],
+    keepHistory: true,
+    onDelete: { death: new Date() },
+    discriminator: (q) => q.whereNull("death"),
+    relations: [{
+        name: "instruments",
+        type: "hasMany",
+        references: {
+            mapping: "AlbumInstumentDBMapping",
+            mappedBy: "album_id",
+            identifies: "revision_id",
+            cascade: true,
+            orphanRemoval: true
+        }
+    }]
+});
+
+registry.register("AlbumInstumentDBMapping", "test", {
+    tableName: "datadictionary.album_instrument",
+    columns: ["id", "album_id"],
+    relations: [{
+        name: "instrument",
+        type: "belongsTo",
+        references: {
+            mapping: "InstrumentDBMapping",
+            mappedBy: "instrument_id",
+            identifies: "revision_id"
+        }
+    }]
+});
+
+registry.register("KittenDBMapping", "test", {
+    tableName: "datadictionary.kitten",
+    columns: ["id", "name", "cat_id", "revision_id", "parent_id", "death"],
+    keepHistory: true,
+    onDelete: { death: new Date() },
+    discriminator: (q) => q.whereNull("death")
+});
+
+registry.register("CatDBMapping", "test", {
+    tableName: "datadictionary.cat",
+    columns: ["id", "name", "revision_id", "parent_id", "death"],
+    keepHistory: true,
+    onDelete: { death: new Date() },
+    discriminator: (q) => q.whereNull("death"),
+    relations: [{
+        name: "kittens",
+        type: "hasMany",
+        references: {
+            mapping: "KittenDBMapping",
+            mappedBy: "cat_id",
+            identifies: "revision_id",
+            cascade: true,
+            orphanRemoval: true
+        }
+    }]
+});
+
+registry.register("SampleKittenDBMapping", "test", {
+    tableName: "datadictionary.kitten",
+    columns: ["id", "name", "revision_id", "parent_id", "death"],
+    keepHistory: true,
+    onDelete: { death: new Date() },
+    discriminator: (q) => q.whereNull("death")
+});
+
+registry.register("SampleCatDBMapping", "test", {
+    tableName: "datadictionary.cat",
+    columns: ["id", "name", "revision_id", "parent_id", "death"],
+    keepHistory: true,
+    onDelete: { death: new Date() },
+    discriminator: (q) => q.whereNull("death"),
+    relations: [{
+        name: "kitten",
+        type: "hasOne",
+        references: {
+            mapping: "SampleKittenDBMapping",
+            mappedBy: "cat_id",
+            identifies: "revision_id",
+            cascade: true,
+            orphanRemoval: true
+        }
+    }]
+});

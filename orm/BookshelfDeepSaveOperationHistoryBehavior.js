@@ -15,7 +15,7 @@ class BookshelfDeepSaveOperationHistoryBehavior {
 
     executeSaveOperation(item, mapping, options = required("options")) {
         const { revisionId, parentId } = mapping.historyColumns;
-        item.set(parentId, item.get(revisionId));
+        item.set(parentId, item.get(revisionId) || null);
         item.unset(revisionId);
 
         this.addListenersForFixingReturningStatement(item);
