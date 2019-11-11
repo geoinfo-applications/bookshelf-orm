@@ -94,7 +94,7 @@ class CarRepository extends EntityRepository {
 These are the basics, for extended documentation see [EntityRepository class documentation](./EntityRepository.html) and 
 the [DBMappingRegistry documentation](./DBMappingRegistry.html).
 
-### Cascading save and remove operations Mapping
+### Cascading save and remove operations
 Only operating on one table is no fun. This OR-Mapper supports loading, saving and removing deep relations:
 ```javascript
 registry.register("CarDBMapping", "test", {

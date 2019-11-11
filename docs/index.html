@@ -122,8 +122,26 @@ const myCar = await carRepository.newEntity();
 myCar.name = &quot;Little red corvette&quot;;
 await carRepository.save(myCar);
 
-await carRepository.remove(myCar);</code></pre><p>These are the basics, for extended documentation see <a href="./EntityRepository.html">EntityRepository class documentation</a> and<br>the <a href="./DBMappingRegistry.html">DBMappingRegistry documentation</a>.</p>
-<h3>Cascading save and remove operations Mapping</h3><p>Only operating on one table is no fun. This OR-Mapper supports loading, saving and removing deep relations:</p>
+await carRepository.remove(myCar);</code></pre><p>Specialized queries can be added to the repository, in order to encapsulate all DB access.<br>The query callback argument is a preinitialized <a href="http://www.knexjs.org">knex</a> instance:</p>
+<pre class="prettyprint source lang-javascript"><code>class CarRepository extends EntityRepository {
+
+    // ...
+
+    async findAllCorvettes() {
+        return this.findAllWhere((q) => q.where(&quot;name&quot;, &quot;like&quot;, &quot;%corvette%&quot;))
+    }
+
+}</code></pre><p>A more direct option to access the DB with knex is <code>Mapping.createQuery</code>:</p>
+<pre class="prettyprint source lang-javascript"><code>class CarRepository extends EntityRepository {
+
+    // ...
+
+    async findAllCorvettes() {
+        return this.Mapping.createQuery().where(&quot;name&quot;, &quot;like&quot;, &quot;%corvette%&quot;).select(&quot;name&quot;);
+    }
+
+}</code></pre><p>These are the basics, for extended documentation see <a href="./EntityRepository.html">EntityRepository class documentation</a> and<br>the <a href="./DBMappingRegistry.html">DBMappingRegistry documentation</a>.</p>
+<h3>Cascading save and remove operations</h3><p>Only operating on one table is no fun. This OR-Mapper supports loading, saving and removing deep relations:</p>
 <pre class="prettyprint source lang-javascript"><code>registry.register(&quot;CarDBMapping&quot;, &quot;test&quot;, {
     tableName: &quot;myschema.car&quot;,
     columns: [&quot;id&quot;, &quot;name&quot;, &quot;model_name&quot;],
@@ -174,7 +192,15 @@ console.log(car.parts); // [{ id: 2, carId: 1, name: &quot;Engine&quot; }]</code
         name: &quot;things&quot;,
         type: &quot;json&quot;
     }]
-});</code></pre><h3>Circular references</h3><p>Not supported. Generally advised against.</p></article>
+});</code></pre><h3>Transactions</h3><p>Generally all operations should support transactions for safety.<br>Most of the time Transaction Control should be left to the &quot;client&quot;, meaning outside of the repository.<br>This is supported by passing <code>{ transactional: true }</code> in options or wrapping multiple calls in <code>repository.executeTransactional</code>:</p>
+<pre class="prettyprint source lang-javascript"><code>await carRepository.save(myCar, { transactional: true });</code></pre><p>Or the more complex case</p>
+<pre class="prettyprint source lang-javascript"><code>const options = { transactional: true };
+await carRepository.executeTransactional(() => {
+    await carRepository.save(myCar, { transactional: true });
+    myCar.name = &quot;new name&quot;;
+    await carRepository.save(myCar, { transactional: true });
+}, options);</code></pre><p>If anything in the call fails, be it DB or an error in the code, the transaction will be rolled back.<br>Once all promises resolve, the transaction will be committed.</p>
+<h3>Circular references</h3><p>Not supported. Generally advised against.</p></article>
     </section>
 
 
