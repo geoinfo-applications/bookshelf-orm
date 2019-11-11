@@ -86,13 +86,95 @@
 
 
     <section class="readme-section">
-        <article><h1>Bookshelf ORM</h1><p>An OR-Mapping tool which features Bookshelf, the Repository Pattern an Persistence Ignorance</p>
-<h2>Start here:</h2><ul>
-<li><a href="./EntityRepository.html">EntityRepository</a></li>
-<li><a href="./DBMappingRegistry.html">DBMappingRegistry</a></li>
-<li><a href="./BookshelfMapping.html">BookshelfMapping</a></li>
-</ul>
-<h2>Examples</h2><h3>Basic usage</h3><h3>Cascading save and remove operations Mapping</h3><h3>JSON and SQL Columns</h3><h3>Circular references</h3><p>Not supported. Generally advised against.</p></article>
+        <article><h1>Bookshelf ORM</h1><p>An OR-Mapping tool which features Bookshelf, the Repository Pattern an Persistence Ignorance.</p>
+<h2>Basics</h2><p>One of the key goals of this OR-Mapper is Persistence Ignorance, meaning, have clear separation from Business Logic code and infrastructure code.<br>For this reason, description of DB columns and relations is separate from Domain Model classes. This is the <strong>Mapping</strong>.<br>The idea of the accompanying <strong>Repository</strong> is to encapsulate all DB related operations and specialized queries.    </p>
+<h2>Examples</h2><p>First, you need an instance of the MappingRegistry:</p>
+<pre class="prettyprint source lang-javascript"><code>const { DBMappingRegistry } = require(&quot;@geoinfo/bookshelf-orm&quot;);
+const mappingRegistry = DBMappingRegistry.getInstance();</code></pre><p>In this registry, you register your DB-Tables and fields:</p>
+<pre class="prettyprint source lang-javascript"><code>registry.register(&quot;CarDBMapping&quot;, &quot;test&quot;, {
+    tableName: &quot;myschema.car&quot;,
+    columns: [&quot;id&quot;, &quot;name&quot;, &quot;model_name&quot;]
+});</code></pre><p>Since we want to separate Mapping and DB related stuff from Domain Objects, you might want to create a separate Class to hold additional logic.<br>This class does not have to &quot;know&quot; anything about the OR-Mapper, and does <strong>not</strong> have to extend a certain base class. You are free to do whatever you wish:</p>
+<pre class="prettyprint source lang-javascript"><code>class Car {
+
+    accelecate() {
+        // ...
+    }
+
+}</code></pre><p>In order to fetch and save entities, you need a Repository. Here you have to extend the base implementation <code>EntityRepository</code> and specify your domain class (or <code>Object</code> if you don't need one):</p>
+<pre class="prettyprint source lang-javascript"><code>const { EntityRepository, DBMappingRegistry } = require(&quot;@geoinfo/bookshelf-orm&quot;);
+const mappingRegistry = DBMappingRegistry.getInstance();
+
+class CarRepository extends EntityRepository {
+
+    constructor() {
+        super(Car, mappingRegistry.compile(&quot;CarDBMapping&quot;))
+    }
+
+}
+</code></pre><h3>Basic usage</h3><p>The base repository implementation has a number of useful methods, mainly simple CRUD.</p>
+<pre class="prettyprint source lang-javascript"><code>const carRepository = new CarRepository();
+
+const allCars = await carRepository.findAll();
+const carNumberOne = await carRepository.findOne(3);
+
+const myCar = await carRepository.newEntity();
+myCar.name = &quot;Little red corvette&quot;;
+await carRepository.save(myCar);
+
+await carRepository.remove(myCar);</code></pre><p>These are the basics, for extended documentation see <a href="./EntityRepository.html">EntityRepository class documentation</a> and<br>the <a href="./DBMappingRegistry.html">DBMappingRegistry documentation</a>.</p>
+<h3>Cascading save and remove operations Mapping</h3><p>Only operating on one table is no fun. This OR-Mapper supports loading, saving and removing deep relations:</p>
+<pre class="prettyprint source lang-javascript"><code>registry.register(&quot;CarDBMapping&quot;, &quot;test&quot;, {
+    tableName: &quot;myschema.car&quot;,
+    columns: [&quot;id&quot;, &quot;name&quot;, &quot;model_name&quot;],
+
+    relations: [{
+        name: &quot;parts&quot;,
+        type: &quot;hasMany&quot;,
+        references: {
+            type: Part,
+            mapping: &quot;PartDBMapping&quot;,
+            mappedBy: &quot;car_id&quot;,
+            orphanRemoval: true,
+            cascade: true
+        }
+    }]
+});
+
+
+registry.register(&quot;PartDBMapping&quot;, &quot;test&quot;, {
+    tableName: &quot;datadictionary.part&quot;,
+    columns: [&quot;id&quot;, &quot;name&quot;]
+});</code></pre><p>Anything thats modified in parts will now be saved to DB and loaded when a car is fetched.<br>Helpermethods to instantiate and add/remove relations are injected to the domain class:</p>
+<pre class="prettyprint source lang-javascript"><code>const part = car.newParts();
+part.name = &quot;Engine&quot;;
+car.addParts(part);
+
+console.log(car.parts); // [{ id: 2, carId: 1, name: &quot;Engine&quot; }]</code></pre><p>Changes to the original array are <em>not</em> reflected in the internal state.<br>It can safely be forwarded to services etc. and is a regular JS array without magic.</p>
+<p>This kind of mapping, <code>&quot;hasMany&quot;</code>, is the most complicated. There are two other types: <code>&quot;hasOne&quot;</code> and <code>&quot;belongsTo&quot;</code>.<br>Both of them reference only one object, and can be modified with simple assignment.<br>The difference between the two is, in which table the foreign key is located.<br>A <code>&quot;hasOne&quot;</code> mapping expects the FK column in the <em>related</em> table,<br>while <code>&quot;belongsTo&quot;</code> assumes the FK to be in the table where the relation is started on. </p>
+<p>For more about mappings see <a href="./BookshelfMapping.html">BookshelfMapping documentation</a></p>
+<h3>SQL Columns</h3><p>Sometimes it is convenient to transform or calculate columns. This can be done directly in the mapping:</p>
+<pre class="prettyprint source lang-javascript"><code>registry.register(&quot;CarDBMapping&quot;, &quot;test&quot;, {
+    tableName: &quot;datadictionary.car&quot;,
+    columns: [&quot;id&quot;, &quot;name&quot;, &quot;model_name&quot;, {
+        name: &quot;description&quot;,
+        type: &quot;sql&quot;,
+        get: &quot;lower(coalesce(car.name, '') || '::' || coalesce(model_name))&quot;
+    }, {
+        name: &quot;serial_number&quot;,
+        type: &quot;sql&quot;,
+        get: () => &quot;upper(car.serial_number)&quot;,
+        set: (v) => &quot;lower('&quot; + v + &quot;')&quot;
+    }]
+});</code></pre><h3>JSON Columns</h3><p>PostgreSQL has support for JSON. For the OR-Mapper to correctly parse and serialize JSON, you must mark these columns in the mapping:</p>
+<pre class="prettyprint source lang-javascript"><code>registry.register(&quot;PersonDBMapping&quot;, &quot;test&quot;, {
+    tableName: &quot;datadictionary.person&quot;,
+    identifiedBy: &quot;name&quot;,
+    columns: [&quot;name&quot;, &quot;age&quot;, {
+        name: &quot;things&quot;,
+        type: &quot;json&quot;
+    }]
+});</code></pre><h3>Circular references</h3><p>Not supported. Generally advised against.</p></article>
     </section>
 
 
