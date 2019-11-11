@@ -45,7 +45,7 @@ module.exports = function (grunt) {
             doc: {
                 src: ["orm/**/*.js", "readme.md"],
                 options: {
-                    destination: "doc",
+                    destination: "docs",
                     template: "node_modules/ink-docstrap/template",
                     configure: "jsdoc.conf.json"
                 }
