@@ -64,6 +64,33 @@ await carRepository.save(myCar);
 await carRepository.remove(myCar);
 ``` 
 
+Specialized queries can be added to the repository, in order to encapsulate all DB access. 
+The query callback argument is a preinitialized [knex](http://www.knexjs.org) instance:
+```javascript
+class CarRepository extends EntityRepository {
+  
+    // ...
+    
+    async findAllCorvettes() {
+        return this.findAllWhere((q) => q.where("name", "like", "%corvette%"))
+    }
+
+}
+```
+
+A more direct option to access the DB with knex is `Mapping.createQuery`:
+```javascript
+class CarRepository extends EntityRepository {
+  
+    // ...
+    
+    async findAllCorvettes() {
+        return this.Mapping.createQuery().where("name", "like", "%corvette%").select("name");
+    }
+
+}
+```  
+
 These are the basics, for extended documentation see [EntityRepository class documentation](./EntityRepository.html) and 
 the [DBMappingRegistry documentation](./DBMappingRegistry.html).
 
@@ -146,6 +173,25 @@ registry.register("PersonDBMapping", "test", {
 });
 ```
 
+### Transactions
+Generally all operations should support transactions for safety. 
+Most of the time Transaction Control should be left to the "client", meaning outside of the repository. 
+This is supported by passing `{ transactional: true }` in options or wrapping multiple calls in `repository.executeTransactional`:
+```javascript
+await carRepository.save(myCar, { transactional: true });
+```
+Or the more complex case
+```javascript
+const options = { transactional: true };
+await carRepository.executeTransactional(() => {
+    await carRepository.save(myCar, { transactional: true });
+    myCar.name = "new name";
+    await carRepository.save(myCar, { transactional: true });
+}, options);
+```
+
+If anything in the call fails, be it DB or an error in the code, the transaction will be rolled back. 
+Once all promises resolve, the transaction will be committed.
 
 ### Circular references
 Not supported. Generally advised against.
