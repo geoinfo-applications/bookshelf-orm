@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Bookshelf ORM Source: BookshelfMapping.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.simplex.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Bookshelf ORM</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="BookshelfMapping.html">BookshelfMapping</a></li><li><a href="DBMappingRegistry.html">DBMappingRegistry</a></li><li><a href="EntityRepository.html">EntityRepository</a></li><li><a href="ColumnDescriptor.html">ColumnDescriptor</a></li><li><a href="ReferenceDescriptor.html">ReferenceDescriptor</a></li><li><a href="RelationDescriptor.html">RelationDescriptor</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: BookshelfMapping.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">"use strict";
+
+const StringUtils = require("./StringUtils");
+const { required } = require("./Annotations");
+
+
+/**
+ * Describes a DB Mapping
+ *
+ * @property {string} tableName - Fully qualified name of DB Table
+ * @property {string} [identifiedBy = "id"] - Primary key column
+ * @property {Array&lt;String | ColumnDescriptor>} [columns] - columns to fetch. 'underscore_space' will be converted to 'lowerCamelCase' in Entity
+ * @property {Object | Function} [discriminator] - Fetch only Entities which match a given query, Knex where condition
+ * @property {Object} [onDelete] - Execute instead of regular delete statement, Knex update statement
+ *
+ * @property {Boolean} [keepHistory = false] - Keep an History History in this table. New states are appended instead of updated.
+ *                    Columns 'revision_id' and 'parent_id' will be added to mapping, thus requires these columns in DB.
+ *                    'revision_id' must have a unique default value, is the Primary Key at best.
+ *                    'identifiedBy' must not be the Primary Key, since many revisions with the same ID can exist.
+ *
+ * @property {Boolean} [historyColumns = { revisionId: "revision_id", parentId: "parent_id" }] - Configure alias for history columns
+ *
+ * @property {Array&lt;RelationDescriptor>} [relations] - Managed relations of this Entity.
+ *                    There will be a getter and setter for n:1 relations
+ *                    There will be a getter and modifiers ("add"/"remove" + relation.name) for m:n relations
+ */
+class BookshelfMapping {
+
+    constructor(dbContext, config) {
+        this.dbContext = dbContext;
+        this.tableName = config.tableName;
+        this.identifiedBy = BookshelfMapping.getOptionOrDefault(config.identifiedBy, "id");
+        this.relations = BookshelfMapping.getOptionOrDefault(config.relations, []);
+        this.relationNames = BookshelfMapping.getOptionOrDefault(this.relations, []).map((r) => r.name);
+        this.columns = BookshelfMapping.getOptionOrDefault(config.columns, []);
+        this.discriminator = config.discriminator;
+        this.onDelete = config.onDelete;
+        this.keepHistory = BookshelfMapping.getOptionOrDefault(config.keepHistory, false);
+        this.historyColumns = BookshelfMapping.getOptionOrDefault(config.historyColumns, { revisionId: "revision_id", parentId: "parent_id" });
+
+        this.configureHistory();
+
+        this.Model = this.createModel();
+        this.Collection = this.createCollection();
+        this.startTransaction = dbContext.transaction.bind(dbContext);
+
+        this.deriveColumnAccessors();
+        this.provideForeignKeyColumnsToRelatedMappings(this.relations);
+    }
+
+    static getOptionOrDefault(configProperty, defaultValue) {
+        return configProperty || defaultValue;
+    }
+
+    configureHistory() {
+        if (this.keepHistory) {
+            this.discriminator = this.addHistoryDiscriminator();
+
+            const columns = new Set(this.columns).add(this.historyColumns.revisionId).add(this.historyColumns.parentId);
+            this.columns = [...columns];
+        }
+    }
+
+    addHistoryDiscriminator() {
+        const discriminator = this.discriminator;
+        const { revisionId, parentId } = this.historyColumns;
+
+        return (q) => {
+            q.whereNotIn(revisionId, (q) => q.from(this.tableName).whereNotNull(parentId).select(parentId));
+            q.andWhere(discriminator);
+        };
+    }
+
+    deriveColumnAccessors() {
+        this.columnMappings = this.columns.map((column) => typeof column === "string" ? { name: column } : column);
+        this.columnNames = this.columnMappings.map((column) => column.name);
+        this.regularColumns = this.columnMappings.filter((c) => c.type !== "sql");
+        this.regularColumnNames = this.regularColumns.map((column) => column.name);
+        this.sqlColumns = this.columnMappings.filter((c) => c.type === "sql");
+        this.writeableSqlColumns = this.sqlColumns.filter((c) => c.set);
+        this.readableSqlColumns = this.sqlColumns.filter((c) => c.get);
+
+        this.qualifiedRegularColumnNames = this.relations
+            .filter((r) => r.type === "belongsTo")
+            .map((r) => r.references.mappedBy)
+            .concat(this.regularColumnNames)
+            .map((name) => `${this.tableName}.${name}`);
+    }
+
+    provideForeignKeyColumnsToRelatedMappings() {
+        this.relations.filter((r) => r.type === "hasMany" || r.type === "hasOne").forEach((r) => {
+            r.references.mapping.qualifiedRegularColumnNames.push(r.references.mappedBy);
+        });
+    }
+
+    createModel() {
+        const prototype = {
+            tableName: this.tableName,
+            idAttribute: this.identifiedBy
+        };
+
+        this.relations.forEach(this.addRelation.bind(this, prototype));
+        return this.dbContext.Model.extend(prototype);
+    }
+
+    createCollection() {
+        return this.dbContext.Collection.extend({ model: this.Model });
+    }
+
+    addRelation(prototype, relation) {
+        const relationName = StringUtils.camelToSnakeCase(relation.name);
+        const fkName = relation.references.mappedBy = relation.references.mappedBy || relationName + "_id";
+
+        prototype["relation_" + relation.name] = function () {
+            if (!(relation.type in this)) {
+                throw new Error("Relation of type '" + relation.type + "' doesn't exist");
+            }
+
+            const referencedColumnName = relation.references.identifies || relation.references.mapping.Model.identifiedBy;
+            return this[relation.type](relation.references.mapping.Model, fkName, referencedColumnName);
+        };
+    }
+
+    createQuery(item, options = required("options")) {
+        /* eslint complexity: 0 */
+        const query = this.dbContext.knex(this.tableName);
+
+        if (item) {
+            query.where(this.identifiedBy, item.get(this.identifiedBy));
+        }
+
+        if (this.discriminator) {
+            query.andWhere(this.discriminator);
+        }
+
+        if (options &amp;&amp; options.transacting) {
+            query.transacting(options.transacting);
+        }
+
+        return query;
+    }
+
+    raw(...args) {
+        return this.dbContext.knex.raw(...args);
+    }
+
+}
+
+module.exports = BookshelfMapping;
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	© GEOINFO Applications AG
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a>
+	
+		on Mon Nov 11th 2019
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>
