@@ -90,7 +90,7 @@
 <h2>Basics</h2><p>One of the key goals of this OR-Mapper is Persistence Ignorance, meaning, have clear separation from Business Logic code and infrastructure code.<br>For this reason, description of DB columns and relations is separate from Domain Model classes. This is the <strong>Mapping</strong>.<br>The idea of the accompanying <strong>Repository</strong> is to encapsulate all DB related operations and specialized queries.    </p>
 <h2>Examples</h2><p>First, you need an instance of the MappingRegistry:</p>
 <pre class="prettyprint source lang-javascript"><code>const { DBMappingRegistry } = require(&quot;@geoinfo/bookshelf-orm&quot;);
-const mappingRegistry = DBMappingRegistry.getInstance();</code></pre><p>In this registry, you register your DB-Tables and fields:</p>
+const registry = DBMappingRegistry.getInstance();</code></pre><p>In this registry, you register your DB-Tables and fields:</p>
 <pre class="prettyprint source lang-javascript"><code>registry.register(&quot;CarDBMapping&quot;, &quot;test&quot;, {
     tableName: &quot;myschema.car&quot;,
     columns: [&quot;id&quot;, &quot;name&quot;, &quot;model_name&quot;]
@@ -103,12 +103,12 @@ const mappingRegistry = DBMappingRegistry.getInstance();</code></pre><p>In this 
 
 }</code></pre><p>In order to fetch and save entities, you need a Repository. Here you have to extend the base implementation <code>EntityRepository</code> and specify your domain class (or <code>Object</code> if you don't need one):</p>
 <pre class="prettyprint source lang-javascript"><code>const { EntityRepository, DBMappingRegistry } = require(&quot;@geoinfo/bookshelf-orm&quot;);
-const mappingRegistry = DBMappingRegistry.getInstance();
+const registry = DBMappingRegistry.getInstance();
 
 class CarRepository extends EntityRepository {
 
     constructor() {
-        super(Car, mappingRegistry.compile(&quot;CarDBMapping&quot;))
+        super(Car, registry.compile(&quot;CarDBMapping&quot;))
     }
 
 }
@@ -169,8 +169,43 @@ part.name = &quot;Engine&quot;;
 car.addParts(part);
 
 console.log(car.parts); // [{ id: 2, carId: 1, name: &quot;Engine&quot; }]</code></pre><p>Changes to the original array are <em>not</em> reflected in the internal state.<br>It can safely be forwarded to services etc. and is a regular JS array without magic.</p>
-<p>This kind of mapping, <code>&quot;hasMany&quot;</code>, is the most complicated. There are two other types: <code>&quot;hasOne&quot;</code> and <code>&quot;belongsTo&quot;</code>.<br>Both of them reference only one object, and can be modified with simple assignment.<br>The difference between the two is, in which table the foreign key is located.<br>A <code>&quot;hasOne&quot;</code> mapping expects the FK column in the <em>related</em> table,<br>while <code>&quot;belongsTo&quot;</code> assumes the FK to be in the table where the relation is started on. </p>
-<p>For more about mappings see <a href="./BookshelfMapping.html">BookshelfMapping documentation</a></p>
+<p>This kind of mapping, <code>&quot;hasMany&quot;</code>, is the most complicated. There are two other types: <code>&quot;hasOne&quot;</code> and <code>&quot;belongsTo&quot;</code>.<br>Both of them reference only one object, and can be modified with simple assignment.<br>The difference between the two is, in which table the foreign key is located.</p>
+<p>A <code>&quot;hasOne&quot;</code> mapping expects the FK column in the <em>related</em> table:</p>
+<pre class="prettyprint source lang-javascript"><code>registry.register(&quot;CarDBMapping&quot;, &quot;test&quot;, {
+    tableName: &quot;datadictionary.car&quot;,
+    columns: [&quot;id&quot;, &quot;name&quot;, &quot;model_name&quot;],
+
+    relations: [{
+        name: &quot;parkingSpace&quot;,
+        type: &quot;hasOne&quot;,
+        references: {
+            mapping: &quot;ParkingSpaceDBMapping&quot;,
+            mappedBy: &quot;car_id&quot;
+        }
+    }]
+});
+
+registry.register(&quot;ParkingSpaceDBMapping&quot;, &quot;test&quot;, {
+    tableName: &quot;datadictionary.parking_space&quot;,
+    columns: [&quot;id&quot;, &quot;name&quot;, &quot;car_id&quot;]
+});</code></pre><p>While <code>&quot;belongsTo&quot;</code> assumes the FK to be in the table where the relation is started on:</p>
+<pre class="prettyprint source lang-javascript"><code>registry.register(&quot;CarDBMapping&quot;, &quot;test&quot;, {
+    tableName: &quot;datadictionary.car&quot;,
+    columns: [&quot;id&quot;, &quot;name&quot;, &quot;model_name&quot;, &quot;owner_id&quot;],
+
+    relations: [{
+        name: &quot;owner&quot;,
+        type: &quot;belongsTo&quot;,
+        references: {
+            mapping: &quot;OwnerDBMapping&quot;
+        }
+    }]
+});
+
+registry.register(&quot;OwnerDBMapping&quot;, &quot;test&quot;, {
+    tableName: &quot;datadictionary.owner&quot;,
+    columns: [&quot;id&quot;, &quot;name&quot;]
+});</code></pre><p>For more about mappings see <a href="./BookshelfMapping.html">BookshelfMapping documentation</a><br>Or have a look at the unit tests and mocks, all examples are copied from <code>/test/db/mappings.js</code>.</p>
 <h3>SQL Columns</h3><p>Sometimes it is convenient to transform or calculate columns. This can be done directly in the mapping:</p>
 <pre class="prettyprint source lang-javascript"><code>registry.register(&quot;CarDBMapping&quot;, &quot;test&quot;, {
     tableName: &quot;datadictionary.car&quot;,
@@ -250,7 +285,7 @@ await carRepository.executeTransactional(() => {
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a>
 	
-		on Mon Nov 11th 2019
+		on Tue Nov 12th 2019
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>

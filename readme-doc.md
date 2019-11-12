@@ -11,7 +11,7 @@ The idea of the accompanying **Repository** is to encapsulate all DB related ope
 First, you need an instance of the MappingRegistry:
 ```javascript
 const { DBMappingRegistry } = require("@geoinfo/bookshelf-orm");
-const mappingRegistry = DBMappingRegistry.getInstance();
+const registry = DBMappingRegistry.getInstance();
 ```
 
 In this registry, you register your DB-Tables and fields:
@@ -37,12 +37,12 @@ class Car {
 In order to fetch and save entities, you need a Repository. Here you have to extend the base implementation `EntityRepository` and specify your domain class (or `Object` if you don't need one):
 ```javascript
 const { EntityRepository, DBMappingRegistry } = require("@geoinfo/bookshelf-orm");
-const mappingRegistry = DBMappingRegistry.getInstance();
+const registry = DBMappingRegistry.getInstance();
 
 class CarRepository extends EntityRepository {
   
     constructor() {
-        super(Car, mappingRegistry.compile("CarDBMapping"))
+        super(Car, registry.compile("CarDBMapping"))
     }
 
 }
@@ -137,10 +137,52 @@ It can safely be forwarded to services etc. and is a regular JS array without ma
 This kind of mapping, `"hasMany"`, is the most complicated. There are two other types: `"hasOne"` and `"belongsTo"`.
 Both of them reference only one object, and can be modified with simple assignment. 
 The difference between the two is, in which table the foreign key is located.
-A `"hasOne"` mapping expects the FK column in the *related* table, 
-while `"belongsTo"` assumes the FK to be in the table where the relation is started on. 
+
+A `"hasOne"` mapping expects the FK column in the *related* table:
+```javascript
+registry.register("CarDBMapping", "test", {
+    tableName: "datadictionary.car",
+    columns: ["id", "name", "model_name"],
+
+    relations: [{
+        name: "parkingSpace",
+        type: "hasOne",
+        references: {
+            mapping: "ParkingSpaceDBMapping",
+            mappedBy: "car_id"
+        }
+    }]
+});
+
+registry.register("ParkingSpaceDBMapping", "test", {
+    tableName: "datadictionary.parking_space",
+    columns: ["id", "name", "car_id"]
+});
+```
+ 
+While `"belongsTo"` assumes the FK to be in the table where the relation is started on:
+```javascript
+registry.register("CarDBMapping", "test", {
+    tableName: "datadictionary.car",
+    columns: ["id", "name", "model_name", "owner_id"],
+
+    relations: [{
+        name: "owner",
+        type: "belongsTo",
+        references: {
+            mapping: "OwnerDBMapping"
+        }
+    }]
+});
+
+registry.register("OwnerDBMapping", "test", {
+    tableName: "datadictionary.owner",
+    columns: ["id", "name"]
+});
+``` 
 
 For more about mappings see [BookshelfMapping documentation](./BookshelfMapping.html)
+Or have a look at the unit tests and mocks, all examples are copied from `/test/db/mappings.js`.
 
 ### SQL Columns
 Sometimes it is convenient to transform or calculate columns. This can be done directly in the mapping:
