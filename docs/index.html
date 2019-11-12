@@ -231,9 +231,9 @@ registry.register(&quot;OwnerDBMapping&quot;, &quot;test&quot;, {
 <pre class="prettyprint source lang-javascript"><code>await carRepository.save(myCar, { transactional: true });</code></pre><p>Or the more complex case</p>
 <pre class="prettyprint source lang-javascript"><code>const options = { transactional: true };
 await carRepository.executeTransactional(() => {
-    await carRepository.save(myCar, { transactional: true });
+    await carRepository.save(myCar, options);
     myCar.name = &quot;new name&quot;;
-    await carRepository.save(myCar, { transactional: true });
+    await carRepository.save(myCar, options);
 }, options);</code></pre><p>If anything in the call fails, be it DB or an error in the code, the transaction will be rolled back.<br>Once all promises resolve, the transaction will be committed.</p>
 <h3>Circular references</h3><p>Not supported. Generally advised against.</p></article>
     </section>

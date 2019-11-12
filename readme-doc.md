@@ -226,9 +226,9 @@ Or the more complex case
 ```javascript
 const options = { transactional: true };
 await carRepository.executeTransactional(() => {
-    await carRepository.save(myCar, { transactional: true });
+    await carRepository.save(myCar, options);
     myCar.name = "new name";
-    await carRepository.save(myCar, { transactional: true });
+    await carRepository.save(myCar, options);
 }, options);
 ```
 
