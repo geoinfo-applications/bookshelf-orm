@@ -64,6 +64,9 @@ const KittenRepository = createRepository(Kitten, "Kitten");
 const SampleCatRepository = createRepository(Cat, "SampleCat");
 const SampleKittenRepository = createRepository(Kitten, "SampleKitten");
 
+class Halfling {}
+const HalflingRepository = createRepository(Halfling, "Halfling");
+
 module.exports = {
     Car,
     Part,
@@ -116,5 +119,8 @@ module.exports = {
     KittenRepository,
 
     SampleCatRepository,
-    SampleKittenRepository
+    SampleKittenRepository,
+
+    Halfling,
+    HalflingRepository
 };

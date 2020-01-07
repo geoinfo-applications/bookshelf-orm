@@ -60,7 +60,7 @@ class BookshelfRepository {
         for (const chunk of chunks) {
             yield this.findWhere((q) => {
                 q.whereIn(this.idColumnName, chunk);
-                _.each(chunk, (id) => q.orderByRaw(this.idColumnName + "=" + id + " DESC"));
+                _.each(chunk, (id) => q.orderByRaw(`${this.idColumnName} = ? DESC`, [id]));
             }, options);
         }
     }

@@ -12,6 +12,7 @@ describe("Bookshelf Repository Test", function () {
     const OwnerRepository = require("./db/mocks").OwnerRepository;
     const NamelessOwnerRepository = require("./db/mocks").NamelessOwnerRepository;
     const PersonRepository = require("./db/mocks").PersonRepository;
+    const HalflingRepository = require("./db/mocks").HalflingRepository;
 
     require("./db/connection");
     const registry = require("./db/registry");
@@ -20,6 +21,7 @@ describe("Bookshelf Repository Test", function () {
     const CarDBMapping = registry.compile("CarDBMapping");
     const PartDBMapping = registry.compile("PartDBMapping");
     const PersonDBMapping = registry.compile("PersonDBMapping");
+    const HalflingDBMapping = registry.compile("HalflingDBMapping");
 
     this.timeout(1000);
     let carRepository;
@@ -106,6 +108,33 @@ describe("Bookshelf Repository Test", function () {
                     });
                 });
             });
+        });
+
+        it("should order ids[] correctly", async () => {
+            await createCar();
+            await createCar();
+
+            const cars = await carRepository.findAll([2, 1], {});
+
+            expect(cars.length).to.be.eql(2);
+            expect(cars.models[0].id).to.be.eql(2);
+            expect(cars.models[1].id).to.be.eql(1);
+        });
+
+        it("should escape correctly for ids[] as uuid[] and order them", async () => {
+            const halflingRepository = new HalflingRepository().repository;
+            await createHalfling();
+            await createHalfling();
+            await createHalfling();
+            const allHalflings = await halflingRepository.findAll(null, {});
+            const uuid1 = allHalflings.models[2].id;
+            const uuid2 = allHalflings.models[1].id;
+
+            const halflings = await halflingRepository.findAll([uuid1, uuid2], {});
+
+            expect(halflings.length).to.be.eql(2);
+            expect(halflings.models[0].id).to.be.eql(uuid1);
+            expect(halflings.models[1].id).to.be.eql(uuid2);
         });
 
     });
@@ -319,6 +348,10 @@ describe("Bookshelf Repository Test", function () {
 
     function createCar() {
         return CarDBMapping.Model.forge({ name: "car" + tableIndex++ }).save();
+    }
+
+    function createHalfling() {
+        return HalflingDBMapping.Model.forge({ name: "halfling" + tableIndex++ }).save();
     }
 
     beforeEach(require("./db/setup"));

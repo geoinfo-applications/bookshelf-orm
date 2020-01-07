@@ -25,7 +25,8 @@ module.exports = () => {
         "datadictionary.instrument",
         "datadictionary.album_instrument",
         "datadictionary.cat",
-        "datadictionary.kitten"
+        "datadictionary.kitten",
+        "datadictionary.halfling"
     ];
 
     return Q.all(tables.map((table) => knex.schema.dropTable(table)));

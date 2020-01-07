@@ -394,3 +394,10 @@ registry.register("SampleCatDBMapping", "test", {
         }
     }]
 });
+
+registry.register("HalflingDBMapping", "test", {
+    tableName: "datadictionary.halfling",
+    columns: ["id", "name", "height", "death"],
+    onDelete: { death: new Date() },
+    discriminator: (q) => q.whereNull("death")
+});

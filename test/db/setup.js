@@ -167,8 +167,15 @@ module.exports = function () {
         table.specificType("death", "timestamp").default(null);
     });
 
+    const halfling = knex.schema.createTable("datadictionary.halfling", (table) => {
+        table.uuid("id").defaultTo(knex.raw("uuid_generate_v4()")).primary();
+        table.integer("height");
+        table.string("name");
+        table.specificType("death", "timestamp").default(null);
+    });
+
     return Q.all([car, part, wheel, engine, owner, make, outlet, injection, parkingSpace,
-        planet, moon, atmosphere, composition, person, horn, unicorn, instrument, album, albumInstrument, cat, kitten
+        planet, moon, atmosphere, composition, person, horn, unicorn, instrument, album, albumInstrument, cat, kitten, halfling
     ]);
 };
 
