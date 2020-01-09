@@ -1,11 +1,11 @@
 {
   "name": "@geoinfo/bookshelf-orm",
-  "version": "1.17.0",
+  "version": "2.0.0",
   "description": "OR-Mapping based on Bookshelf.js",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "http://git.geoinfo.ch/scm/ngp/bookshelf-orm.git"
+    "url": "git+https://github.com/geoinfo-applications/bookshelf-orm.git"
   },
   "scripts": {
     "test": "grunt test"
@@ -13,9 +13,6 @@
   "author": "Geoinfo Applications AG",
   "license": "MIT",
   "private": false,
-  "publishConfig": {
-    "registry": "http://npm.geoinfo.ch"
-  },
   "engines": {
     "node": ">8.11.0",
     "npm": ">5.8.0"
@@ -39,7 +36,7 @@
   },
   "devDependencies": {
     "chai": "^4.2.0",
-    "grunt-david": "bschaepper/grunt-david",
+    "grunt-david": "github:bschaepper/grunt-david",
     "grunt-env": "^1.0.1",
     "grunt-eslint": "^22.0.0",
     "grunt-mocha-istanbul": "^5.0.2",
@@ -53,5 +50,18 @@
     "mocha-multi": "*",
     "sinon": "^7.5.0",
     "sinon-chai": "^3.3.0"
-  }
+  },
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "keywords": [
+    "booksehlf",
+    "knex",
+    "orm"
+  ],
+  "bugs": {
+    "url": "https://github.com/geoinfo-applications/bookshelf-orm/issues"
+  },
+  "homepage": "https://github.com/geoinfo-applications/bookshelf-orm#readme"
 }
