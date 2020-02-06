@@ -67,27 +67,6 @@ describe("Entity Repository Test with identifies option", function () {
 
     });
 
-    describe("omiting the disciminator on finder methods", () => {
-        beforeEach(async () => {
-            const newHornType = await hornRepository.save(hornRepository.newEntity({ type: "spiral horn" }));
-            await hornRepository.save(hornRepository.newEntity({ ...newHornType, type: "flat horn" }));
-        });
-
-        it("omitDiscriminator is set on true with find where by revision", async () => {
-            const hornType = await hornRepository.findWhere((q) => q.where("revision_id", 1), { omitDiscriminator: true });
-            expect(hornType.type).to.be.eql("spiral horn");
-        });
-
-        it("omitDiscriminator is set on true with find where by id", async () => {
-            const hornTypes = await hornRepository.findByConditions([{ query: (q) => q.where("id", 1) }], { omitDiscriminator: true });
-            expect(hornTypes).to.be.an("array");
-            expect(hornTypes.length).to.be.eql(2);
-            hornTypes.forEach((hornType) => {
-                expect(hornType.type).to.be.eql(hornType.revisionId === 1 ? "spiral horn" : "flat horn");
-            })
-        });
-    });
-
     describe("hasMany relation with complex model", () => {
         let singer, guitar1, guitar2, bass, drums;
         let firstAlbum;

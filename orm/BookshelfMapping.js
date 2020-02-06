@@ -126,7 +126,11 @@ class BookshelfMapping {
         const query = this.dbContext.knex(this.tableName);
 
         if (item) {
-            query.where(this.identifiedBy, item.get(this.identifiedBy));
+            if (item.get(this.identifiedBy) === undefined) {
+                query.whereRaw(`${query.client.wrapIdentifier(this.identifiedBy)} = NULL`);
+            } else {
+                query.where(this.identifiedBy, item.get(this.identifiedBy));
+            }
         }
 
         if (this.discriminator) {

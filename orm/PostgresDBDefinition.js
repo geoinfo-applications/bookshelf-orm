@@ -26,9 +26,7 @@ class PostgresDBDefinition {
                     min: 0,
                     max: 5,
                     idleTimeoutMillis: 5 * 60 * 1000,
-                    reapIntervalMillis: 10 * 1000,
-                    refreshIdle: false,
-                    ping: (connection, callback) => connection.query("SELECT 1", callback)
+                    reapIntervalMillis: 10 * 1000
                 }, this.config.db[name].pool)
             })));
         });

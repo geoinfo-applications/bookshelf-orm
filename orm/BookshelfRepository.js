@@ -69,7 +69,7 @@ class BookshelfRepository {
         const collection = this.Mapping.Collection.forge().query((q) => {
             condition && condition.call(this, q);
 
-            if (this.Mapping.discriminator && !this.omitDiscriminator(options)) {
+            if (this.Mapping.discriminator) {
                 q.andWhere(this.Mapping.discriminator);
             }
 
@@ -85,7 +85,7 @@ class BookshelfRepository {
             q.whereIn(this.Mapping.identifiedBy, (subQuery) => {
                 subQuery.select(`${this.Mapping.tableName}.${this.Mapping.identifiedBy}`).from(this.Mapping.tableName);
 
-                if (this.Mapping.discriminator && !this.omitDiscriminator(options)) {
+                if (this.Mapping.discriminator) {
                     subQuery.andWhere(this.Mapping.discriminator);
                 }
 
@@ -131,10 +131,13 @@ class BookshelfRepository {
     }
 
     findOne(id, options = required("options")) {
+        if (_.isUndefined(id)) {
+            return Promise.resolve(null);
+        }
         const query = this.createIdQuery(id);
         const model = this.Mapping.Model.forge(query);
 
-        if (this.Mapping.discriminator && !this.omitDiscriminator(options)) {
+        if (this.Mapping.discriminator) {
             model.where(this.Mapping.discriminator);
         }
 
@@ -177,6 +180,9 @@ class BookshelfRepository {
         }
 
         const id = item instanceof this.Mapping.Model ? item.get(this.idColumnName) : item;
+        if (_.isUndefined(id)) {
+            return Promise.resolve();
+        }
         const operation = new RemoveOperation(this.Mapping, options);
 
         return this.findOne(id, options).then((item) => item && operation.remove(item));
@@ -205,10 +211,6 @@ class BookshelfRepository {
         const query = {};
         query[this.idColumnName] = id;
         return query;
-    }
-
-    omitDiscriminator(options) {
-        return options && options.omitDiscriminator;
     }
 }
 

@@ -13,7 +13,13 @@ class BookshelfDeepFetchOperation extends BookshelfDeepOperation {
 
     fetch(model, fetchOptions = required("fetchOptions")) {
         return model.fetch(fetchOptions)
-            .then((model) => this.stripEmptyRelations(model));
+            .then((model) => this.stripEmptyRelations(model))
+            .catch((error) => {
+                if (error.message === "EmptyResponse") {
+                    return null;
+                }
+                return Promise.reject(error);
+            });
     }
 
     stripEmptyRelations(model) {

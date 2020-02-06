@@ -116,8 +116,9 @@ class EntityRepository {
 
         return this.executeTransactional(() => {
             return this.repository.save(this.wrapper.unwrap(entity), options).then((item) => this.wrapper.wrap(item));
-        }, options).tap((entity) => {
+        }, options).then((entity) => {
             this.afterSave(entity[this.Mapping.identifiedBy]);
+            return entity;
         });
     }
 
@@ -145,12 +146,13 @@ class EntityRepository {
 
         return this.executeTransactional(() => {
             return this.repository.remove(entity, options);
-        }, options).tap(() => {
-            const id  = _.isObject(entity) ? entity[this.Mapping.identifiedBy] : +entity;
+        }, options).then((result) => {
+            const id = _.isObject(entity) ? entity[this.Mapping.identifiedBy] : +entity;
 
             if (id) {
                 this.afterRemove(id);
             }
+            return result;
         });
     }
 

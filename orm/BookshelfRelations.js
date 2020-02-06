@@ -30,7 +30,8 @@ class BookshelfRelations {
             columns: () => {
                 fetchProperties.columns = options.columns;
             },
-            transacting: () => fetchProperties.transacting = options.transacting
+            transacting: () => fetchProperties.transacting = options.transacting,
+            debug: () => fetchProperties.debug = options.debug
         };
 
         Object.keys(optionalOptions).filter((key) => options[key]).forEach((key) => optionalOptions[key]());
@@ -69,13 +70,13 @@ class BookshelfRelations {
 
         const readableColumnNamesAppearConditions = [
             {
-                condition: () =>  _.contains(fetchProperties.exclude, "*"),
+                condition: () => _.contains(fetchProperties.exclude, "*"),
                 execute: () => []
             }, {
-                condition: () =>  excludedSqlReadableColumnNames.length,
+                condition: () => excludedSqlReadableColumnNames.length,
                 execute: () => _.difference(defaultSqlReadableColumnNames, excludedSqlReadableColumnNames)
             }, {
-                condition: () =>  selectedSqlReadableColumnNames.length,
+                condition: () => selectedSqlReadableColumnNames.length,
                 execute: () => {
                     selectedSqlReadableColumnNames.forEach((sqlColumn) => {
                         let sqlColumnIndex = fetchProperties.columns.indexOf(sqlColumn);
@@ -84,7 +85,7 @@ class BookshelfRelations {
                     return selectedSqlReadableColumnNames;
                 }
             }, {
-                condition: () =>  true,
+                condition: () => true,
                 execute: () => defaultSqlReadableColumnNames
             }
         ];
