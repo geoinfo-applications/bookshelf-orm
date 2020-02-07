@@ -1,6 +1,6 @@
 {
   "name": "@geoinfo/bookshelf-orm",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "OR-Mapping based on Bookshelf.js",
   "main": "index.js",
   "repository": {
@@ -56,7 +56,7 @@
     "test": "test"
   },
   "keywords": [
-    "booksehlf",
+    "bookshelf",
     "knex",
     "orm"
   ],
