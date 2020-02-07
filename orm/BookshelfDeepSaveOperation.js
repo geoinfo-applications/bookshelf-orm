@@ -162,6 +162,11 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
         const columnName = relation.references.identifies || "id";
         const entityId = item.attributes[columnName];
         related.set(fkColumn, entityId);
+
+        if (related.isNew()) {
+            return;
+        }
+
         const query = relation.references.mapping.createQuery(null, this.options).where(related.idAttribute, related[related.idAttribute]);
         this.addTransactionToQuery(query);
         return query.update(fkColumn, entityId);
