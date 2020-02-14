@@ -1,19 +1,25 @@
 "use strict";
 
-const _ = require("underscore");
-const StringUtils = require("./StringUtils");
-const { required } = require("./Annotations");
+import _ from "underscore";
+import StringUtils from "./StringUtils";
+import BookshelfMapping from "./BookshelfMapping";
+import { required } from "./Annotations";
+import IEntityRepositoryOptions from "./IEntityRepositoryOptions";
 
 
-class BookshelfRelations {
+export default class BookshelfRelations {
 
-    constructor(Mapping) {
+    private readonly Mapping: BookshelfMapping;
+    private readonly relationNamesDeep: string[];
+    private readonly withRelatedFetchOptions: Array<{ [prop: string]: () => void }>;
+
+    public constructor(Mapping: BookshelfMapping) {
         this.Mapping = Mapping;
         this.relationNamesDeep = this.getRelationNamesDeep();
         this.withRelatedFetchOptions = this.getWithRelatedFetchOptions();
     }
 
-    getFetchOptions(options = required("options")) {
+    public getFetchOptions(options: IEntityRepositoryOptions = required("options")): IEntityRepositoryOptions {
         const fetchProperties = this.fetchProperties;
 
         if (options) {
@@ -24,20 +30,20 @@ class BookshelfRelations {
         return fetchProperties;
     }
 
-    addOptionalFetchOptions(options, fetchProperties) {
+    private addOptionalFetchOptions(options: IEntityRepositoryOptions, fetchProperties) {
         const optionalOptions = {
-            exclude: () => this.applyExcludesToFetchProperties(fetchProperties, options.exclude),
+            exclude: () => this.applyExcludesToFetchProperties(fetchProperties, options!.exclude),
             columns: () => {
-                fetchProperties.columns = options.columns;
+                fetchProperties.columns = options!.columns;
             },
-            transacting: () => fetchProperties.transacting = options.transacting,
-            debug: () => fetchProperties.debug = options.debug
+            transacting: () => fetchProperties.transacting = options!.transacting,
+            debug: () => fetchProperties.debug = options!.debug
         };
 
-        Object.keys(optionalOptions).filter((key) => options[key]).forEach((key) => optionalOptions[key]());
+        Object.keys(optionalOptions).filter((key) => options![key]).forEach((key) => optionalOptions[key]());
     }
 
-    manageReadableSqlColumns(options, fetchProperties) {
+    private manageReadableSqlColumns(options: IEntityRepositoryOptions, fetchProperties) {
         fetchProperties.exclude = options && options.exclude;
         fetchProperties.exclude = _.isArray(fetchProperties.exclude) &&
             fetchProperties.exclude.map((sqlColumnName) => StringUtils.camelToSnakeCase(sqlColumnName));
@@ -49,21 +55,21 @@ class BookshelfRelations {
         this.addReadableSqlColumnsToFetchProperties(fetchProperties);
     }
 
-    addPrimaryKeyIfColumnsAreDefinedInProperties(fetchProperties) {
-        let primaryKeyColumn = `${this.Mapping.tableName}.${this.Mapping.identifiedBy}`;
+    private addPrimaryKeyIfColumnsAreDefinedInProperties(fetchProperties) {
+        const primaryKeyColumn = `${this.Mapping.tableName}.${this.Mapping.identifiedBy}`;
         if (!_.contains(fetchProperties.columns, primaryKeyColumn)) {
             fetchProperties.columns.push(primaryKeyColumn);
         }
     }
 
-    addReadableSqlColumnsToFetchProperties(fetchProperties) {
+    private addReadableSqlColumnsToFetchProperties(fetchProperties) {
         const selectedReadableSqlColumnNames = this.getSelectedReadableColumnNames(fetchProperties);
         const selectedReadableSqlColumns = selectedReadableSqlColumnNames.map((name) => _.findWhere(this.Mapping.readableSqlColumns, { name }));
 
         return this.addSqlColumnsToFetchPropertiesColumnsAsSqlQuery(fetchProperties, selectedReadableSqlColumns);
     }
 
-    getSelectedReadableColumnNames(fetchProperties) {
+    private getSelectedReadableColumnNames(fetchProperties) {
         const defaultSqlReadableColumnNames = this.Mapping.readableSqlColumns.map((sqlColumns) => sqlColumns.name);
         const excludedSqlReadableColumnNames = _.intersection(fetchProperties.exclude, defaultSqlReadableColumnNames);
         const selectedSqlReadableColumnNames = _.intersection(fetchProperties.columns, defaultSqlReadableColumnNames);
@@ -79,7 +85,7 @@ class BookshelfRelations {
                 condition: () => selectedSqlReadableColumnNames.length,
                 execute: () => {
                     selectedSqlReadableColumnNames.forEach((sqlColumn) => {
-                        let sqlColumnIndex = fetchProperties.columns.indexOf(sqlColumn);
+                        const sqlColumnIndex = fetchProperties.columns.indexOf(sqlColumn);
                         fetchProperties.columns.splice(sqlColumnIndex, 1);
                     });
                     return selectedSqlReadableColumnNames;
@@ -90,38 +96,38 @@ class BookshelfRelations {
             }
         ];
 
-        return _.find(readableColumnNamesAppearConditions, (condition) => condition.condition()).execute();
+        return _.find(readableColumnNamesAppearConditions, (condition) => condition.condition())!.execute();
     }
 
-    addSqlColumnsToFetchPropertiesColumnsAsSqlQuery(fetchProperties, selectedReadableSqlColumns) {
+    private addSqlColumnsToFetchPropertiesColumnsAsSqlQuery(fetchProperties, selectedReadableSqlColumns) {
         fetchProperties.columns = fetchProperties.columns.concat(this.getRawColumnSelectStatements(selectedReadableSqlColumns));
     }
 
-    getRawColumnSelectStatements(selectedReadableSqlColumns) {
+    private getRawColumnSelectStatements(selectedReadableSqlColumns) {
         return selectedReadableSqlColumns.map((sqlColumn) => {
-            let getter = _.isFunction(sqlColumn.get) ? sqlColumn.get() : sqlColumn.get;
+            const getter = _.isFunction(sqlColumn.get) ? sqlColumn.get() : sqlColumn.get;
             return this.Mapping.dbContext.knex.raw(getter + " as \"" + sqlColumn.name + "\"");
         });
     }
 
-    applyExcludesToFetchProperties(fetchProperties, exclude) {
+    private applyExcludesToFetchProperties(fetchProperties, exclude) {
         if (_.contains(exclude, "*")) {
             fetchProperties.withRelated = [];
             return;
         }
 
         const wildcardExcludes = exclude.filter((e) => e.endsWith("*"));
-        let excludes = _.difference(exclude, wildcardExcludes);
+        let excludes: string[] = _.difference(exclude, wildcardExcludes);
         excludes = this.addWildcardExcludes(excludes, wildcardExcludes);
         excludes = excludes.map(this.renameRelationProperty, this);
 
-        fetchProperties.withRelated = _.reject(fetchProperties.withRelated, (name) => {
+        fetchProperties.withRelated = _.reject(fetchProperties.withRelated, (name: string) => {
             name = _.isObject(name) ? _.keys(name)[0] : name;
             return excludes.some((exclude) => name.indexOf(exclude) === 0);
         });
     }
 
-    addWildcardExcludes(excludes, wildcardExcludes) {
+    private addWildcardExcludes(excludes, wildcardExcludes) {
         if (wildcardExcludes.length) {
             wildcardExcludes = wildcardExcludes.map((e) => e.substring(0, e.length - 1));
             wildcardExcludes = this.relationNamesDeep.filter((name) => wildcardExcludes.some((exclude) => name.startsWith(exclude)));
@@ -130,7 +136,7 @@ class BookshelfRelations {
         return excludes;
     }
 
-    renameRelationProperty(propertyName) {
+    private renameRelationProperty(propertyName) {
         const isRelationName = _.contains(this.relationNamesDeep, propertyName);
 
         if (isRelationName) {
@@ -140,11 +146,11 @@ class BookshelfRelations {
         return propertyName;
     }
 
-    get relationNames() {
+    public get relationNames() {
         return _.map(this.Mapping.relations, (relation) => relation.name);
     }
 
-    getRelationNamesDeep() {
+    private getRelationNamesDeep() {
         function extractName(parent, relation) {
             const name = _.compact([parent, relation.name]).join(".");
             return [name].concat(_.map(relation.references.mapping.relations, _.partial(extractName, name)));
@@ -153,14 +159,14 @@ class BookshelfRelations {
         return _.flatten(_.map(this.Mapping.relations, _.partial(extractName, "")));
     }
 
-    get fetchProperties() {
+    private get fetchProperties(): IEntityRepositoryOptions {
         return { withRelated: this.withRelatedFetchOptions };
     }
 
-    getWithRelatedFetchOptions() {
+    private getWithRelatedFetchOptions(): Array<{ [prop: string]: () => void }> {
         return this.relationNamesDeep.map((relationName) => {
             const relationNamePath = relationName.split(".");
-            const prefixedRelationName = relationNamePath.map((name) => "relation_" + name).join(".");
+            const prefixedRelationName = relationNamePath.map((name) => `relation_${name}`).join(".");
             const mapping = relationNamePath.reduce(BookshelfRelations.lookupReferencedMapping, this.Mapping);
             const mainRelationName = relationNamePath[0];
 
@@ -180,18 +186,17 @@ class BookshelfRelations {
         });
     }
 
-    static lookupReferencedMapping(mapping, name) {
+    private static lookupReferencedMapping(mapping, name) {
         return BookshelfRelations.lookupReference(mapping, name).references.mapping;
     }
 
-    static lookupReference(mapping, name) {
+    private static lookupReference(mapping, name) {
         return mapping.relations.find((relation) => relation.name === name);
     }
 
-    skipDiscriminator(referencedMapping, relationName) {
+    private skipDiscriminator(referencedMapping, relationName) {
         const lookupReference = BookshelfRelations.lookupReference(this.Mapping, relationName);
         return lookupReference && lookupReference.references.identifies && lookupReference.references.identifies !== referencedMapping.identifiedBy;
     }
 }
 
-module.exports = BookshelfRelations;

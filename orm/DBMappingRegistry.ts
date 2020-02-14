@@ -1,20 +1,26 @@
 "use strict";
 
-const ModelFactory = require("./ModelFactory");
+import ModelFactory from "./ModelFactory";
+import BookshelfMapping from "./BookshelfMapping";
+
 let instance;
 
 /**
  * Holds all Mappings and converts them to Bookshelf Models
  */
-class DBMappingRegistry {
+export default class DBMappingRegistry {
 
-    constructor(ModelFactory) {
+    private readonly mappings: { [prop: string]: { dbContextName: string; mapping: BookshelfMapping; } };
+    private readonly compiled: { [prop: string]: BookshelfMapping };
+    private readonly ModelFactory: ModelFactory;
+
+    public constructor(ModelFactory) {
         this.mappings = {};
         this.compiled = {};
         this.ModelFactory = ModelFactory;
     }
 
-    static getInstance() {
+    public static getInstance() {
         if (!instance) {
             instance = new DBMappingRegistry(ModelFactory);
         }
@@ -28,7 +34,7 @@ class DBMappingRegistry {
      * @param {string} dbContextName - DB context / connection name
      * @param {BookshelfMapping} mapping - Mapping description of columns, relations etc.
      */
-    register(name, dbContextName, mapping) {
+    public register(name, dbContextName, mapping) {
         if (this.isRegistered(name)) {
             throw new Error(`A mapping with name '${name}' is already registered`);
         }
@@ -39,11 +45,11 @@ class DBMappingRegistry {
         };
     }
 
-    get(name) {
+    public get(name) {
         return this.mappings[name].mapping;
     }
 
-    isRegistered(name) {
+    public isRegistered(name) {
         return name in this.mappings;
     }
 
@@ -52,7 +58,7 @@ class DBMappingRegistry {
      * @param {string} name - Name of a registered Mapping
      * @returns {EntityRepository} compiled Mapping, ready to use
      */
-    compile(name) {
+    public compile(name) {
         if (!this.isCached(name)) {
             this.compileAndCache(name);
         }
@@ -60,9 +66,9 @@ class DBMappingRegistry {
         return this.compiled[name];
     }
 
-    compileAndCache(name) {
+    private compileAndCache(name: string) {
         if (!this.isRegistered(name)) {
-            throw new Error(name + " is not a registered mapping");
+            throw new Error(`${name} is not a registered mapping`);
         }
 
         const factory = this.ModelFactory.context[this.mappings[name].dbContextName];
@@ -86,10 +92,9 @@ class DBMappingRegistry {
         this.compiled[name] = factory.createModel(mapping);
     }
 
-    isCached(name) {
+    private isCached(name: string) {
         return name in this.compiled;
     }
 
 }
 
-module.exports = DBMappingRegistry;

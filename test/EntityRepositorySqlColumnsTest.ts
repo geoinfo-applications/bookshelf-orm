@@ -1,19 +1,16 @@
 "use strict";
 
 
+import _ from "underscore";
+import "./db/connection";
+import "./db/mappings";
+import { expect } from "chai";
+import { CarRepository } from "./db/mocks";
+import setup from "./db/setup";
+import teardown from "./db/teardown";
+
+
 describe("Entity Repository SQL Columns Test", function () {
-    /* eslint max-statements: 0 */
-
-    const _ = require("underscore");
-    const chai = require("chai");
-    const expect = chai.expect;
-
-    const CarRepository = require("./db/mocks").CarRepository;
-
-    require("./db/connection");
-    require("./db/mappings");
-
-    this.timeout(1000);
     let carRepository, car, serialNumber;
 
     beforeEach(() => {
@@ -172,7 +169,7 @@ describe("Entity Repository SQL Columns Test", function () {
         });
     });
 
-    beforeEach(require("./db/setup"));
-    afterEach(require("./db/teardown"));
+    beforeEach(setup);
+    afterEach(teardown);
 
 });

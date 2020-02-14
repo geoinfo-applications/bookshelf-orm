@@ -1,32 +1,29 @@
 "use strict";
 
+const path = require("path");
+
 module.exports = function (grunt) {
     /* eslint camelcase: 0 */
     require("time-grunt")(grunt);
 
-    var jsFiles = [
-        "orm/**/*.js",
-        "test/**/*.js",
-        "index.js",
+    const jsFiles = [
+        "orm/**/*.ts",
+        "test/**/*.ts",
+        "index.ts",
         "gruntfile.js"
     ];
 
     grunt.initConfig({
 
         eslint: {
+            options: { fix: grunt.option("fix") },
             src: jsFiles
         },
 
-        plato: {
-            reports: {
-                options: {
-                    jshint: false,
-                    exclude: /^(node_modules|coverage|reports)\//
-                },
-                files: {
-                    reports: ["**/*.js"]
-                }
-            }
+        tslint: {
+            options: { configuration: require("./tslint.js"), fix: grunt.option("fix") },
+            orm: ["orm/**/*.ts"],
+            test: ["test/**/*.ts"]
         },
 
         david: {
@@ -56,7 +53,7 @@ module.exports = function (grunt) {
             options: {
                 reporter: "spec"
             },
-            src: ["./test/**/*.js"]
+            src: ["./test/**/*.ts"]
         },
 
         mocha_istanbul: {
@@ -101,6 +98,15 @@ module.exports = function (grunt) {
                 commitMessage: "[grunt release plugin] release <%= version %>",
                 tagMessage: "[grunt release plugin] version <%= version %>"
             }
+        },
+
+        exec: {
+            tsc: {
+                command: `${path.resolve(__dirname, "node_modules/.bin/tsc")}`
+            },
+            tsCheck: {
+                command: `${path.resolve(__dirname, "node_modules/.bin/tsc")} --project ./server --noEmit`
+            }
         }
 
     });
@@ -111,6 +117,6 @@ module.exports = function (grunt) {
     grunt.registerTask("update", ["npm-install", "clean", "david"]);
     grunt.registerTask("update-development", ["env:unit_test", "update", "env:development"]);
     grunt.registerTask("test", ["env:unit_test", "code-check", "mochaTest"]);
-    grunt.registerTask("build", ["env:build", "code-check", "mocha_istanbul", "plato", "jsdoc"]);
+    grunt.registerTask("build", ["env:build", "code-check", "mocha_istanbul", "jsdoc"]);
 
 };

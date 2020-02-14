@@ -1,24 +1,21 @@
 "use strict";
 
+import { expect } from "chai";
+import ModelFactory from "../orm/ModelFactory";
+import { bookshelf } from "./db/connection";
+
 
 describe("Model Factory Test", function () {
-    /* eslint max-statements: 0 */
-
-    const expect = require("chai").expect;
-    const ModelFactory = require("../orm/ModelFactory");
-    const connection = require("./db/connection");
-
-    this.timeout(1000);
 
     describe("Context Registration", () => {
 
         it("should hold context for key", () => {
             const context = {};
 
-            ModelFactory.registerContext("thatContext", context);
+            ModelFactory.registerContext("thatContext", context as any);
             const instance = ModelFactory.context.thatContext;
 
-            expect(instance.dbContext).to.be.equal(context);
+            expect((instance as any).dbContext).to.be.equal(context);
         });
 
     });
@@ -27,7 +24,7 @@ describe("Model Factory Test", function () {
         let factory;
 
         beforeEach(function () {
-            ModelFactory.registerContext("testContext", connection.bookshelf);
+            ModelFactory.registerContext("testContext", bookshelf);
             factory = ModelFactory.context.testContext;
         });
 

@@ -1,23 +1,33 @@
 "use strict";
 
-const Q = require("q");
-const _ = require("underscore");
-const BookshelfRepository = require("./BookshelfRepository");
-const BookshelfModelWrapper = require("./BookshelfModelWrapper");
-const BookshelfDeepOperation = require("./BookshelfDeepOperation");
-const { required } = require("./Annotations");
+import Q from "q";
+import Knex from "knex";
+import _ from "underscore";
+import BookshelfRepository from "./BookshelfRepository";
+import BookshelfMapping from "./BookshelfMapping";
+import BookshelfModelWrapper from "./BookshelfModelWrapper";
+import BookshelfDeepOperation from "./BookshelfDeepOperation";
+import IEntityRepositoryOptions from "./IEntityRepositoryOptions";
+import { required } from "./Annotations";
+import IEntityType from "@geolib/bookshelf-orm/orm/typedef/IEntityType";
+import { DeepPartial } from "ts-essentials";
 
 
 /**
- * Abstraction on top of BookshelfRepository, Bookshelf and Knex. Provies basic CRUD operations for a specific type.
+ * Abstraction on top of BookshelfRepository, Bookshelf and Knex. Provides basic CRUD operations for a specific type.
  */
-class EntityRepository {
+export default class EntityRepository<E extends object | IEntityType, ID = number> {
+
+    public Mapping: BookshelfMapping;
+    private readonly Entity;
+    protected readonly wrapper: BookshelfModelWrapper<E>;
+    protected readonly repository: BookshelfRepository<object, ID>;
 
     /**
      * @param {Class | Function} Entity - Class or constructor function. Entities from this repository will be instances of this Type
      * @param {BookshelfMapping} Mapping - {@link DBMappingRegistry#compile Compiled Mapping} which describes this type and its relations
      */
-    constructor(Entity, Mapping) {
+    protected constructor(Entity, Mapping) {
         this.Entity = Entity;
         this.Mapping = Mapping;
         this.wrapper = new BookshelfModelWrapper(Mapping, Entity);
@@ -29,7 +39,7 @@ class EntityRepository {
      * @param {object} [flatModel] - Simple object representation of Entity, e.g. after deserializing JSON. Properties missing in Mapping are dropped
      * @returns {Entity} - Instance of Entity, with given properties if any
      */
-    newEntity(flatModel) {
+    public newEntity(flatModel?: DeepPartial<E>): E {
         return this.wrapper.createNew(flatModel);
     }
 
@@ -42,7 +52,7 @@ class EntityRepository {
      * @param {Array<string>} [options.exclude] - Relation names to exclude, deep relations in dot notation. Specify wildcards using "*"
      * @returns {Promise<Entity|null>} - Returns Promise resolved with entity, or null if not found
      */
-    async findOne(id, options = null) {
+    public async findOne(id: ID, options: IEntityRepositoryOptions = null): Promise<E | null> {
         return this.repository.findOne(id, options).then((item) => this.wrapper.wrap(item));
     }
 
@@ -56,7 +66,7 @@ class EntityRepository {
      * @returns {Promise<Array<Entity>>} - Returns Promise resolved with array of entities, or empty list if not found.
      *                                If ids were specified, Entities are sorted statically by given ids
      */
-    async findAll(ids, options = null) {
+    public async findAll(ids?: ID[] | IEntityRepositoryOptions, options: IEntityRepositoryOptions = null): Promise<E[]> {
         return this.repository.findAll(ids, options).then((item) => this.wrapper.wrap(item));
     }
 
@@ -69,7 +79,7 @@ class EntityRepository {
      * @param {Array<string>} [options.exclude] - Relation names to exclude, deep relations in dot notation. Specify wildcards using "*"
      * @returns {Promise<Array<Entity>>} - Returns Promise resolved with array of entities, or empty list if not found.
      */
-    async findAllWhere(q, options = null) {
+    public async findAllWhere(q: (q: Knex.QueryInterface) => void, options: IEntityRepositoryOptions = null): Promise<E[]> {
         return this.repository.findWhere(q, options).then((items) => {
             return items.length ? this.wrapper.wrap(items) : [];
         });
@@ -84,7 +94,7 @@ class EntityRepository {
      * @param {Array<string>} [options.exclude] - Relation names to exclude, deep relations in dot notation. Specify wildcards using "*"
      * @returns {Promise<Entity|null>} - Returns Promise resolved with entity, or null if not found
      */
-    async findWhere(q, options = null) {
+    public async findWhere(q: (q: Knex.QueryInterface) => void, options: IEntityRepositoryOptions = null): Promise<E | null> {
         return this.repository.findWhere(q, options).then((items) => {
             if (items.length) {
                 return this.wrapper.wrap(items.pop());
@@ -94,7 +104,7 @@ class EntityRepository {
         });
     }
 
-    async findByConditions(conditions, options = null) {
+    public async findByConditions(conditions, options: IEntityRepositoryOptions = null): Promise<E[]> {
         return this.repository.findByConditions(conditions, options).then((items) => {
             return items.length ? this.wrapper.wrap(items) : [];
         });
@@ -109,9 +119,13 @@ class EntityRepository {
      * @param {string} [options.method] - Specify "update" or "insert". Defaults to "update", or "insert" if Id is null
      * @returns {Promise<Entity | Array<Entity>>} - Returns Promise resolved with saved entity, or array of saved entities
      */
-    async save(entity, options = null) {
+
+    public async save(entity: E, options?: IEntityRepositoryOptions): Promise<E>;
+    public async save(entity: E[], options?: IEntityRepositoryOptions): Promise<E[]>;
+
+    public async save(entity: E | E[], options: IEntityRepositoryOptions = null): Promise<E | E[]> {
         if (Array.isArray(entity)) {
-            return Q.all(entity.map((entity) => this.save(entity, options)));
+            return Promise.all(entity.map((entity) => this.save(entity, options)));
         }
 
         return this.executeTransactional(() => {
@@ -126,7 +140,8 @@ class EntityRepository {
      * Hook, is called once after every successful save operation
      * @param {ID} id - Identifier of saved Entity
      */
-    afterSave() {
+    protected afterSave(_id: ID): void {
+        // template method
     }
 
     /**
@@ -137,30 +152,34 @@ class EntityRepository {
      * @param {boolean} [options.transactional] - Run in a transaction, start new one if not already transacting
      * @returns {Promise<Void>} - Returns Promise resolved after removal
      */
-    async remove(entity, options = null) {
+    public async remove(entity: ID | ID[] | E | E[], options: IEntityRepositoryOptions = null): Promise<void> {
+        let item: ID | object = entity;
+
         if (Array.isArray(entity)) {
-            return Q.all(entity.map((entity) => this.remove(entity, options)));
-        } else if (entity instanceof this.Entity) {
-            entity = this.wrapper.unwrap(entity);
+            await Promise.all((entity as E[]).map((entity) => this.remove(entity, options)));
+            return;
         }
 
-        return this.executeTransactional(() => {
-            return this.repository.remove(entity, options);
-        }, options).then((result) => {
-            const id = _.isObject(entity) ? entity[this.Mapping.identifiedBy] : +entity;
+        if (entity instanceof this.Entity) {
+            item = this.wrapper.unwrap(entity as E);
+        }
 
-            if (id) {
-                this.afterRemove(id);
-            }
-            return result;
-        });
+        await this.executeTransactional(async () => {
+            await this.repository.remove(item, options);
+        }, options);
+
+        const id = _.isObject(entity) ? entity[this.Mapping.identifiedBy] : +entity;
+        if (id) {
+            this.afterRemove(id);
+        }
     }
 
     /**
      * Hook, is called once after every successful remove operation
      * @param {ID} id - Identifier of removed Entity
      */
-    afterRemove() {
+    protected afterRemove(_id: ID): void {
+        // template method
     }
 
     /**
@@ -171,9 +190,9 @@ class EntityRepository {
      * @param {boolean} [options.transactional] - Run in a transaction, start new one if not already transacting
      * @returns {Promise<*>} - Promise resolved with result of operation. If operation fails, Promise is rejected
      */
-    async executeTransactional(operation, options = null) {
+    public async executeTransactional<R>(operation: () => R | Promise<R>, options: IEntityRepositoryOptions = null): Promise<R> {
         if (options && options.transactional && !options.transacting) {
-            return this.Mapping.startTransaction((t) => {
+            return this.Mapping.startTransaction(async (t) => {
                 options.transacting = t;
                 return Q.try(operation).then(t.commit).catch(t.rollback);
             });
@@ -191,8 +210,8 @@ class EntityRepository {
      * @param {boolean} [options.transactional] - Run in a transaction, start new one if not already transacting
      * @returns {KnexQuery} query - Returns KnexQuery for chaining
      */
-    addTransactionToQuery(query, options = required("options")) {
-        return BookshelfDeepOperation.addTransactionToQuery(query, options);
+    public addTransactionToQuery<Q extends Knex.ChainableInterface>(query: Q, options: IEntityRepositoryOptions = required("options")): Q {
+        return BookshelfDeepOperation.addTransactionToQuery<Q>(query, options);
     }
 
     /**
@@ -203,7 +222,7 @@ class EntityRepository {
      * @param {boolean} [options.transactional] - Run in a transaction, start new one if not already transacting
      * @returns {Promise<boolean>} - Returns Promise resolved with flag indicating whether an Entity with the given Identifier exists
      */
-    async exists(id, options = null) {
+    public async exists(id: ID, options: IEntityRepositoryOptions = null): Promise<boolean> {
         if (!id) {
             return Q.when(false);
         }
@@ -213,5 +232,3 @@ class EntityRepository {
     }
 
 }
-
-module.exports = EntityRepository;

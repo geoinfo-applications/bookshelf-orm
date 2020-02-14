@@ -1,33 +1,27 @@
 "use strict";
 
+import "mocha";
+import sinonChai from "sinon-chai";
+import chai, { expect } from "chai";
+import Q from "q";
+import sinon from "sinon";
+import { Car, CarRepository, Engine, Part, PartRepository } from "./db/mocks";
+import BookshelfModelWrapper from "../orm/BookshelfModelWrapper";
+import "./db/connection";
+import "./db/mappings";
+import registry from "./db/registry";
+import setup from "./db/setup";
+import teardown from "./db/teardown";
+
 
 describe("Bookshelf Model Wrapper Test", function () {
     /* eslint max-statements: 0, camelcase: 0 */
 
-    const Q = require("q");
-    const chai = require("chai");
-    const expect = chai.expect;
-    const sinon = require("sinon");
-    const sinonChai = require("sinon-chai");
     chai.use(sinonChai);
-
-    const BookshelfModelWrapper = require("../orm/BookshelfModelWrapper");
-
-    const Car = require("./db/mocks").Car;
-    const Part = require("./db/mocks").Part;
-    const Engine = require("./db/mocks").Engine;
-    const CarRepository = require("./db/mocks").CarRepository;
-    const PartRepository = require("./db/mocks").PartRepository;
-
-    require("./db/connection");
-    const registry = require("./db/registry");
-    require("./db/mappings");
-
     const CarDBMapping = registry.compile("CarDBMapping");
     const PartDBMapping = registry.compile("PartDBMapping");
 
     let carRepository, carWrapper, partRepository, partWrapper;
-    this.timeout(1000);
 
     beforeEach(() => {
         carRepository = new CarRepository();
@@ -89,7 +83,7 @@ describe("Bookshelf Model Wrapper Test", function () {
                     Collection: sinon.stub(),
                     identifiedBy: "id"
                 };
-                const wrapper = new BookshelfModelWrapper(mapping, sinon.stub().returnsThis());
+                const wrapper = new BookshelfModelWrapper(mapping as any, sinon.stub().returnsThis());
                 const item = {
                     get: sinon.stub(),
                     set: sinon.stub()
@@ -112,7 +106,7 @@ describe("Bookshelf Model Wrapper Test", function () {
                     Collection: sinon.stub(),
                     identifiedBy: "id"
                 };
-                const wrapper = new BookshelfModelWrapper(mapping, sinon.stub().returnsThis());
+                const wrapper = new BookshelfModelWrapper(mapping as any, sinon.stub().returnsThis());
                 const item = {
                     get: sinon.stub().returns(JSON.stringify(thing)),
                     set: sinon.stub()
@@ -135,7 +129,7 @@ describe("Bookshelf Model Wrapper Test", function () {
                     Collection: sinon.stub(),
                     identifiedBy: "id"
                 };
-                const wrapper = new BookshelfModelWrapper(mapping, sinon.stub().returnsThis());
+                const wrapper = new BookshelfModelWrapper(mapping as any, sinon.stub().returnsThis());
                 const item = {
                     get: sinon.stub().returns(thing),
                     set: sinon.stub()
@@ -393,7 +387,7 @@ describe("Bookshelf Model Wrapper Test", function () {
                 Collection: sinon.stub(),
                 identifiedBy: "id"
             };
-            const wrapper = new BookshelfModelWrapper(mapping, sinon.stub().returnsThis());
+            const wrapper = new BookshelfModelWrapper(mapping as any, sinon.stub().returnsThis());
             const item = {
                 get: sinon.stub().returns(thing),
                 set: sinon.stub()
@@ -437,14 +431,14 @@ describe("Bookshelf Model Wrapper Test", function () {
         it("should set given related single item of data on list in Entity", () => {
             const flatModel = {
                 engine: {
-                    name: "label" + Date.now()
+                    serialNumber: "label" + Date.now()
                 }
             };
 
             const item = partWrapper.createNew(flatModel);
 
             expect(item.engine).to.be.instanceof(Engine);
-            expect(item.engine.label).to.be.eql(flatModel.engine.label);
+            expect(item.engine.serialNumber).to.be.eql(flatModel.engine.serialNumber);
         });
 
     });
@@ -461,13 +455,15 @@ describe("Bookshelf Model Wrapper Test", function () {
                 Collection: sinon.stub(),
                 identifiedBy: "id"
             };
-            const wrapper = new BookshelfModelWrapper(mapping, sinon.stub().returnsThis());
+            const wrapper = new BookshelfModelWrapper(mapping as any, sinon.stub().returnsThis());
+
+            let privateValue = undefined;
             const item = {
                 get: () => {
-                    return this._value;
+                    return privateValue;
                 },
                 set: (name, value) => {
-                    this._value = value;
+                    privateValue = value;
                 }
             };
             const entity = wrapper.wrap(item);
@@ -481,7 +477,7 @@ describe("Bookshelf Model Wrapper Test", function () {
         return carWrapper.wrap(CarDBMapping.Model.forge({ name: "", model_name: "" }));
     }
 
-    beforeEach(require("./db/setup"));
-    afterEach(require("./db/teardown"));
+    beforeEach(setup);
+    afterEach(teardown);
 
 });

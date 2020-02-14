@@ -1,25 +1,22 @@
 "use strict";
 
+import Q from "q";
+import chai, { expect } from "chai";
+import sinon from "sinon";
+import sinonChai from "sinon-chai";
+import { CarRepository } from "./db/mocks";
+import "./db/connection";
+import registry from "./db/registry";
+import "./db/mappings";
+import IOptionalEntityRepositoryOptions from "../orm/IEntityRepositoryOptions";
+import setup from "./db/setup";
+import teardown from "./db/teardown";
+
 
 describe("Entity Repository Transactions Test", function () {
-    /* eslint max-statements: 0 */
-
-    const Q = require("q");
-    const chai = require("chai");
-    const expect = chai.expect;
-    const sinon = require("sinon");
-    const sinonChai = require("sinon-chai");
     chai.use(sinonChai);
-
-    const CarRepository = require("./db/mocks").CarRepository;
-
-    require("./db/connection");
-    const registry = require("./db/registry");
-    require("./db/mappings");
-
     const CarDBMapping = registry.compile("CarDBMapping");
 
-    this.timeout(1000);
     let carRepository;
 
     beforeEach(() => {
@@ -30,12 +27,12 @@ describe("Entity Repository Transactions Test", function () {
     });
 
     afterEach(() => {
-        CarDBMapping.startTransaction.restore();
+        (CarDBMapping.startTransaction as sinon.spy).restore();
     });
 
     it("should save in transaction", () => {
         const car = carRepository.newEntity();
-        const options = { transactional: true };
+        const options: IOptionalEntityRepositoryOptions = { transactional: true };
 
         const promise = carRepository.save(car, options);
 
@@ -63,7 +60,7 @@ describe("Entity Repository Transactions Test", function () {
 
     it("should remove in transaction", () => {
         const car = carRepository.newEntity();
-        const options = { transactional: true };
+        const options: IOptionalEntityRepositoryOptions = { transactional: true };
         let promise = carRepository.save(car);
 
         promise = promise.then(() => {
@@ -82,7 +79,7 @@ describe("Entity Repository Transactions Test", function () {
 
         return carRepository.save(car).then(() => {
             return CarDBMapping.startTransaction((transaction) => {
-                const options = { transactional: transaction };
+                const options: IOptionalEntityRepositoryOptions = { transacting: transaction };
 
                 const promise = carRepository.remove(car, options);
 
@@ -140,7 +137,7 @@ describe("Entity Repository Transactions Test", function () {
         });
 
         return promise.then(() => {
-            expect(promise.isRejected()).to.be.eql(true);
+            throw new Error("should fail");
         }).catch(() => {
             expect(transaction.commit).to.have.callCount(0);
             expect(transaction.rollback).to.have.callCount(1);
@@ -162,7 +159,7 @@ describe("Entity Repository Transactions Test", function () {
         });
 
         return promise.then(() => {
-            expect(promise.isRejected()).to.be.eql(true);
+            throw new Error("should fail");
         }).catch(() => {
             expect(transaction.commit).to.have.callCount(0);
             expect(transaction.rollback).to.have.callCount(1);
@@ -183,7 +180,7 @@ describe("Entity Repository Transactions Test", function () {
             const promise = carRepository.save(car, options);
 
             return promise.then(() => {
-                expect(promise.isRejected()).to.be.eql(true);
+                throw new Error("should fail");
             }).catch(() => {
                 expect(transaction.commit).to.have.callCount(0);
                 expect(transaction.rollback).to.have.callCount(0);
@@ -205,7 +202,7 @@ describe("Entity Repository Transactions Test", function () {
             const promise = carRepository.remove(car, options);
 
             return promise.then(() => {
-                expect(promise.isRejected()).to.be.eql(true);
+                throw new Error("should fail");
             }).catch(() => {
                 expect(transaction.commit).to.have.callCount(0);
                 expect(transaction.rollback).to.have.callCount(0);
@@ -237,7 +234,7 @@ describe("Entity Repository Transactions Test", function () {
             return CarDBMapping.startTransaction((t) => {
                 transaction = t;
                 sinon.spy(transaction, "commit");
-                const options = { transactional: transaction };
+                const options = { transacting: transaction };
 
                 const promise = carRepository.remove(car, options);
 
@@ -268,7 +265,7 @@ describe("Entity Repository Transactions Test", function () {
         });
     });
 
-    beforeEach(require("./db/setup"));
-    afterEach(require("./db/teardown"));
+    beforeEach(setup);
+    afterEach(teardown);
 
 });

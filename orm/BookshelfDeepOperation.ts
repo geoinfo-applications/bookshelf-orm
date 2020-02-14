@@ -1,39 +1,47 @@
 "use strict";
 
-const { required } = require("./Annotations");
+import Knex from "knex";
+import IEntityRepositoryOptions from "./IEntityRepositoryOptions";
+import { required } from "./Annotations";
+import BookshelfMapping from "./BookshelfMapping";
+import { IRelationDescriptor } from "./typedef/IRelationDescriptor";
 
 
-class BookshelfDeepOperation {
+export default abstract class BookshelfDeepOperation {
 
-    constructor(mapping, options = required("options")) {
+    protected readonly Mapping: BookshelfMapping;
+    protected readonly relations: Array<IRelationDescriptor<unknown>>;
+    protected readonly options: IEntityRepositoryOptions;
+
+    protected constructor(mapping: BookshelfMapping, options: IEntityRepositoryOptions = required("options")) {
         this.Mapping = mapping;
         this.relations = mapping.relations || [];
         this.options = options;
     }
 
-    get cascadeRelations() {
+    protected get cascadeRelations() {
         return this.relations.filter((relation) => relation.references.cascade);
     }
 
-    get relationsWhereKeyIsOnRelated() {
+    protected get relationsWhereKeyIsOnRelated() {
         return this.relations.filter(this.isRelationWithKeyIsOnRelated);
     }
 
-    get relationsWhereKeyIsOnItem() {
+    protected get relationsWhereKeyIsOnItem() {
         return this.relations.filter((relation) => relation.type === "belongsTo");
     }
 
-    isRelationWithKeyIsOnRelated(relation) {
+    protected isRelationWithKeyIsOnRelated(relation) {
         return relation.type === "hasMany" || relation.type === "hasOne";
     }
 
-    addTransactionToQuery(query) {
+    protected addTransactionToQuery(query) {
         return BookshelfDeepOperation.addTransactionToQuery(query, this.options);
     }
 
-    static addTransactionToQuery(query, options = required("options")) {
+    public static addTransactionToQuery<Q extends Knex.ChainableInterface>(query: Q, options: IEntityRepositoryOptions = required("options")): Q {
         if (options && options.transacting) {
-            query.transacting(options.transacting);
+            query.transacting(options.transacting as any);
         }
 
         return query;
@@ -41,4 +49,3 @@ class BookshelfDeepOperation {
 
 }
 
-module.exports = BookshelfDeepOperation;

@@ -1,20 +1,16 @@
 "use strict";
 
+import { expect } from "chai";
+import { CarRepository, EngineRepository, PartRepository } from "./db/mocks";
+import "./db/connection";
+import registry from "./db/registry";
+import "./db/mappings";
+import { BookshelfRepository } from "../index";
+import setup from "./db/setup";
+import teardown from "./db/teardown";
+
 
 describe("Bookshelf Repository Orphan Removal Test", function () {
-    /* eslint max-statements: 0, camelcase: 0 */
-
-    const chai = require("chai");
-    const expect = chai.expect;
-
-    const CarRepository = require("./db/mocks").CarRepository;
-    const EngineRepository = require("./db/mocks").EngineRepository;
-    const PartRepository = require("./db/mocks").PartRepository;
-
-    require("./db/connection");
-    const registry = require("./db/registry");
-    require("./db/mappings");
-
     const CarDBMapping = registry.compile("CarDBMapping");
     const PartDBMapping = registry.compile("PartDBMapping");
     const EngineDBMapping = registry.compile("EngineDBMapping");
@@ -23,11 +19,10 @@ describe("Bookshelf Repository Orphan Removal Test", function () {
     const OutletDBMapping = registry.compile("OutletDBMapping");
     const InjectionDBMapping = registry.compile("InjectionDBMapping");
 
-    this.timeout(1000);
-    let carRepository;
+    let carRepository: BookshelfRepository<object>;
 
     beforeEach(() => {
-        carRepository = new CarRepository().repository;
+        carRepository = (new CarRepository() as any).repository as BookshelfRepository<object>;
     });
 
     describe("1:n relations", () => {
@@ -133,36 +128,33 @@ describe("Bookshelf Repository Orphan Removal Test", function () {
 
     });
 
-    it("should save convoluted relations in transaction", () => {
-        return Promise.all([
-            CarDBMapping.Model.forge().save(),
-            MakeDBMapping.Model.forge().save()
-        ]).then(([car, make]) => {
-            return PartDBMapping.Model.forge({ car_id: car.id, name: "part1" }).save().then((part) => {
-                const wheel1 = WheelDBMapping.Model.forge({ part_id: part.id, make_id: make.id, index: 1 });
-                const wheel2 = WheelDBMapping.Model.forge({ part_id: part.id, make_id: make.id, index: 2 });
-                return Promise.all([wheel1.save(), wheel2.save()]);
-            }).then(() => carRepository.findOne(car.id, {}));
-        }).then((car) => {
-            const parts = car.relations.relation_parts;
-            expect(parts.models.length).to.be.eql(1);
-            const wheels = parts.at(0).relations.relation_wheels;
-            expect(wheels.models.length).to.be.eql(2);
-            expect(wheels.at(0).relations.relation_make.id).to.be.eql(wheels.at(1).relations.relation_make.id);
+    it("should save convoluted relations in transaction", async () => {
+        let car = await CarDBMapping.Model.forge().save();
+        let make = await MakeDBMapping.Model.forge().save();
+        let part = await PartDBMapping.Model.forge({ car_id: car.id, name: "part1" }).save();
+        const wheel1 = WheelDBMapping.Model.forge({ part_id: part.id, make_id: make.id, index: 1 });
+        const wheel2 = WheelDBMapping.Model.forge({ part_id: part.id, make_id: make.id, index: 2 });
+        await Promise.all([wheel1.save(), wheel2.save()]);
+        car = await carRepository.findOne(car.id, {});
 
-            wheels.remove(wheels.at(0));
-            car.set("description", "foo");
+        let parts = car.relations.relation_parts;
+        expect(parts.models.length).to.be.eql(1);
+        let wheels = parts.at(0).relations.relation_wheels;
+        expect(wheels.models.length).to.be.eql(2);
+        expect(wheels.at(0).relations.relation_make.id).to.be.eql(wheels.at(1).relations.relation_make.id);
+        wheels.remove(wheels.at(0));
+        car.set("description", "foo");
 
-            return CarDBMapping.startTransaction((t) => {
-                return carRepository.save(car, { transacting: t }).then(t.commit).catch(t.rollback);
-            }).then(carRepository.findOne(car.id, {}));
-        }).then((car) => {
-            const parts = car.relations.relation_parts;
-            expect(parts.models.length).to.be.eql(1);
-            const wheels = parts.at(0).relations.relation_wheels;
-            expect(wheels.models.length).to.be.eql(1);
-            expect(wheels.at(0).relations.relation_make.id).to.be.gt(0);
+        await CarDBMapping.startTransaction((t) => {
+            return carRepository.save(car, { transacting: t }).then(t.commit).catch(t.rollback);
         });
+
+        car = await carRepository.findOne(car.id, {});
+        parts = car.relations.relation_parts;
+        expect(parts.models.length).to.be.eql(1);
+        wheels = parts.at(0).relations.relation_wheels;
+        expect(wheels.models.length).to.be.eql(1);
+        expect(wheels.at(0).relations.relation_make.id).to.be.gt(0);
     });
 
 
@@ -172,7 +164,7 @@ describe("Bookshelf Repository Orphan Removal Test", function () {
         return CarDBMapping.Model.forge({ name: "car" + tableIndex++ }).save();
     }
 
-    beforeEach(require("./db/setup"));
-    afterEach(require("./db/teardown"));
+    beforeEach(setup);
+    afterEach(teardown);
 
 });

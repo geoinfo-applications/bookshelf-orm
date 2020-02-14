@@ -1,14 +1,18 @@
 "use strict";
 
-const { required } = require("./Annotations");
+import Bookshelf from "bookshelf";
+import IBookshelfDeepSaveOperationBehavior from "./IBookshelfDeepSaveOperationBehavior";
+import { required } from "./Annotations";
+import BookshelfMapping from "./BookshelfMapping";
+import IEntityRepositoryOptions from "./IEntityRepositoryOptions";
 
 
-class BookshelfDeepSaveOperationDefaultBehavior {
+export default class BookshelfDeepSaveOperationDefaultBehavior implements IBookshelfDeepSaveOperationBehavior {
 
-    executeSaveOperation(item, mapping, options = required("options")) {
+    public async executeSaveOperation(item: Bookshelf.Model, _mapping: BookshelfMapping, options: IEntityRepositoryOptions = required("options")):
+        Promise<Bookshelf.Model> {
         return item.save(null, options);
     }
 
 }
 
-module.exports = BookshelfDeepSaveOperationDefaultBehavior;

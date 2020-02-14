@@ -1,10 +1,10 @@
 "use strict";
 
-const Q = require("q");
-const knex = require("./connection").knex;
+import Q from "q";
+import { knex } from "./connection";
 
 /* eslint max-statements: 0 */
-module.exports = function () {
+export default function () {
 
     // car sample
     const car = knex.schema.withSchema("datadictionary").createTable("car", (table) => {
@@ -68,7 +68,7 @@ module.exports = function () {
         table.specificType("id", "serial");
         table.increments("revision_id");
         table.integer("parent_id");
-        table.boolean("is_deleted").default(false);
+        table.boolean("is_deleted").defaultTo(false);
         table.string("name");
         table.integer("distance_to_star");
         table.integer("composition_id");
@@ -78,7 +78,7 @@ module.exports = function () {
         table.specificType("id", "serial");
         table.increments("revision_id");
         table.integer("parent_id");
-        table.boolean("is_deleted").default(false);
+        table.boolean("is_deleted").defaultTo(false);
         table.integer("planet_id");
         table.integer("distance_to_planet");
         table.string("name");
@@ -89,7 +89,7 @@ module.exports = function () {
         table.specificType("id", "serial");
         table.increments("the_revision_id");
         table.integer("the_parent_id");
-        table.boolean("is_deleted").default(false);
+        table.boolean("is_deleted").defaultTo(false);
         table.integer("planet_id");
         table.text("description");
         table.integer("composition_id");
@@ -99,7 +99,7 @@ module.exports = function () {
         table.specificType("id", "serial");
         table.increments("revision_id");
         table.integer("parent_id");
-        table.boolean("is_deleted").default(false);
+        table.boolean("is_deleted").defaultTo(false);
         table.text("description");
     });
 
@@ -114,7 +114,7 @@ module.exports = function () {
         table.increments("revision_id");
         table.integer("parent_id");
         table.string("type");
-        table.specificType("death", "timestamp").default(null);
+        table.specificType("death", "timestamp").defaultTo(null);
     });
 
     const unicorn = knex.schema.withSchema("datadictionary").createTable("unicorn", (table) => {
@@ -122,7 +122,7 @@ module.exports = function () {
         table.increments("revision_id");
         table.integer("parent_id");
         table.string("name");
-        table.specificType("death", "timestamp").default(null);
+        table.specificType("death", "timestamp").defaultTo(null);
         table.integer("horn_type_id");
     });
 
@@ -132,7 +132,7 @@ module.exports = function () {
         table.integer("parent_id");
         table.string("player");
         table.string("instrument");
-        table.specificType("death", "timestamp").default(null);
+        table.specificType("death", "timestamp").defaultTo(null);
     });
 
     const album = knex.schema.withSchema("datadictionary").createTable("album", (table) => {
@@ -140,7 +140,7 @@ module.exports = function () {
         table.increments("revision_id");
         table.integer("parent_id");
         table.string("name");
-        table.specificType("death", "timestamp").default(null);
+        table.specificType("death", "timestamp").defaultTo(null);
     });
 
     const albumInstrument = knex.schema.withSchema("datadictionary").createTable("album_instrument", (table) => {
@@ -155,7 +155,7 @@ module.exports = function () {
         table.increments("revision_id");
         table.integer("parent_id");
         table.string("name");
-        table.specificType("death", "timestamp").default(null);
+        table.specificType("death", "timestamp").defaultTo(null);
     });
 
     const kitten = knex.schema.withSchema("datadictionary").createTable("kitten", (table) => {
@@ -164,19 +164,17 @@ module.exports = function () {
         table.integer("cat_id");
         table.integer("parent_id");
         table.string("name");
-        table.specificType("death", "timestamp").default(null);
+        table.specificType("death", "timestamp").defaultTo(null);
     });
 
     const halfling = knex.schema.withSchema("datadictionary").createTable("halfling", (table) => {
         table.uuid("id").defaultTo(knex.raw("uuid_generate_v4()")).primary();
         table.integer("height");
         table.string("name");
-        table.specificType("death", "timestamp").default(null);
+        table.specificType("death", "timestamp").defaultTo(null);
     });
 
     return Q.all([car, part, wheel, engine, owner, make, outlet, injection, parkingSpace,
         planet, moon, atmosphere, composition, person, horn, unicorn, instrument, album, albumInstrument, cat, kitten, halfling
     ]);
-};
-
-
+}

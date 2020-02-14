@@ -1,11 +1,17 @@
 "use strict";
 
-const { required } = require("./Annotations");
+import Bookshelf from "bookshelf";
+import IBookshelfDeepSaveOperationBehavior from "./IBookshelfDeepSaveOperationBehavior";
+import { required } from "./Annotations";
+import BookshelfMapping from "./BookshelfMapping";
+import IEntityRepositoryOptions from "./IEntityRepositoryOptions";
 
 
-class BookshelfDeepSaveOperationHistoryBehavior {
+export default class BookshelfDeepSaveOperationHistoryBehavior implements IBookshelfDeepSaveOperationBehavior {
 
-    executeSaveOperation(item, mapping, options = required("options")) {
+    public async executeSaveOperation(item: Bookshelf.Model, mapping: BookshelfMapping, options: IEntityRepositoryOptions = required("options")):
+        Promise<Bookshelf.Model> {
+
         const { revisionId, parentId } = mapping.historyColumns;
         item.set(parentId, item.get(revisionId) || null);
         item.unset(revisionId);
@@ -16,4 +22,3 @@ class BookshelfDeepSaveOperationHistoryBehavior {
 
 }
 
-module.exports = BookshelfDeepSaveOperationHistoryBehavior;

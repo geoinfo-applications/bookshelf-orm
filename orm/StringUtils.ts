@@ -1,9 +1,9 @@
 "use strict";
 
 
-class StringUtils {
+export default class StringUtils {
 
-    static snakeToCamelCase(string) {
+    public static snakeToCamelCase(string: string): string {
         let out = "";
         for (let i = 0; i < string.length; i++) {
             if (string[i] === "_") {
@@ -16,14 +16,13 @@ class StringUtils {
         return out;
     }
 
-    static camelToSnakeCase(string) {
+    public static camelToSnakeCase(string: string): string {
         return string.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase();
     }
 
-    static firstLetterUp(string) {
+    public static firstLetterUp(string: string): string {
         return string[0].toUpperCase() + string.substr(1);
     }
 
 }
 
-module.exports = StringUtils;

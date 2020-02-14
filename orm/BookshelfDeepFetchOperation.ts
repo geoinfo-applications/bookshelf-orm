@@ -1,41 +1,44 @@
 "use strict";
 
-const BookshelfDeepOperation = require("./BookshelfDeepOperation");
-const MappingRelationsIterator = require("./MappingRelationsIterator");
-const { required } = require("./Annotations");
+import BookshelfDeepOperation from "./BookshelfDeepOperation";
+import MappingRelationsIterator from "./MappingRelationsIterator";
+import BookshelfMapping from "./BookshelfMapping";
+import IEntityRepositoryOptions from "./IEntityRepositoryOptions";
+import { required } from "./Annotations";
 
 
-class BookshelfDeepFetchOperation extends BookshelfDeepOperation {
+export default class BookshelfDeepFetchOperation extends BookshelfDeepOperation {
 
-    constructor(mapping, options = required("options")) {
+    constructor(mapping: BookshelfMapping, options: IEntityRepositoryOptions = required("options")) {
         super(mapping, options);
     }
 
-    fetch(model, fetchOptions = required("fetchOptions")) {
-        return model.fetch(fetchOptions)
-            .then((model) => this.stripEmptyRelations(model))
-            .catch((error) => {
-                if (error.message === "EmptyResponse") {
-                    return null;
-                }
-                return Promise.reject(error);
-            });
+    public async fetch(model, fetchOptions: IEntityRepositoryOptions = required("fetchOptions")) {
+        try {
+            const model1 = await model.fetch(fetchOptions);
+            return await this.stripEmptyRelations(model1);
+        } catch (error) {
+            if (error.message === "EmptyResponse") {
+                return null;
+            }
+
+            throw error;
+        }
     }
 
-    stripEmptyRelations(model) {
+    private stripEmptyRelations(model) {
         return this.mappingRelationsIterator(model, null, this.stripRelationIfEmpty);
     }
 
-    stripRelationIfEmpty(relatedNode, node, key) {
+    private stripRelationIfEmpty(relatedNode, node, key) {
         if (Object.keys(relatedNode.attributes).length === 0) {
             delete node.relations[key];
         }
     }
 
-    mappingRelationsIterator(model, preOrder, postOrder) {
+    private mappingRelationsIterator(model, preOrder, postOrder) {
         return new MappingRelationsIterator(preOrder, postOrder).traverse(this.Mapping, model);
     }
 
 }
 
-module.exports = BookshelfDeepFetchOperation;

@@ -1,9 +1,9 @@
 "use strict";
 
-const Q = require("q");
-const knex = require("./connection").knex;
+import { knex } from "./connection";
 
-module.exports = () => {
+
+export default () => {
     const tables = [
         "datadictionary.car",
         "datadictionary.part",
@@ -29,7 +29,5 @@ module.exports = () => {
         "datadictionary.halfling"
     ];
 
-    return Q.all(tables.map((table) => knex.schema.dropTable(table)));
+    return Promise.all(tables.map((table) => knex.schema.dropTable(table)));
 };
-
-

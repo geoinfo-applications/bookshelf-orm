@@ -1,14 +1,19 @@
 "use strict";
 
-const knex = require("knex");
-const bookshelf = require("bookshelf");
-const _ = require("underscore");
-const os = require("os");
+import knex from "knex";
+import bookshelf from "bookshelf";
+import _ from "underscore";
+import os from "os";
+import { ModelFactoryStatic } from "./ModelFactory";
+import IDbConnectionConfig from "./IDbConnectionConfig";
 
 
-class PostgresDBDefinition {
+export default class PostgresDBDefinition {
 
-    constructor(config, ModelFactory) {
+    private readonly ModelFactory: ModelFactoryStatic;
+    private config: IDbConnectionConfig;
+
+    constructor(config, ModelFactory: ModelFactoryStatic) {
         this.config = config;
         this.ModelFactory = ModelFactory;
     }
@@ -38,4 +43,3 @@ class PostgresDBDefinition {
 
 }
 
-module.exports = PostgresDBDefinition;

@@ -1,33 +1,34 @@
 "use strict";
+import { expect } from "chai";
+import {
+    CarRepository,
+    EngineRepository,
+    HalflingRepository,
+    NamelessOwnerRepository,
+    OwnerRepository, Person,
+    PersonRepository,
+    VeyronEngineRepository,
+    VeyronPartRepository
+} from "./db/mocks";
+import "./db/connection";
+import "./db/mappings";
+import registry from "./db/registry";
+import { BookshelfRepository } from "../index";
+import setup from "./db/setup";
+import teardown from "./db/teardown";
 
 
 describe("Bookshelf Repository Test", function () {
-    /* eslint max-statements: 0, camelcase: 0 */
-
-    const expect = require("chai").expect;
-    const CarRepository = require("./db/mocks").CarRepository;
-    const EngineRepository = require("./db/mocks").EngineRepository;
-    const VeyronEngineRepository = require("./db/mocks").VeyronEngineRepository;
-    const VeyronPartRepository = require("./db/mocks").VeyronPartRepository;
-    const OwnerRepository = require("./db/mocks").OwnerRepository;
-    const NamelessOwnerRepository = require("./db/mocks").NamelessOwnerRepository;
-    const PersonRepository = require("./db/mocks").PersonRepository;
-    const HalflingRepository = require("./db/mocks").HalflingRepository;
-
-    require("./db/connection");
-    const registry = require("./db/registry");
-    require("./db/mappings");
 
     const CarDBMapping = registry.compile("CarDBMapping");
     const PartDBMapping = registry.compile("PartDBMapping");
     const PersonDBMapping = registry.compile("PersonDBMapping");
     const HalflingDBMapping = registry.compile("HalflingDBMapping");
 
-    this.timeout(1000);
-    let carRepository;
+    let carRepository: BookshelfRepository<object>;
 
     beforeEach(() => {
-        carRepository = new CarRepository().repository;
+        carRepository = (new CarRepository() as any).repository as BookshelfRepository<object>;
     });
 
     it("should be defined", () => {
@@ -122,7 +123,7 @@ describe("Bookshelf Repository Test", function () {
         });
 
         it("should escape correctly for ids[] as uuid[] and order them", async () => {
-            const halflingRepository = new HalflingRepository().repository;
+            const halflingRepository = (new HalflingRepository() as any).repository as BookshelfRepository<object>;
             await createHalfling();
             await createHalfling();
             await createHalfling();
@@ -174,10 +175,10 @@ describe("Bookshelf Repository Test", function () {
 
     describe("remove", () => {
 
-        let personRepository;
+        let personRepository: BookshelfRepository<object, string>;
 
         beforeEach(() => {
-            personRepository = new PersonRepository().repository;
+            personRepository = (new PersonRepository() as any).repository as BookshelfRepository<object, string>;
         });
 
         it("should drop item which is identified by a column other than id", () => {
@@ -194,11 +195,11 @@ describe("Bookshelf Repository Test", function () {
 
     describe("stringifyJson", () => {
         let personRepository;
-        let personRepositoryBookshelf;
+        let personRepositoryBookshelf: BookshelfRepository<object, string>;
 
         beforeEach(() => {
             personRepository = new PersonRepository();
-            personRepositoryBookshelf = new PersonRepository().repository;
+            personRepositoryBookshelf = (new PersonRepository() as any).repository as BookshelfRepository<object, string>;
         });
 
         it("shouldn't stringify null values", () => {
@@ -354,7 +355,7 @@ describe("Bookshelf Repository Test", function () {
         return HalflingDBMapping.Model.forge({ name: "halfling" + tableIndex++ }).save();
     }
 
-    beforeEach(require("./db/setup"));
-    afterEach(require("./db/teardown"));
+    beforeEach(setup);
+    afterEach(teardown);
 
 });

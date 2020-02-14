@@ -1,27 +1,36 @@
 "use strict";
 
-const _ = require("underscore");
-const BookshelfModelRelation = require("./BookshelfModelRelation");
-const StringUtils = require("./StringUtils");
+import _ from "underscore";
+import Bookshelf from "bookshelf";
+import BookshelfModelRelation from "./BookshelfModelRelation";
+import StringUtils from "./StringUtils";
+import BookshelfMapping from "./BookshelfMapping";
+import IEntityType from "./typedef/IEntityType";
 
 
-class BookshelfModelWrapper {
+export default class BookshelfModelWrapper<E extends IEntityType> {
 
-    constructor(Mapping, Entity) {
+    private readonly Mapping: BookshelfMapping;
+    private readonly Entity: () => E;
+    private readonly modelMap: WeakMap<object, E>;
+    private wrappedPrototype: E;
+    private wrappedPrototypeKeys: string[];
+
+    public constructor(Mapping: BookshelfMapping, Entity: () => E) {
         this.Mapping = Mapping;
         this.Entity = Entity || Object;
         this.modelMap = new WeakMap();
     }
 
-    get columnMappings() {
+    private get columnMappings() {
         return this.Mapping.columnMappings;
     }
 
-    get columnNames() {
+    private get columnNames() {
         return this.Mapping.columnNames;
     }
 
-    wrap(item) {
+    public wrap(item: object) {
         if (this.modelMap.has(item)) {
             return this.modelMap.get(item);
         }
@@ -29,16 +38,16 @@ class BookshelfModelWrapper {
         return item && (this.wrapCollectionTypes(item) || this.createWrappedInstance(item));
     }
 
-    wrapCollectionTypes(item) {
+    private wrapCollectionTypes(item: object) {
         if (Array.isArray(item)) {
             return item.map(this.wrap, this);
         } else if (item instanceof this.Mapping.Collection) {
-            return this.wrap(item.models);
+            return this.wrap((item as Bookshelf.Collection).models);
         }
     }
 
-    createWrappedInstance(item) {
-        const wrapped = new this.Entity();
+    private createWrappedInstance(item: object): E {
+        const wrapped = Reflect.construct(this.Entity, []) as E;
         this.addItemGetter(wrapped, item);
 
         const wrappedPrototype = this.getWrappedPrototype();
@@ -49,13 +58,13 @@ class BookshelfModelWrapper {
         return wrapped;
     }
 
-    addItemGetter(wrapped, item) {
+    private addItemGetter(wrapped, item: object) {
         Object.defineProperty(wrapped, "item", {
             get: () => item
         });
     }
 
-    getWrappedPrototype() {
+    private getWrappedPrototype() {
         if (this.wrappedPrototype) {
             return this.wrappedPrototype;
         }
@@ -66,7 +75,7 @@ class BookshelfModelWrapper {
         return this.wrappedPrototype;
     }
 
-    createWrappedPrototype() {
+    private createWrappedPrototype() {
         const wrappedPrototype = Object.create(this.Entity.prototype);
         this.defineProperties(wrappedPrototype);
 
@@ -80,16 +89,16 @@ class BookshelfModelWrapper {
         return wrappedPrototype;
     }
 
-    defineProperties(wrapped) {
+    private defineProperties(wrapped) {
         this.defineColumnProperties(wrapped);
         this.defineRelationalProperties(wrapped);
     }
 
-    defineColumnProperties(wrapped) {
+    private defineColumnProperties(wrapped) {
         this.columnMappings.forEach((property) => this.defineColumnProperty(wrapped, property));
     }
 
-    defineColumnProperty(wrapped, property) {
+    private defineColumnProperty(wrapped, property) {
         Object.defineProperty(wrapped, StringUtils.snakeToCamelCase(property.name), {
             get() {
                 const value = this.item.get(property.name);
@@ -106,33 +115,33 @@ class BookshelfModelWrapper {
         });
     }
 
-    defineRelationalProperties(wrapped) {
+    private defineRelationalProperties(wrapped) {
         this.Mapping.relations.forEach((relation) => {
-            const wrapper = new BookshelfModelWrapper(relation.references.mapping, relation.references.type);
+            const wrapper = new BookshelfModelWrapper(relation.references.mapping as BookshelfMapping, relation.references.type as any);
             const bookshelfModelRelation = new BookshelfModelRelation(wrapped, wrapper, relation);
 
-            wrapped["new" + StringUtils.firstLetterUp(relation.name)] = (model) => wrapper.createNew(model);
+            wrapped[`new${StringUtils.firstLetterUp(relation.name)}`] = (model) => wrapper.createNew(model);
 
             if (relation.type in bookshelfModelRelation) {
                 bookshelfModelRelation[relation.type]();
             } else {
-                throw new Error("Relation of type '" + relation.type + "' not implemented");
+                throw new Error(`Relation of type '${relation.type}' not implemented`);
             }
 
         });
     }
 
-    localizeProperties(wrapped, wrappedPrototype) {
+    private localizeProperties(wrapped, wrappedPrototype) {
         this.wrappedPrototypeKeys.forEach((key) => {
             if (!wrapped.hasOwnProperty(key)) {
-                Object.defineProperty(wrapped, key, Object.getOwnPropertyDescriptor(wrappedPrototype, key));
+                Object.defineProperty(wrapped, key, Object.getOwnPropertyDescriptor(wrappedPrototype, key)!);
             }
         });
     }
 
-    unwrap(entity) {
+    public unwrap(entity: E): Bookshelf.Model | Bookshelf.Model[] {
         if (Array.isArray(entity)) {
-            return entity.map(this.unwrap, this);
+            return entity.map((e) => this.unwrap(e));
         }
 
         this.columnMappings.filter((property) => property.type === "json").forEach((property) => {
@@ -143,7 +152,7 @@ class BookshelfModelWrapper {
         return entity.item;
     }
 
-    createNew(flatModel) {
+    public createNew(flatModel?: object) {
         const item = this.Mapping.Model.forge();
         const wrapped = this.wrap(item);
 
@@ -152,7 +161,7 @@ class BookshelfModelWrapper {
         return wrapped;
     }
 
-    applyFlatModel(wrapped, flatModel) {
+    private applyFlatModel(wrapped, flatModel?: object) {
         if (flatModel) {
             const relationNames = this.Mapping.relationNames.filter((name) => name in flatModel);
 
@@ -161,7 +170,7 @@ class BookshelfModelWrapper {
         }
     }
 
-    applyFlatModelValues(wrapped, model) {
+    private applyFlatModelValues(wrapped, model) {
         for (let name of this.columnNames) {
             name = StringUtils.snakeToCamelCase(name);
             if (name in model) {
@@ -170,7 +179,7 @@ class BookshelfModelWrapper {
         }
     }
 
-    applyFlatModelRelations(wrapped, model, relationNames) {
+    private applyFlatModelRelations(wrapped, model, relationNames) {
         if (!relationNames) {
             return;
         }
@@ -180,15 +189,14 @@ class BookshelfModelWrapper {
             const pascalCasedName = StringUtils.firstLetterUp(relationName);
 
             if (Array.isArray(relatedData)) {
-                wrapped["add" + pascalCasedName](relatedData.map((data) => {
-                    return wrapped["new" + pascalCasedName](data);
+                wrapped[`add${pascalCasedName}`](relatedData.map((data) => {
+                    return wrapped[`new${pascalCasedName}`](data);
                 }));
             } else if (relatedData) {
-                wrapped[relationName] = wrapped["new" + pascalCasedName](relatedData);
+                wrapped[relationName] = wrapped[`new${pascalCasedName}`](relatedData);
             }
         });
     }
 
 }
 
-module.exports = BookshelfModelWrapper;

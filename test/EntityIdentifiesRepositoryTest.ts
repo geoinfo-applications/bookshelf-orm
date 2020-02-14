@@ -1,27 +1,26 @@
 "use strict";
 
+import chai, { expect } from "chai";
+import sinonChai from "sinon-chai";
+import {
+    AlbumRepository,
+    CatRepository,
+    HornRepository,
+    InstrumentRepository,
+    KittenRepository,
+    SampleCatRepository,
+    SampleKittenRepository,
+    UnicornRepository
+} from "./db/mocks";
+import "./db/connection";
+import "./db/mappings";
+import setup from "./db/setup";
+import teardown from "./db/teardown";
+
 
 describe("Entity Repository Test with identifies option", function () {
-    /* eslint max-statements: 0 */
-
-    const chai = require("chai");
-    const expect = chai.expect;
-    const sinonChai = require("sinon-chai");
     chai.use(sinonChai);
 
-    const HornRepository = require("./db/mocks").HornRepository;
-    const UnicornRepository = require("./db/mocks").UnicornRepository;
-    const AlbumRepository = require("./db/mocks").AlbumRepository;
-    const InstrumentRepository = require("./db/mocks").InstrumentRepository;
-    const CatRepository = require("./db/mocks").CatRepository;
-    const KittenRepository = require("./db/mocks").KittenRepository;
-    const SampleCatRepository = require("./db/mocks").SampleCatRepository;
-    const SampleKittenRepository = require("./db/mocks").SampleKittenRepository;
-
-    require("./db/connection");
-    require("./db/mappings");
-
-    this.timeout(1000);
     let hornRepository, unicornRepository, albumRepository, instrumentRepository, catRepository, kittenRepository, sampleCatRepository,
         sampleKittenRepository;
 
@@ -122,7 +121,7 @@ describe("Entity Repository Test with identifies option", function () {
         });
     });
 
-    beforeEach(require("./db/setup"));
-    afterEach(require("./db/teardown"));
+    beforeEach(setup);
+    afterEach(teardown);
 
 });

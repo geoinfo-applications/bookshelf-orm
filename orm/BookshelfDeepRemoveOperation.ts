@@ -1,25 +1,27 @@
 "use strict";
 
-const Q = require("q");
-const _ = require("underscore");
-const BookshelfDeepOperation = require("./BookshelfDeepOperation");
-const { required } = require("./Annotations");
+import Q from "q";
+import _ from "underscore";
+import BookshelfDeepOperation from "./BookshelfDeepOperation";
+import { required } from "./Annotations";
+import BookshelfMapping from "./BookshelfMapping";
+import IEntityRepositoryOptions from "./IEntityRepositoryOptions";
 
 
-class BookshelfDeepRemoveOperation extends BookshelfDeepOperation {
+export default class BookshelfDeepRemoveOperation extends BookshelfDeepOperation {
 
-    constructor(mapping, options = required("options")) {
+    constructor(mapping: BookshelfMapping, options: IEntityRepositoryOptions = required("options")) {
         super(mapping, options);
     }
 
-    remove(item) {
-        return this.dropRelations(this.relationsWhereKeyIsOnRelated, item)
-            .then(() => this.executeRemoveOperation(item))
-            .then(() => this.dropRelations(this.relationsWhereKeyIsOnItem, item))
-            .then(() => item);
+    public async remove(item) {
+        await this.dropRelations(this.relationsWhereKeyIsOnRelated, item);
+        await this.executeRemoveOperation(item);
+        await this.dropRelations(this.relationsWhereKeyIsOnItem, item);
+        return item;
     }
 
-    executeRemoveOperation(item) {
+    private executeRemoveOperation(item) {
         if (this.Mapping.onDelete) {
             return this.Mapping.createQuery(item, this.options).update(this.Mapping.onDelete);
         } else {
@@ -27,18 +29,18 @@ class BookshelfDeepRemoveOperation extends BookshelfDeepOperation {
         }
     }
 
-    dropRelations(collection, item) {
+    private dropRelations(collection, item) {
         return Q.all(collection.map((relation) => this.dropRelated(item, relation)));
     }
 
-    dropRelated(item, relation) {
-        const relationName = "relation_" + relation.name;
+    private dropRelated(item, relation) {
+        const relationName = `relation_${relation.name}`;
         const related = item.relations[relationName];
 
         return related && this.handleRelated(item, relation, related);
     }
 
-    handleRelated(item, relation, related) {
+    private handleRelated(item, relation, related) {
         if (relation.references.cascade) {
             return this.cascadeDropRelations(relation, related);
         } else if (this.isRelationWithKeyIsOnRelated(relation)) {
@@ -46,12 +48,12 @@ class BookshelfDeepRemoveOperation extends BookshelfDeepOperation {
         }
     }
 
-    cascadeDropRelations(relation, related) {
+    private cascadeDropRelations(relation, related) {
         const mapping = relation.references.mapping;
         return this.cascadeDrop(related, mapping);
     }
 
-    cascadeDrop(related, mapping) {
+    private cascadeDrop(related, mapping) {
         const operation = new BookshelfDeepRemoveOperation(mapping, this.options);
 
         if (_.isFunction(related.destroy)) {
@@ -59,11 +61,11 @@ class BookshelfDeepRemoveOperation extends BookshelfDeepOperation {
         } else if (Array.isArray(related.models)) {
             return Q.all(related.models.map(operation.remove, operation));
         } else {
-            throw new Error("Related value of type '" + typeof related + "' can not be removed");
+            throw new Error(`Related value of type '${typeof related}' can not be removed`);
         }
     }
 
-    cascadeForeignKeys(item, relation, related) {
+    private cascadeForeignKeys(item, relation, related) {
         if (_.isArray(related.models)) {
             return Q.all(related.models.map(this.removeForeignKey.bind(this, item, relation)));
         } else {
@@ -71,7 +73,7 @@ class BookshelfDeepRemoveOperation extends BookshelfDeepOperation {
         }
     }
 
-    removeForeignKey(item, relation, related) {
+    private removeForeignKey(_item, relation, related) {
         const fkColumn = relation.references.mappedBy;
         const query = relation.references.mapping.createQuery(null, this.options).where(related.idAttribute, related[related.idAttribute]);
         this.addTransactionToQuery(query);
@@ -81,4 +83,3 @@ class BookshelfDeepRemoveOperation extends BookshelfDeepOperation {
 
 }
 
-module.exports = BookshelfDeepRemoveOperation;

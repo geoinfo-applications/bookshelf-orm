@@ -1,21 +1,27 @@
 "use strict";
 
-const Q = require("q");
-const _ = require("underscore");
-const BookshelfDeepOperation = require("./BookshelfDeepOperation");
-const DefaultBehavior = require("./BookshelfDeepSaveOperationDefaultBehavior");
-const HistoryBehavior = require("./BookshelfDeepSaveOperationHistoryBehavior");
-const { required } = require("./Annotations");
+import Q from "q";
+import _ from "underscore";
+import BookshelfRepository from "./BookshelfRepository";
+import BookshelfDeepOperation from "./BookshelfDeepOperation";
+import IBookshelfDeepSaveOperationBehavior from "./IBookshelfDeepSaveOperationBehavior";
+import DefaultBehavior from "./BookshelfDeepSaveOperationDefaultBehavior";
+import HistoryBehavior from "./BookshelfDeepSaveOperationHistoryBehavior";
+import { required } from "./Annotations";
+import BookshelfMapping from "./BookshelfMapping";
+import IEntityRepositoryOptions from "./IEntityRepositoryOptions";
 
 
-class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
+export default class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
 
-    constructor(mapping, options = required("options")) {
+    private saveBehavior: IBookshelfDeepSaveOperationBehavior;
+
+    constructor(mapping: BookshelfMapping, options: IEntityRepositoryOptions = required("options")) {
         super(mapping, options);
         this.saveBehavior = this.Mapping.keepHistory ? new HistoryBehavior() : new DefaultBehavior();
     }
 
-    save(item) {
+    public save(item) {
         return this.saveWhereKeyIsOnItem(item).then(() => {
             const rawUpdates = this.prepareRawUpdates(item);
             const unsetValues = this.prepareSqlColumnsForSave(item);
@@ -29,11 +35,11 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
         }).then((item) => this.saveWhereKeyIsOnRelated(item).then(() => item));
     }
 
-    executeSaveOperation(item) {
+    private executeSaveOperation(item) {
         return this.saveBehavior.executeSaveOperation(item, this.Mapping, this.options);
     }
 
-    prepareRawUpdates(item) {
+    private prepareRawUpdates(item) {
         const rawUpdates = Object.create(null);
 
         this.Mapping.writeableSqlColumns.filter((column) => item.has(column.name)).map((column) => {
@@ -44,7 +50,7 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
         return rawUpdates;
     }
 
-    prepareSqlColumnsForSave(item) {
+    private prepareSqlColumnsForSave(item) {
         const unsetValues = Object.create(null);
 
         this.Mapping.sqlColumns.forEach((column) => {
@@ -57,29 +63,29 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
         return unsetValues;
     }
 
-    saveWhereKeyIsOnItem(item) {
+    private saveWhereKeyIsOnItem(item) {
         return Q.all(this.relationsWhereKeyIsOnItem
             .filter((relation) => relation.references.cascade)
             .map((relation) => this.handleRelated(item, relation, this.saveWithKeyOnItem)));
     }
 
-    saveWithKeyOnItem(item, keyName, operation, related) {
+    private saveWithKeyOnItem(item, keyName, operation, related) {
         return operation.save(related).then((related) => item.set(keyName, related.id));
     }
 
-    saveWhereKeyIsOnRelated(item) {
+    private saveWhereKeyIsOnRelated(item) {
         return Q.all(this.relationsWhereKeyIsOnRelated.map((relation) => {
             return this.handleRelated(item, relation, relation.references.cascade ? this.saveWithKeyOnRelated : this.saveRelatedKey);
         }));
     }
 
-    saveWithKeyOnRelated(item, keyName, operation, related, relation) {
+    private saveWithKeyOnRelated(item, keyName, operation, related, relation) {
         const columnName = relation.references.identifies || "id";
         related.set(keyName, item.attributes[columnName]);
         return operation.save(related);
     }
 
-    handleRelated(item, relation, saveFunction) {
+    private handleRelated(item, relation, saveFunction) {
         const relationName = "relation_" + relation.name;
         const value = item.relations[relationName];
         const keyName = relation.references.mappedBy;
@@ -93,7 +99,7 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
         });
     }
 
-    saveRelatedValue(value, saveOperation, sequential) {
+    private saveRelatedValue(value, saveOperation, sequential) {
         if (_.isFunction(value.save)) {
             return saveOperation(value);
         } else if (Array.isArray(value.models)) {
@@ -103,17 +109,17 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
         }
     }
 
-    runSaveOperation(models, saveOperation, sequential) {
+    private runSaveOperation(models, saveOperation, sequential) {
         return sequential ? this.doSequential(models, saveOperation) : Q.all(models.map(saveOperation));
     }
 
-    doSequential(list, callback) {
+    private doSequential(list, callback) {
         return _.reduce(list, (promise, item, index) => {
             return promise.then(() => callback(item, index));
         }, Q.when());
     }
 
-    removeOrphans(item, relation, value) {
+    private removeOrphans(item, relation, value) {
         const idColumn = relation.references.identifiedBy || "id";
 
         return this.isRelationWithKeyIsOnRelated(relation) ?
@@ -121,7 +127,7 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
             this.removeManyToOneOrphans(item, relation);
     }
 
-    removeOneToManyOrphans(item, relation, value, idColumn) {
+    private removeOneToManyOrphans(item, relation, value, idColumn) {
         const ids = value && (Array.isArray(value.models) ? _.pluck(value.models, idColumn) : [value[idColumn]]);
         const fkColumn = relation.references.mappedBy;
 
@@ -138,7 +144,7 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
         });
     }
 
-    removeManyToOneOrphans(item, relation) {
+    private removeManyToOneOrphans(item, relation) {
         const fkColumn = relation.references.mappedBy;
 
         if (item.get(fkColumn)) {
@@ -150,15 +156,14 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
             .then(() => this.Mapping.createQuery(item, this.options).update(fkColumn, null));
     }
 
-    removeOrphanInRelatedRepository(relation, results, fkColumn) {
-        const BookshelfRepository = require("./BookshelfRepository");
+    private removeOrphanInRelatedRepository(relation, results, fkColumn) {
         const repository = new BookshelfRepository(relation.references.mapping);
 
-        const ids = _.filter(results, (result) => result && result[fkColumn]).map((result) => result[fkColumn]);
+        const ids = results.filter((result) => result && result[fkColumn]).map((result) => result[fkColumn]);
         return repository.remove(ids, this.options);
     }
 
-    saveRelatedKey(item, fkColumn, operation, related, relation) {
+    private saveRelatedKey(item, fkColumn, _operation, related, relation) {
         const columnName = relation.references.identifies || "id";
         const entityId = item.attributes[columnName];
         related.set(fkColumn, entityId);
@@ -174,4 +179,3 @@ class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
 
 }
 
-module.exports = BookshelfDeepSaveOperation;

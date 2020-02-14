@@ -1,27 +1,24 @@
 "use strict";
 
+import { expect } from "chai";
+import setup from "./db/setup";
+import teardown from "./db/teardown";
+import { knex } from "./db/connection";
+import { PlanetRepository } from "./db/mocks";
+import registry from "./db/registry";
+import "./db/mappings";
+
 
 describe("Entity Repository Soft Delete Test", function () {
-    /* eslint max-statements: 0 */
 
-    const chai = require("chai");
-    const expect = chai.expect;
-
-    beforeEach(require("./db/setup"));
-    afterEach(require("./db/teardown"));
-
-    const PlanetRepository = require("./db/mocks").PlanetRepository;
-
-    const { knex } = require("./db/connection");
-    const registry = require("./db/registry");
-    require("./db/mappings");
+    beforeEach(setup);
+    afterEach(teardown);
 
     const PlanetDBMapping = registry.compile("PlanetDBMapping");
     const MoonDBMapping = registry.compile("MoonDBMapping");
     const AtmosphereDBMapping = registry.compile("AtmosphereDBMapping");
     const CompositionDBMapping = registry.compile("CompositionDBMapping");
 
-    this.timeout(1000);
     let planetRepository, jupiter, io, europa, ganymed, kallisto;
 
     beforeEach(() => {

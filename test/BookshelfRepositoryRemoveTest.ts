@@ -1,29 +1,25 @@
 "use strict";
 
+import { expect } from "chai";
+import { CarRepository, EngineRepository, OwnerRepository } from "./db/mocks";
+import "./db/connection";
+import "./db/mappings";
+import registry from "./db/registry";
+import { BookshelfRepository } from "../index";
+import setup from "./db/setup";
+import teardown from "./db/teardown";
+
 
 describe("Bookshelf Repository Remove Test", function () {
-    /* eslint max-statements: 0, camelcase: 0 */
-
-    const chai = require("chai");
-    const expect = chai.expect;
-
-    const CarRepository = require("./db/mocks").CarRepository;
-    const EngineRepository = require("./db/mocks").EngineRepository;
-    const OwnerRepository = require("./db/mocks").OwnerRepository;
-
-    require("./db/connection");
-    const registry = require("./db/registry");
-    require("./db/mappings");
 
     const CarDBMapping = registry.compile("CarDBMapping");
     const PartDBMapping = registry.compile("PartDBMapping");
     const ParkingSpaceDBMapping = registry.compile("ParkingSpaceDBMapping");
 
-    this.timeout(1000);
-    let carRepository;
+    let carRepository: BookshelfRepository<object>;
 
     beforeEach(() => {
-        carRepository = new CarRepository().repository;
+        carRepository = (new CarRepository() as any).repository as BookshelfRepository<object>;
     });
 
     it("should drop item", () => {
@@ -135,7 +131,7 @@ describe("Bookshelf Repository Remove Test", function () {
     });
 
     it("should cascade drop deeply", () => {
-        carRepository = new CarRepository();
+        const carRepository = new CarRepository();
         const engineRepository = new EngineRepository();
         const serialNumber = "SN" + Date.now();
         const car = carRepository.newEntity({ parts: [{ wheels: [{ index: 1 }], engine: { serialNumber: serialNumber } }] });
@@ -154,7 +150,7 @@ describe("Bookshelf Repository Remove Test", function () {
     });
 
     it("should cascade drop nodes in graph", () => {
-        carRepository = new CarRepository();
+        const carRepository = new CarRepository();
         const engineRepository = new EngineRepository();
         const serialNumber = "SN" + Date.now();
         const car = carRepository.newEntity({ parts: [{ wheels: [{ index: 1 }], engine: { serialNumber: serialNumber } }] });
@@ -194,7 +190,7 @@ describe("Bookshelf Repository Remove Test", function () {
         return CarDBMapping.Model.forge({ name: "car" + tableIndex++ }).save();
     }
 
-    beforeEach(require("./db/setup"));
-    afterEach(require("./db/teardown"));
+    beforeEach(setup);
+    afterEach(teardown);
 
 });

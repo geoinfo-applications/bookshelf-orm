@@ -1,11 +1,11 @@
 "use strict";
 
-const Engine = require("./mocks").Engine;
-const VeyronEngine = require("./mocks").VeyronEngine;
-const Part = require("./mocks").Part;
-const Owner = require("./mocks").Owner;
-const ParkingSpace = require("./mocks").ParkingSpace;
-const registry = require("./registry");
+import { Engine } from "./mocks";
+import { VeyronEngine } from "./mocks";
+import { Part } from "./mocks";
+import { Owner } from "./mocks";
+import { ParkingSpace } from "./mocks";
+import registry from "./registry";
 /* eslint camelcase: 0 */
 
 registry.register("CarDBMapping", "test", {
@@ -179,7 +179,6 @@ registry.register("InjectionDBMapping", "test", {
     tableName: "datadictionary.injection",
     columns: ["id", "name"]
 });
-
 
 
 registry.register("PlanetDBMapping", "test", {

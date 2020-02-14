@@ -1,19 +1,28 @@
 "use strict";
 
-const StringUtils = require("./StringUtils");
+import Bookshelf from "bookshelf";
+import StringUtils from "./StringUtils";
+import BookshelfModelWrapper from "./BookshelfModelWrapper";
+import IEntityType from "./typedef/IEntityType";
 
 
-class BookshelfModelRelation {
+export default class BookshelfModelRelation<E extends IEntityType> {
 
-    constructor(wrapped, wrapper, relation) {
+    private readonly wrapped;
+    private readonly wrapper: BookshelfModelWrapper<E>;
+    private readonly relation;
+    private readonly relationName: string;
+    private readonly pascalCasedName: string;
+
+    public constructor(wrapped, wrapper: BookshelfModelWrapper<E>, relation) {
         this.wrapped = wrapped;
         this.wrapper = wrapper;
         this.relation = relation;
-        this.relationName = "relation_" + this.relation.name;
+        this.relationName = `relation_${this.relation.name}`;
         this.pascalCasedName = StringUtils.firstLetterUp(this.relation.name);
     }
 
-    hasMany() {
+    public hasMany() {
         const self = this;
 
         this.defineProperty({
@@ -22,16 +31,16 @@ class BookshelfModelRelation {
             }
         });
 
-        this.wrapped["add" + this.pascalCasedName] = function (entity) {
+        this.wrapped[`add${this.pascalCasedName}`] = function (entity) {
             return self.addRelated(this.item, entity);
         };
 
-        this.wrapped["remove" + this.pascalCasedName] = function (entity) {
+        this.wrapped[`remove${this.pascalCasedName}`] = function (entity) {
             return self.removeRelated(this.item, entity);
         };
     }
 
-    belongsTo() {
+    public belongsTo() {
         const self = this;
 
         this.defineProperty({
@@ -44,7 +53,7 @@ class BookshelfModelRelation {
         });
     }
 
-    hasOne() {
+    public hasOne() {
         const self = this;
 
         this.defineProperty({
@@ -57,23 +66,23 @@ class BookshelfModelRelation {
         });
     }
 
-    defineProperty(propertyDescriptor) {
+    private defineProperty(propertyDescriptor) {
         propertyDescriptor.enumerable = true;
         Object.defineProperty(this.wrapped, this.relation.name, propertyDescriptor);
     }
 
-    oneToManyGetter(item) {
+    private oneToManyGetter(item) {
         return this.wrapper.wrap(item.related(this.relationName).models);
     }
 
-    oneToOneGetter(item) {
+    private oneToOneGetter(item) {
         const related = item.relations[this.relationName];
         return related ? this.wrapper.wrap(related) : null;
     }
 
-    oneToOneSetter(item, entity) {
+    private oneToOneSetter(item, entity) {
         const referencedColumn = this.relation.references.identifies || "id";
-        let unwrapped = null;
+        let unwrapped: Bookshelf.Model = null;
         let id = null;
 
         if (entity) {
@@ -85,8 +94,8 @@ class BookshelfModelRelation {
         item.relations[this.relationName] = unwrapped;
     }
 
-    oneToManySetter(item, entity) {
-        let unwrapped = null;
+    private oneToManySetter(item, entity) {
+        let unwrapped: Bookshelf.Model = null;
 
         if (entity) {
             unwrapped = this.wrapper.unwrap(entity);
@@ -96,7 +105,7 @@ class BookshelfModelRelation {
         item.relations[this.relationName] = unwrapped;
     }
 
-    addRelated(item, entity) {
+    private addRelated(item, entity) {
         if (Array.isArray(entity)) {
             return entity.map(this.addRelated.bind(this, item));
         }
@@ -106,7 +115,7 @@ class BookshelfModelRelation {
         item.related(this.relationName).add(model);
     }
 
-    removeRelated(item, entity) {
+    private removeRelated(item, entity) {
         if (Array.isArray(entity)) {
             return entity.map(this.removeRelated.bind(this, item));
         }
@@ -118,4 +127,3 @@ class BookshelfModelRelation {
 
 }
 
-module.exports = BookshelfModelRelation;

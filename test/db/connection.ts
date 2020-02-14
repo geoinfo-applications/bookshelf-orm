@@ -1,10 +1,15 @@
 "use strict";
 
-const knex = require("knex")({
+import Knex from "knex";
+import Bookshelf from "bookshelf";
+import ModelFactory from "../../orm/ModelFactory";
+
+
+const knex = Knex({
     client: "pg",
     connection: {
         host: process.env.TESTSERVER_HOST || "localhost",
-        port: process.env.TESTSERVER_PORT,
+        port: process.env.TESTSERVER_PORT ? +process.env.TESTSERVER_PORT : undefined,
         user: process.env.TESTSERVER_USER,
         password: process.env.TESTSERVER_PASSWORD,
         database: process.env.TESTSERVER_DATABASE,
@@ -12,8 +17,8 @@ const knex = require("knex")({
     }
 });
 
-const bookshelf = require("bookshelf")(knex);
+const bookshelf = Bookshelf(knex);
 
-require("../../orm/ModelFactory").registerContext("test", bookshelf);
+ModelFactory.registerContext("test", bookshelf);
 
-module.exports = { bookshelf, knex };
+export { bookshelf, knex };

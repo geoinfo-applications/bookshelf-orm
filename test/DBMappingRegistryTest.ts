@@ -1,13 +1,12 @@
 "use strict";
 
 
+import { expect } from "chai";
+import ModelFactory from "../orm/ModelFactory";
+import DBMappingRegistry from "../orm/DBMappingRegistry";
+
+
 describe("DB-Mapping Registry Test", () => {
-    /* eslint max-statements: 0 */
-
-    const expect = require("chai").expect;
-    const ModelFactory = require("../orm/ModelFactory");
-    const DBMappingRegistry = require("../orm/DBMappingRegistry");
-
     let registry;
 
     beforeEach(() => {
@@ -32,7 +31,7 @@ describe("DB-Mapping Registry Test", () => {
                         relations: m.relations
                     };
                 }
-            };
+            } as any;
             const fooMapping = {
                 tableName: "footbl",
                 relations: [{

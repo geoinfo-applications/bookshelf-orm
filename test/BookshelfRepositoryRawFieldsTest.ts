@@ -1,23 +1,23 @@
 "use strict";
 
+import { expect } from "chai";
+import { CarRepository } from "./db/mocks";
+import "./db/connection";
+import "./db/mappings";
+import registry from "./db/registry";
+import { BookshelfRepository } from "../index";
+import setup from "./db/setup";
+import teardown from "./db/teardown";
+
 
 describe("Bookshelf Repository Raw Fields Test", function () {
-    /* eslint max-statements: 0, camelcase: 0 */
-
-    const expect = require("chai").expect;
-    const CarRepository = require("./db/mocks").CarRepository;
-
-    require("./db/connection");
-    const registry = require("./db/registry");
-    require("./db/mappings");
 
     const CarDBMapping = registry.compile("CarDBMapping");
 
-    this.timeout(1000);
-    let carRepository;
+    let carRepository: BookshelfRepository<object>;
 
     beforeEach(() => {
-        carRepository = new CarRepository().repository;
+        carRepository = (new CarRepository() as any).repository as BookshelfRepository<object>;
     });
 
     describe("findAll", () => {
@@ -152,7 +152,7 @@ describe("Bookshelf Repository Raw Fields Test", function () {
 
     });
 
-    beforeEach(require("./db/setup"));
-    afterEach(require("./db/teardown"));
+    beforeEach(setup);
+    afterEach(teardown);
 
 });

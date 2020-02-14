@@ -1,6 +1,7 @@
 "use strict";
 
-const DBMappingRegistry = require("../../orm/DBMappingRegistry");
-const ModelFactory = require("../../orm/ModelFactory");
+import DBMappingRegistry from "../../orm/DBMappingRegistry";
+import ModelFactory from "../../orm/ModelFactory";
 
-module.exports = new DBMappingRegistry(ModelFactory);
+
+export default new DBMappingRegistry(ModelFactory);

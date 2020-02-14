@@ -1,29 +1,28 @@
 "use strict";
 
+import { expect } from "chai";
+import { CarRepository, PartRepository } from "./db/mocks";
+import "./db/connection";
+import "./db/mappings";
+import registry from "./db/registry";
+import { BookshelfRepository } from "../index";
+import setup from "./db/setup";
+import teardown from "./db/teardown";
+
 
 describe("Bookshelf Repository Save Test", function () {
-    /* eslint max-statements: 0, camelcase: 0 */
-
-    const expect = require("chai").expect;
-
-    const CarRepository = require("./db/mocks").CarRepository;
-    const PartRepository = require("./db/mocks").PartRepository;
-
-    require("./db/connection");
-    const registry = require("./db/registry");
-    require("./db/mappings");
 
     const CarDBMapping = registry.compile("CarDBMapping");
     const PartDBMapping = registry.compile("PartDBMapping");
     const ParkingSpaceDBMapping = registry.compile("ParkingSpaceDBMapping");
     const WheelDBMapping = registry.compile("WheelDBMapping");
 
-    this.timeout(1000);
-    let carRepository;
+    let carRepository: BookshelfRepository<object>;
 
     beforeEach(() => {
-        carRepository = new CarRepository().repository;
+        carRepository = (new CarRepository() as any).repository as BookshelfRepository<object>;
     });
+
 
     it("should persist item", () => {
         const item = CarDBMapping.Model.forge({ name: "" });
@@ -167,7 +166,7 @@ describe("Bookshelf Repository Save Test", function () {
             return partRepository.findAll().then((parts) => {
                 expect(parts.length).to.be.eql(1);
                 expect(parts[0].name).to.be.eql(name);
-                expect(parts[0].engine.serialNumber).to.be.eql(serialNumber);
+                expect(parts[0].engine!.serialNumber).to.be.eql(serialNumber);
             });
         });
     });
@@ -177,7 +176,7 @@ describe("Bookshelf Repository Save Test", function () {
             item.relations.relation_parts = {};
 
             return carRepository.save(item, {}).then(() => {
-                throw "fail";
+                throw new Error("should fail");
             }).catch((error) => {
                 expect(error.message).to.match(/can not be saved/);
             });
@@ -191,7 +190,7 @@ describe("Bookshelf Repository Save Test", function () {
     }
 
 
-    beforeEach(require("./db/setup"));
-    afterEach(require("./db/teardown"));
+    beforeEach(setup);
+    afterEach(teardown);
 
 });

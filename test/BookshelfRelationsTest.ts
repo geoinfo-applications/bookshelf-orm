@@ -1,12 +1,11 @@
 "use strict";
 
+import _ from "underscore";
+import { expect } from "chai";
+import BookshelfRelations from "../orm/BookshelfRelations";
+
 
 describe("Bookshelf Relations Test", function () {
-    /* eslint max-statements: 0 */
-    const _ = require("underscore");
-    const expect = require("chai").expect;
-    const BookshelfRelations = require("../orm/BookshelfRelations");
-
     let mapping, subMapping, subSubMapping, relations, tableName, identifiedBy;
 
     beforeEach(() => {

@@ -1,25 +1,23 @@
 "use strict";
 
 
+/* eslint max-statements: 0 */
+import chai, { expect } from "chai";
+import sinon from "sinon";
+import sinonChai from "sinon-chai";
+import { Car, CarRepository } from "./db/mocks";
+import "./db/connection";
+import registry from "./db/registry";
+import "./db/mappings";
+import setup from "./db/setup";
+import teardown from "./db/teardown";
+
+
 describe("Entity Repository Test", function () {
-    /* eslint max-statements: 0 */
-
-    const chai = require("chai");
-    const expect = chai.expect;
-    const sinon = require("sinon");
-    const sinonChai = require("sinon-chai");
     chai.use(sinonChai);
-
-    const Car = require("./db/mocks").Car;
-    const CarRepository = require("./db/mocks").CarRepository;
-
-    require("./db/connection");
-    const registry = require("./db/registry");
-    require("./db/mappings");
 
     const CarDBMapping = registry.compile("CarDBMapping");
 
-    this.timeout(1000);
     let carRepository;
 
     beforeEach(() => {
@@ -441,9 +439,12 @@ describe("Entity Repository Test", function () {
         });
 
         it("should call constructor after initialization", () => {
-            carRepository.Entity = function () {
-                expect(this.item).to.be.instanceof(CarDBMapping.Model);
-                expect("name" in this).to.be.eql(true);
+            carRepository.Entity = class {
+                private item;
+                constructor() {
+                    expect(this.item).to.be.instanceof(CarDBMapping.Model);
+                    expect("name" in this).to.be.eql(true);
+                }
             };
 
             carRepository.newEntity.apply(carRepository);
@@ -742,7 +743,7 @@ describe("Entity Repository Test", function () {
         return carRepository.newEntity({ name: "car" + tableIndex++ });
     }
 
-    beforeEach(require("./db/setup"));
-    afterEach(require("./db/teardown"));
+    beforeEach(setup);
+    afterEach(teardown);
 
 });
