@@ -30,7 +30,7 @@ export default class BookshelfModelWrapper<E extends IEntityType> {
         return this.Mapping.columnNames;
     }
 
-    public wrap(item: object) {
+    public wrap(item: Bookshelf.Model<any>) {
         if (this.modelMap.has(item)) {
             return this.modelMap.get(item);
         }
@@ -42,7 +42,7 @@ export default class BookshelfModelWrapper<E extends IEntityType> {
         if (Array.isArray(item)) {
             return item.map(this.wrap, this);
         } else if (item instanceof this.Mapping.Collection) {
-            return this.wrap((item as Bookshelf.Collection).models);
+            return this.wrap((item as any).models);
         }
     }
 
@@ -133,13 +133,16 @@ export default class BookshelfModelWrapper<E extends IEntityType> {
 
     private localizeProperties(wrapped, wrappedPrototype) {
         this.wrappedPrototypeKeys.forEach((key) => {
-            if (!wrapped.hasOwnProperty(key)) {
+            if (!Object.prototype.hasOwnProperty.call(wrapped, key)) {
                 Object.defineProperty(wrapped, key, Object.getOwnPropertyDescriptor(wrappedPrototype, key)!);
             }
         });
     }
 
-    public unwrap(entity: E): Bookshelf.Model | Bookshelf.Model[] {
+    public unwrap(entity: E): Bookshelf.Model<any>;
+    public unwrap(entity: E[]): Bookshelf.Model<any>[];
+
+    public unwrap(entity: E | E[]): Bookshelf.Model<any> | Bookshelf.Model<any>[] {
         if (Array.isArray(entity)) {
             return entity.map((e) => this.unwrap(e));
         }
@@ -149,11 +152,11 @@ export default class BookshelfModelWrapper<E extends IEntityType> {
             entity[propertyName] = entity[propertyName]; // eslint-disable-line no-self-assign
         });
 
-        return entity.item;
+        return entity.item!;
     }
 
     public createNew(flatModel?: object) {
-        const item = this.Mapping.Model.forge();
+        const item = this.Mapping.Model.forge() as Bookshelf.Model<any>;
         const wrapped = this.wrap(item);
 
         this.applyFlatModel(wrapped, flatModel);

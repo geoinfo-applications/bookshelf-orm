@@ -1,6 +1,5 @@
 "use strict";
 
-import Q from "q";
 import _ from "underscore";
 import Bookshelf from "bookshelf";
 import SaveOperation from "./BookshelfDeepSaveOperation";
@@ -14,7 +13,7 @@ import BookshelfMapping from "./BookshelfMapping";
 import { required } from "./Annotations";
 
 
-export default class BookshelfRepository<M extends Bookshelf.Model, ID = number> {
+export default class BookshelfRepository<M extends Bookshelf.Model<any>, ID = number> {
 
     private static readonly CHUNK_SIZE = 1000;
 
@@ -74,7 +73,7 @@ export default class BookshelfRepository<M extends Bookshelf.Model, ID = number>
     }
 
     public findWhere(condition, options: IEntityRepositoryOptions = required("options")) {
-        const collection = this.Mapping.Collection.forge().query((q) => {
+        const collection = (this.Mapping.Collection.forge() as Bookshelf.Collection<any>).query((q) => {
             if (condition) {
                 condition.call(this, q);
             }
@@ -142,7 +141,7 @@ export default class BookshelfRepository<M extends Bookshelf.Model, ID = number>
             return Promise.resolve(null);
         }
         const query = this.createIdQuery(id);
-        const model = this.Mapping.Model.forge(query);
+        const model = (this.Mapping.Model.forge(query) as Bookshelf.Model<any>);
 
         if (this.Mapping.discriminator) {
             model.where(this.Mapping.discriminator);
@@ -199,20 +198,20 @@ export default class BookshelfRepository<M extends Bookshelf.Model, ID = number>
         }
     }
 
-    private isCollectionType(item: M | M[] | Bookshelf.Collection<M>) {
+    private isCollectionType(item: ID | M | M[] | Bookshelf.Collection<M>): item is (M[] | Bookshelf.Collection<M>) {
         return Array.isArray(item) || item instanceof this.Mapping.Collection;
     }
 
-    private invokeOnCollection(collection: Bookshelf.Collection<M>, fn, options: IEntityRepositoryOptions = required("options")) {
+    private invokeOnCollection(collection: M[] | Bookshelf.Collection<M>, fn, options: IEntityRepositoryOptions = required("options")) {
         const iterator = _.partial(fn, _, options).bind(this);
-        return _.isArray(collection) ? Q.all(collection.map(iterator)) : collection.mapThen(iterator);
+        return Promise.all(Array.isArray(collection) ? collection.map(iterator) : collection.map(iterator));
     }
 
     public updateRaw(values, where, options: IEntityRepositoryOptions = required("options")) {
         const query = this.Mapping.createQuery(null, options).where(where).update(values);
 
         if (options && options.transacting) {
-            query.transacting(options.transacting);
+            query.transacting(options.transacting as any);
         }
 
         return query;

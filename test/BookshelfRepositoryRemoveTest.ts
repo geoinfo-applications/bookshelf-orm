@@ -8,18 +8,20 @@ import registry from "./db/registry";
 import { BookshelfRepository } from "../index";
 import setup from "./db/setup";
 import teardown from "./db/teardown";
+import Bookshelf = require("bookshelf");
 
 
 describe("Bookshelf Repository Remove Test", function () {
+    /* eslint-disable camelcase */
 
     const CarDBMapping = registry.compile("CarDBMapping");
     const PartDBMapping = registry.compile("PartDBMapping");
     const ParkingSpaceDBMapping = registry.compile("ParkingSpaceDBMapping");
 
-    let carRepository: BookshelfRepository<object>;
+    let carRepository: BookshelfRepository<any>;
 
     beforeEach(() => {
-        carRepository = (new CarRepository() as any).repository as BookshelfRepository<object>;
+        carRepository = (new CarRepository() as any).repository as BookshelfRepository<any>;
     });
 
     it("should drop item", () => {
@@ -66,8 +68,8 @@ describe("Bookshelf Repository Remove Test", function () {
     });
 
     it("should drop array of items specified by id", () => {
-        const item1 = CarDBMapping.Model.forge({ name: "item1" });
-        const item2 = CarDBMapping.Model.forge({ name: "item2" });
+        const item1 = CarDBMapping.Model.forge<Bookshelf.Model<any>>({ name: "item1" });
+        const item2 = CarDBMapping.Model.forge<Bookshelf.Model<any>>({ name: "item2" });
 
         return carRepository.save([item1, item2], {}).then(() => {
             return carRepository.remove([item1.id, item2.id], {}).then(() => {
@@ -103,7 +105,7 @@ describe("Bookshelf Repository Remove Test", function () {
             return carRepository.save(item, {}).then(() => {
                 return carRepository.findOne(item.id, {}).then((item) => {
                     return carRepository.remove(item, {}).then(() => {
-                        return PartDBMapping.Collection.forge().fetch().then((attrs) => {
+                        return PartDBMapping.Collection.forge<Bookshelf.Collection<any>>().fetch().then((attrs) => {
                             expect(attrs.length).to.be.eql(0);
                         });
                     });
@@ -122,7 +124,7 @@ describe("Bookshelf Repository Remove Test", function () {
 
             return carRepository.save(item, {}).then((item) => {
                 return carRepository.remove(item, {}).then(() => {
-                    return ParkingSpaceDBMapping.Collection.forge().fetch().then((parkingSpaces) => {
+                    return ParkingSpaceDBMapping.Collection.forge<Bookshelf.Collection<any>>().fetch().then((parkingSpaces) => {
                         expect(parkingSpaces.length).to.be.eql(0);
                     });
                 });
@@ -187,7 +189,7 @@ describe("Bookshelf Repository Remove Test", function () {
     let tableIndex = 0;
 
     function createCar() {
-        return CarDBMapping.Model.forge({ name: "car" + tableIndex++ }).save();
+        return CarDBMapping.Model.forge<Bookshelf.Model<any>>({ name: "car" + tableIndex++ }).save();
     }
 
     beforeEach(setup);

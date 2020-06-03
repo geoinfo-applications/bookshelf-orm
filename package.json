@@ -35,12 +35,18 @@
     "underscore": "^1.9.2"
   },
   "devDependencies": {
+    "@types/bookshelf": "^1.1.0",
+    "@types/chai": "^4.2.11",
     "@types/mocha": "^7.0.1",
     "@types/node": "^13.7.7",
+    "@types/sinon": "^9.0.4",
+    "@types/sinon-chai": "^3.2.4",
+    "@typescript-eslint/eslint-plugin": "^1.7.0",
+    "@typescript-eslint/parser": "^1.7.0",
     "chai": "^4.2.0",
     "grunt-david": "github:bschaepper/grunt-david",
     "grunt-env": "^1.0.1",
-    "grunt-eslint": "^22.0.0",
+    "grunt-eslint": "^23.0.0",
     "grunt-exec": "^3.0.0",
     "grunt-mocha-istanbul": "^5.0.2",
     "grunt-mocha-test": "^0.13.3",
@@ -53,6 +59,7 @@
     "mocha-multi": "*",
     "sinon": "^7.5.0",
     "sinon-chai": "^3.3.0",
+    "source-map-support": "^0.5.19",
     "ts-essentials": "^6.0.2",
     "tslint": "^6.0.0",
     "typescript": "^3.8.3"

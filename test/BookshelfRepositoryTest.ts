@@ -1,11 +1,12 @@
 "use strict";
+
 import { expect } from "chai";
 import {
     CarRepository,
     EngineRepository,
     HalflingRepository,
     NamelessOwnerRepository,
-    OwnerRepository, Person,
+    OwnerRepository,
     PersonRepository,
     VeyronEngineRepository,
     VeyronPartRepository
@@ -16,19 +17,21 @@ import registry from "./db/registry";
 import { BookshelfRepository } from "../index";
 import setup from "./db/setup";
 import teardown from "./db/teardown";
+import Bookshelf = require("bookshelf");
 
 
 describe("Bookshelf Repository Test", function () {
+    /* eslint-disable camelcase */
 
     const CarDBMapping = registry.compile("CarDBMapping");
     const PartDBMapping = registry.compile("PartDBMapping");
     const PersonDBMapping = registry.compile("PersonDBMapping");
     const HalflingDBMapping = registry.compile("HalflingDBMapping");
 
-    let carRepository: BookshelfRepository<object>;
+    let carRepository: BookshelfRepository<any>;
 
     beforeEach(() => {
-        carRepository = (new CarRepository() as any).repository as BookshelfRepository<object>;
+        carRepository = (new CarRepository() as any).repository as BookshelfRepository<any>;
     });
 
     it("should be defined", () => {
@@ -73,12 +76,12 @@ describe("Bookshelf Repository Test", function () {
 
         it("should return instance with related data", () => {
             return createCar().then((model1) => {
-                return PartDBMapping.Model.forge({
+                return PartDBMapping.Model.forge<Bookshelf.Model<any>>({
                     car_id: model1.id,
                     name: ""
                 }).save().then((attribute1) => {
                     createCar().then((model2) => {
-                        return PartDBMapping.Model.forge({
+                        return PartDBMapping.Model.forge<Bookshelf.Model<any>>({
                             car_id: model2.id,
                             name: "",
                             label: ""
@@ -123,7 +126,7 @@ describe("Bookshelf Repository Test", function () {
         });
 
         it("should escape correctly for ids[] as uuid[] and order them", async () => {
-            const halflingRepository = (new HalflingRepository() as any).repository as BookshelfRepository<object>;
+            const halflingRepository = (new HalflingRepository() as any).repository as BookshelfRepository<any>;
             await createHalfling();
             await createHalfling();
             await createHalfling();
@@ -153,7 +156,7 @@ describe("Bookshelf Repository Test", function () {
 
         it("should return instance with related data", () => {
             return createCar().then((model) => {
-                return PartDBMapping.Model.forge({
+                return PartDBMapping.Model.forge<Bookshelf.Model<any>>({
                     car_id: model.id,
                     name: ""
                 }).save().then((attribute) => {
@@ -175,14 +178,14 @@ describe("Bookshelf Repository Test", function () {
 
     describe("remove", () => {
 
-        let personRepository: BookshelfRepository<object, string>;
+        let personRepository: BookshelfRepository<any, string>;
 
         beforeEach(() => {
-            personRepository = (new PersonRepository() as any).repository as BookshelfRepository<object, string>;
+            personRepository = (new PersonRepository() as any).repository as BookshelfRepository<any, string>;
         });
 
         it("should drop item which is identified by a column other than id", () => {
-            return PersonDBMapping.Model.forge({ name: "Gandalf" }).save(null, { method: "insert" }).then((item) => {
+            return PersonDBMapping.Model.forge<Bookshelf.Model<any>>({ name: "Gandalf" }).save(undefined, { method: "insert" }).then((item) => {
                 return personRepository.remove(item, {}).then(() => {
                     return personRepository.findOne("Gandalf", {}).then((item) => {
                         expect(item).to.be.eql(null);
@@ -195,11 +198,11 @@ describe("Bookshelf Repository Test", function () {
 
     describe("stringifyJson", () => {
         let personRepository;
-        let personRepositoryBookshelf: BookshelfRepository<object, string>;
+        let personRepositoryBookshelf: BookshelfRepository<any, string>;
 
         beforeEach(() => {
             personRepository = new PersonRepository();
-            personRepositoryBookshelf = (new PersonRepository() as any).repository as BookshelfRepository<object, string>;
+            personRepositoryBookshelf = (new PersonRepository() as any).repository as BookshelfRepository<any, string>;
         });
 
         it("shouldn't stringify null values", () => {
@@ -348,11 +351,11 @@ describe("Bookshelf Repository Test", function () {
     let tableIndex = 0;
 
     function createCar() {
-        return CarDBMapping.Model.forge({ name: "car" + tableIndex++ }).save();
+        return CarDBMapping.Model.forge<Bookshelf.Model<any>>({ name: "car" + tableIndex++ }).save();
     }
 
     function createHalfling() {
-        return HalflingDBMapping.Model.forge({ name: "halfling" + tableIndex++ }).save();
+        return HalflingDBMapping.Model.forge<Bookshelf.Model<any>>({ name: "halfling" + tableIndex++ }).save();
     }
 
     beforeEach(setup);

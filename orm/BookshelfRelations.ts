@@ -106,7 +106,7 @@ export default class BookshelfRelations {
 
     private getRawColumnSelectStatements(selectedReadableSqlColumns) {
         return selectedReadableSqlColumns.map((sqlColumn: IReadableSqlColumnDescriptor) => {
-            const getter = _.isFunction(sqlColumn.get) ? sqlColumn.get(this.Mapping.dbContext.knex) : sqlColumn.get;
+            const getter = _.isFunction(sqlColumn.get) ? sqlColumn.get(this.Mapping.dbContext.knex as any) : sqlColumn.get;
             return this.Mapping.dbContext.knex.raw(`${getter} as "${sqlColumn.name}"`);
         });
     }

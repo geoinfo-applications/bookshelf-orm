@@ -31,14 +31,14 @@ export interface  IWritableSqlColumnDescriptor extends IBaseSqlColumnDescriptor 
     /**
      * this setter creates an sql snipped to set the value
      */
-    set(value, queryBuilder: Knex.QueryBuilder): string;
+    set(value, queryBuilder: Knex): string;
 }
 
 export interface  IReadableSqlColumnDescriptor extends IBaseSqlColumnDescriptor {
     /**
      * this getter creates an sql snipped to get the value
      */
-    get(queryBuilder: Knex.QueryBuilder): string;
+    get(queryBuilder: Knex): string;
 }
 
 export type ISqlColumnDescriptor = IBaseSqlColumnDescriptor & Partial<IWritableSqlColumnDescriptor> & Partial<IReadableSqlColumnDescriptor>;

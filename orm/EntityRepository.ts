@@ -9,8 +9,9 @@ import BookshelfModelWrapper from "./BookshelfModelWrapper";
 import BookshelfDeepOperation from "./BookshelfDeepOperation";
 import IEntityRepositoryOptions from "./IEntityRepositoryOptions";
 import { required } from "./Annotations";
-import IEntityType from "@geolib/bookshelf-orm/orm/typedef/IEntityType";
+import IEntityType from "./typedef/IEntityType";
 import { DeepPartial } from "ts-essentials";
+import Bookshelf = require("bookshelf");
 
 
 /**
@@ -21,7 +22,7 @@ export default class EntityRepository<E extends object | IEntityType, ID = numbe
     public Mapping: BookshelfMapping;
     private readonly Entity;
     protected readonly wrapper: BookshelfModelWrapper<E>;
-    protected readonly repository: BookshelfRepository<object, ID>;
+    protected readonly repository: BookshelfRepository<Bookshelf.Model<any>, ID>;
 
     /**
      * @param {Class | Function} Entity - Class or constructor function. Entities from this repository will be instances of this Type
@@ -165,7 +166,7 @@ export default class EntityRepository<E extends object | IEntityType, ID = numbe
         }
 
         await this.executeTransactional(async () => {
-            await this.repository.remove(item, options);
+            await this.repository.remove(item as any, options);
         }, options);
 
         const id = _.isObject(entity) ? entity[this.Mapping.identifiedBy] : +entity;

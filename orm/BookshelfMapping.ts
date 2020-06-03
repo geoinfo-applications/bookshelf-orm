@@ -30,8 +30,8 @@ export default class BookshelfMapping {
     public readonly keepHistory: boolean;
     public readonly historyColumns: { revisionId: string; parentId: string };
 
-    public Model: Bookshelf.Model;
-    public Collection: Bookshelf.Collection;
+    public Model: typeof Bookshelf.Model;
+    public Collection: typeof Bookshelf.Collection;
     public startTransaction: <T>(callback: (q: Knex.Transaction) => Promise<T>) => Promise<T>;
 
     public columnMappings: IColumnDescriptor[];
@@ -59,7 +59,7 @@ export default class BookshelfMapping {
 
         this.Model = this.createModel();
         this.Collection = this.createCollection();
-        this.startTransaction = dbContext.transaction.bind(dbContext);
+        this.startTransaction = dbContext.transaction.bind(dbContext) as any;
 
         this.deriveColumnAccessors();
         this.provideForeignKeyColumnsToRelatedMappings();
@@ -110,18 +110,18 @@ export default class BookshelfMapping {
         });
     }
 
-    private createModel() {
+    private createModel(): typeof Bookshelf.Model {
         const prototype = {
             tableName: this.tableName,
             idAttribute: this.identifiedBy
         };
 
         this.relations.forEach(this.addRelation.bind(this, prototype));
-        return this.dbContext.Model.extend(prototype);
+        return this.dbContext.Model.extend(prototype) as any;
     }
 
-    private createCollection() {
-        return this.dbContext.Collection.extend({ model: this.Model });
+    private createCollection(): typeof Bookshelf.Collection {
+        return this.dbContext.Collection.extend({ model: this.Model }) as any;
     }
 
     private addRelation(prototype, relation) {
@@ -145,7 +145,7 @@ export default class BookshelfMapping {
 
         if (item) {
             if (item.get(this.identifiedBy) === undefined) {
-                query.whereRaw(`${query.client.wrapIdentifier(this.identifiedBy)} = NULL`);
+                query.whereRaw(`${(query as any).client.wrapIdentifier(this.identifiedBy)} = NULL`);
             } else {
                 query.where(this.identifiedBy, item.get(this.identifiedBy));
             }
@@ -156,14 +156,14 @@ export default class BookshelfMapping {
         }
 
         if (options && options.transacting) {
-            query.transacting(options.transacting);
+            query.transacting(options.transacting as any);
         }
 
         return query;
     }
 
-    public raw(...args) {
-        return this.dbContext.knex.raw(...args);
+    public raw(arg1, ...args) {
+        return this.dbContext.knex.raw(arg1, ...args);
     }
 
 }

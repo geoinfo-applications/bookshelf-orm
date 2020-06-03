@@ -11,6 +11,7 @@ import "./db/mappings";
 import IOptionalEntityRepositoryOptions from "../orm/IEntityRepositoryOptions";
 import setup from "./db/setup";
 import teardown from "./db/teardown";
+import "mocha";
 
 
 describe("Entity Repository Transactions Test", function () {
@@ -27,7 +28,7 @@ describe("Entity Repository Transactions Test", function () {
     });
 
     afterEach(() => {
-        (CarDBMapping.startTransaction as sinon.spy).restore();
+        (CarDBMapping.startTransaction as any).restore();
     });
 
     it("should save in transaction", () => {

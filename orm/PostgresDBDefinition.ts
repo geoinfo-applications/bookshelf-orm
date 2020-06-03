@@ -33,7 +33,7 @@ export default class PostgresDBDefinition {
                     idleTimeoutMillis: 5 * 60 * 1000,
                     reapIntervalMillis: 10 * 1000
                 }, this.config.db[name].pool)
-            })));
+            }) as any) as any);
         });
     }
 

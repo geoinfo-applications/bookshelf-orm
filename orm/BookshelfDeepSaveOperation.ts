@@ -43,8 +43,8 @@ export default class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
         const rawUpdates = Object.create(null);
 
         this.Mapping.writeableSqlColumns.filter((column) => item.has(column.name)).map((column) => {
-            const setter = _.isFunction(column.set) ? column.set(item.get(column.name), this.Mapping.dbContext.knex) : column.set;
-            rawUpdates[column.name] = this.Mapping.dbContext.knex.raw(setter);
+            const setter = column.set ? column.set(item.get(column.name), this.Mapping.dbContext.knex as any) : column.set;
+            rawUpdates[column.name] = this.Mapping.dbContext.knex.raw(setter as any);
         });
 
         return rawUpdates;
@@ -153,7 +153,7 @@ export default class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
 
         return this.Mapping.createQuery(item, this.options).select(fkColumn)
             .then((results) => this.removeOrphanInRelatedRepository(relation, results, fkColumn))
-            .then(() => this.Mapping.createQuery(item, this.options).update(fkColumn, null));
+            .then(() => this.Mapping.createQuery(item, this.options).update(fkColumn, null as any));
     }
 
     private removeOrphanInRelatedRepository(relation, results, fkColumn) {

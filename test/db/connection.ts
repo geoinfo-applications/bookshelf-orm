@@ -5,6 +5,7 @@ import Bookshelf from "bookshelf";
 import ModelFactory from "../../orm/ModelFactory";
 
 
+// eslint-disable-next-line new-cap
 const knex = Knex({
     client: "pg",
     connection: {
@@ -17,8 +18,9 @@ const knex = Knex({
     }
 });
 
-const bookshelf = Bookshelf(knex);
+// eslint-disable-next-line new-cap
+const bookshelf = Bookshelf(knex as any);
 
-ModelFactory.registerContext("test", bookshelf);
+ModelFactory.registerContext("test", bookshelf as any);
 
 export { bookshelf, knex };

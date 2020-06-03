@@ -24,7 +24,7 @@ describe("Model Factory Test", function () {
         let factory;
 
         beforeEach(function () {
-            ModelFactory.registerContext("testContext", bookshelf);
+            ModelFactory.registerContext("testContext", bookshelf as any);
             factory = ModelFactory.context.testContext;
         });
 

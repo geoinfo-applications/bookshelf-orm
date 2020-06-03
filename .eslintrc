@@ -6,10 +6,12 @@
         "mocha": true
     },
     "extends": "eslint:recommended",
+    "parser": "@typescript-eslint/parser",
     "parserOptions": {
         "ecmaVersion": 2018,
-        "sourceType": "script"
+        "sourceType": "module"
     },
+    "plugins": ["@typescript-eslint"],
     "rules": {
         "max-len": [
             2,
@@ -55,7 +57,8 @@
         "no-script-url": 2,
         "no-new-func": 0,
         "no-new-wrappers": 0,
-        "no-undef": 2,
+        "no-undef": 0,
+        "no-dupe-class-members": 0,
         "no-extend-native": 2,
         "new-cap": 2,
         "no-empty": [
@@ -179,10 +182,7 @@
             }
         ],
         "no-nested-ternary": 2,
-        "no-unused-vars": [
-            2,
-            { "vars": "all", "args": "after-used", "caughtErrors": "none" }
-        ],
+        "no-unused-vars": [0],
         "getter-return" : [
             2,
             { "allowImplicit": true }

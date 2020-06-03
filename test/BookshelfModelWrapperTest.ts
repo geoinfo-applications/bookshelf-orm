@@ -12,6 +12,7 @@ import "./db/mappings";
 import registry from "./db/registry";
 import setup from "./db/setup";
 import teardown from "./db/teardown";
+import Bookshelf = require("bookshelf");
 
 
 describe("Bookshelf Model Wrapper Test", function () {
@@ -41,7 +42,7 @@ describe("Bookshelf Model Wrapper Test", function () {
         describe("properties", () => {
 
             it("should wrap Model in Car", () => {
-                const item = CarDBMapping.Model.forge({ name: "", label: "" });
+                const item = CarDBMapping.Model.forge({ name: "", label: "" }) as Bookshelf.Model<any>;
                 item.set("name", "testName " + Date.now());
                 item.set("model_name", Date.now());
 
@@ -56,7 +57,7 @@ describe("Bookshelf Model Wrapper Test", function () {
                 const item = CarDBMapping.Model.forge({
                     name: "",
                     model_name: ""
-                });
+                })  as Bookshelf.Model<any>;
                 const entity = carWrapper.wrap(item);
 
                 entity.name = "testName " + Date.now();
@@ -88,7 +89,7 @@ describe("Bookshelf Model Wrapper Test", function () {
                     get: sinon.stub(),
                     set: sinon.stub()
                 };
-                const entity = wrapper.wrap(item);
+                const entity = wrapper.wrap(item as any);
 
                 entity.thing = thing;
 
@@ -111,7 +112,7 @@ describe("Bookshelf Model Wrapper Test", function () {
                     get: sinon.stub().returns(JSON.stringify(thing)),
                     set: sinon.stub()
                 };
-                const entity = wrapper.wrap(item);
+                const entity = wrapper.wrap(item as any);
 
                 const thingFromEntity = entity.thing;
 
@@ -134,7 +135,7 @@ describe("Bookshelf Model Wrapper Test", function () {
                     get: sinon.stub().returns(thing),
                     set: sinon.stub()
                 };
-                const entity = wrapper.wrap(item);
+                const entity = wrapper.wrap(item as any);
 
                 const thingFromEntity = entity.thing;
 
@@ -154,7 +155,7 @@ describe("Bookshelf Model Wrapper Test", function () {
 
             it("should add getter for related list", () => {
                 return carRepository.save(createCar()).then((item) => {
-                    return PartDBMapping.Model.forge({ car_id: item.id }).save().then((part) => {
+                    return PartDBMapping.Model.forge<Bookshelf.Model<any>>({ car_id: item.id }).save().then((part) => {
                         return carRepository.findOne(item.id).then((item) => {
                             expect(item.parts).to.be.an("array");
                             expect(item.parts.length).to.be.eql(1);
@@ -166,7 +167,7 @@ describe("Bookshelf Model Wrapper Test", function () {
 
             it("should wrap items in related list", () => {
                 return carRepository.save(createCar()).then((item) => {
-                    return PartDBMapping.Model.forge({ car_id: item.id }).save().then(() => {
+                    return PartDBMapping.Model.forge<Bookshelf.Model<any>>({ car_id: item.id }).save().then(() => {
                         return carRepository.findOne(item.id).then((item) => {
                             expect(item.parts[0]).to.be.instanceof(Part);
                             expect(carWrapper.unwrap(item.parts[0])).to.be.instanceof(PartDBMapping.Model);
@@ -200,7 +201,7 @@ describe("Bookshelf Model Wrapper Test", function () {
 
             it("should remove removed item from related list", () => {
                 return carRepository.save(createCar()).then((item) => {
-                    return PartDBMapping.Model.forge({ car_id: item.id }).save().then(() => {
+                    return PartDBMapping.Model.forge<Bookshelf.Model<any>>({ car_id: item.id }).save().then(() => {
                         return carRepository.findOne(item.id).then((item) => {
                             item.removeParts(item.parts[0]);
                             expect(item.parts.length).to.be.eql(0);
@@ -211,7 +212,7 @@ describe("Bookshelf Model Wrapper Test", function () {
 
             it("should remove array of removed item from related list", () => {
                 return carRepository.save(createCar()).then((item) => {
-                    return PartDBMapping.Model.forge({ car_id: item.id }).save().then(() => {
+                    return PartDBMapping.Model.forge<Bookshelf.Model<any>>({ car_id: item.id }).save().then(() => {
                         return carRepository.findOne(item.id).then((item) => {
                             item.removeParts(item.parts);
                             expect(item.parts.length).to.be.eql(0);
@@ -222,7 +223,7 @@ describe("Bookshelf Model Wrapper Test", function () {
 
             it("should add added item to related list", () => {
                 return carRepository.save(createCar()).then((item) => {
-                    return PartDBMapping.Model.forge({ car_id: item.id }).save().then(() => {
+                    return PartDBMapping.Model.forge<Bookshelf.Model<any>>({ car_id: item.id }).save().then(() => {
                         return carRepository.findOne(item.id).then((item) => {
                             const part = item.parts[0];
                             item.removeParts(part);
@@ -255,7 +256,7 @@ describe("Bookshelf Model Wrapper Test", function () {
 
             it("should add array of added item to related list", () => {
                 return carRepository.save(createCar()).then((item) => {
-                    return PartDBMapping.Model.forge({ car_id: item.id }).save().then(() => {
+                    return PartDBMapping.Model.forge<Bookshelf.Model<any>>({ car_id: item.id }).save().then(() => {
                         return carRepository.findOne(item.id).then((item) => {
                             const parts = item.parts;
                             item.removeParts(parts);
@@ -321,7 +322,7 @@ describe("Bookshelf Model Wrapper Test", function () {
 
             it("should create nice JSON", () => {
                 return carRepository.save(createCar()).then((car) => {
-                    return PartDBMapping.Model.forge({
+                    return PartDBMapping.Model.forge<Bookshelf.Model<any>>({
                         car_id: car.id,
                         name: "attrName"
                     }).save().then(() => {
@@ -392,7 +393,7 @@ describe("Bookshelf Model Wrapper Test", function () {
                 get: sinon.stub().returns(thing),
                 set: sinon.stub()
             };
-            const unrwapped = wrapper.unwrap(wrapper.wrap(item));
+            const unrwapped = wrapper.unwrap(wrapper.wrap(item as any));
 
             expect(unrwapped.set).to.have.been.calledWith("thing", JSON.stringify(thing));
         });
@@ -462,11 +463,11 @@ describe("Bookshelf Model Wrapper Test", function () {
                 get: () => {
                     return privateValue;
                 },
-                set: (name, value) => {
+                set: (_name, value) => {
                     privateValue = value;
                 }
             };
-            const entity = wrapper.wrap(item);
+            const entity = wrapper.wrap(item as any);
             entity.thing = null;
             expect(item.get()).to.be.eql(null);
         });

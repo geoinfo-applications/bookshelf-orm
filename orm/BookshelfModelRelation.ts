@@ -82,7 +82,7 @@ export default class BookshelfModelRelation<E extends IEntityType> {
 
     private oneToOneSetter(item, entity) {
         const referencedColumn = this.relation.references.identifies || "id";
-        let unwrapped: Bookshelf.Model = null;
+        let unwrapped: Bookshelf.Model<any> | null = null;
         let id = null;
 
         if (entity) {
@@ -95,7 +95,7 @@ export default class BookshelfModelRelation<E extends IEntityType> {
     }
 
     private oneToManySetter(item, entity) {
-        let unwrapped: Bookshelf.Model = null;
+        let unwrapped: Bookshelf.Model<any> | null = null;
 
         if (entity) {
             unwrapped = this.wrapper.unwrap(entity);

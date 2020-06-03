@@ -51,19 +51,21 @@ module.exports = function (grunt) {
 
         mochaTest: {
             options: {
-                reporter: "spec"
+                reporter: "spec",
+                require: ["source-map-support/register"]
             },
-            src: ["./test/**/*.ts"]
+            src: ["./test/**/*.js"]
         },
 
         mocha_istanbul: {
             coverage: {
-                src: "./test/**",
+                src: ["./test/**/*.js"],
                 options: {
                     reporter: "mocha-multi",
                     reportFormats: ["lcov", "clover"],
                     recursive: true,
-                    coverageFolder: "./coverage"
+                    coverageFolder: "./coverage",
+                    require: ["source-map-support/register"]
                 }
             }
         },
@@ -116,7 +118,7 @@ module.exports = function (grunt) {
     grunt.registerTask("code-check", ["eslint", "todo"]);
     grunt.registerTask("update", ["npm-install", "clean", "david"]);
     grunt.registerTask("update-development", ["env:unit_test", "update", "env:development"]);
-    grunt.registerTask("test", ["env:unit_test", "code-check", "mochaTest"]);
-    grunt.registerTask("build", ["env:build", "code-check", "mocha_istanbul", "jsdoc"]);
+    grunt.registerTask("test", ["env:unit_test", "code-check", "exec:tsc", "mochaTest"]);
+    grunt.registerTask("build", ["env:build", "code-check", "exec:tsc", "mocha_istanbul", "jsdoc"]);
 
 };

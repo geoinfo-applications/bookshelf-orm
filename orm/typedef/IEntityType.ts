@@ -1,5 +1,8 @@
 "use strict";
 
+import Bookshelf = require("bookshelf");
+
+
 export default interface IEntityType {
-    readonly item?: object;
+    readonly item?: Bookshelf.Model<any>;
 }

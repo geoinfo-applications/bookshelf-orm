@@ -8,19 +8,21 @@ import registry from "./db/registry";
 import { BookshelfRepository } from "../index";
 import setup from "./db/setup";
 import teardown from "./db/teardown";
+import Bookshelf = require("bookshelf");
 
 
 describe("Bookshelf Repository Raw Fields Test", function () {
+    /* eslint-disable camelcase */
 
     const CarDBMapping = registry.compile("CarDBMapping");
     const SaferCarDBMapping = registry.compile("SaferCarDBMapping");
 
-    let carRepository: BookshelfRepository<object>;
-    let saferCarRepository: BookshelfRepository<object>;
+    let carRepository: BookshelfRepository<any>;
+    let saferCarRepository: BookshelfRepository<any>;
 
     beforeEach(() => {
-        carRepository = (new CarRepository() as any).repository as BookshelfRepository<object>;
-        saferCarRepository = (new SaferCarRepository() as any).repository as BookshelfRepository<object>;
+        carRepository = (new CarRepository() as any).repository as BookshelfRepository<any>;
+        saferCarRepository = (new SaferCarRepository() as any).repository as BookshelfRepository<any>;
     });
 
     describe("findAll", () => {
@@ -140,7 +142,7 @@ describe("Bookshelf Repository Raw Fields Test", function () {
             const promise = carRepository.save(car, {});
 
             return promise.then(() => {
-                return CarDBMapping.Collection.forge().query().select();
+                return CarDBMapping.Collection.forge<Bookshelf.Collection<any>>().query().select();
             }).then((cars) => {
                 expect(cars.length).to.be.eql(1);
                 expect(cars[0].serial_number).to.be.eql(serialNumber.toLowerCase());
