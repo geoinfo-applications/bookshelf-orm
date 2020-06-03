@@ -52,6 +52,20 @@ registry.register("CarDBMapping", "test", {
     ]
 });
 
+registry.register("SaferCarDBMapping", "test", {
+    tableName: "datadictionary.car",
+    columns: ["id", "name", "model_name", {
+        name: "description",
+        type: "sql",
+        get: "lower(coalesce(car.name, '') || '::' || coalesce(model_name))"
+    }, {
+        name: "serial_number",
+        type: "sql",
+        get: () => "car.serial_number",
+        set: (v, knex) => knex.raw("lower( :value)", { value: v })
+    }]
+});
+
 registry.register("PartDBMapping", "test", {
     tableName: "datadictionary.part",
     columns: ["id", "name",

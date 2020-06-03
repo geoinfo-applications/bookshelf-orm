@@ -1,7 +1,7 @@
 "use strict";
 
 import { expect } from "chai";
-import { CarRepository } from "./db/mocks";
+import { CarRepository, SaferCarRepository } from "./db/mocks";
 import "./db/connection";
 import "./db/mappings";
 import registry from "./db/registry";
@@ -13,11 +13,14 @@ import teardown from "./db/teardown";
 describe("Bookshelf Repository Raw Fields Test", function () {
 
     const CarDBMapping = registry.compile("CarDBMapping");
+    const SaferCarDBMapping = registry.compile("SaferCarDBMapping");
 
     let carRepository: BookshelfRepository<object>;
+    let saferCarRepository: BookshelfRepository<object>;
 
     beforeEach(() => {
         carRepository = (new CarRepository() as any).repository as BookshelfRepository<object>;
+        saferCarRepository = (new SaferCarRepository() as any).repository as BookshelfRepository<object>;
     });
 
     describe("findAll", () => {
@@ -142,6 +145,20 @@ describe("Bookshelf Repository Raw Fields Test", function () {
                 expect(cars.length).to.be.eql(1);
                 expect(cars[0].serial_number).to.be.eql(serialNumber.toLowerCase());
             });
+        });
+
+    });
+
+    describe("findOne", () => {
+
+        it("should restore calculated field from DB", async () => {
+            const serialNumber = "sN" + Date.now();
+            const car = SaferCarDBMapping.Model.forge({ serial_number: serialNumber });
+            const savedCar = await saferCarRepository.save(car, {});
+
+            const returnedCar = await saferCarRepository.findOne(savedCar.id, {});
+
+            expect(returnedCar.get("serial_number")).to.be.eql(serialNumber.toLowerCase());
         });
 
     });

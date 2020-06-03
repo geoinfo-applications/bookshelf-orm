@@ -29,6 +29,8 @@ class Car {
     parkingSpace: ParkingSpace;
 }
 
+class SaferCar extends Car {}
+
 class Part {
     id: number;
     name: string;
@@ -77,6 +79,7 @@ class NamelessOwner {}
 class ParkingSpace {}
 
 const CarRepository = createRepository<Car>(Car, "Car");
+const SaferCarRepository = createRepository<Car>(Car, "SaferCar");
 const PartRepository = createRepository<Part>(Part, "Part");
 const VeyronPartRepository = createRepository<VeyronPart>(VeyronPart, "VeyronPart");
 const VeyronEngineRepository = createRepository<VeyronEngine>(VeyronEngine, "VeyronEngine");
@@ -123,6 +126,7 @@ const HalflingRepository = createRepository<Halfling>(Halfling, "Halfling");
 
 export {
     Car,
+    SaferCar,
     Part,
     VeyronPart,
     Engine,
@@ -133,6 +137,7 @@ export {
     ParkingSpace,
 
     CarRepository,
+    SaferCarRepository,
     PartRepository,
     VeyronPartRepository,
     EngineRepository,

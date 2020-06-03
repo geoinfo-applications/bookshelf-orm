@@ -1,5 +1,7 @@
 "use strict";
 
+import Knex from "knex";
+
 
 /**
  * Describes a Column in BookshelfMapping
@@ -29,14 +31,14 @@ export interface  IWritableSqlColumnDescriptor extends IBaseSqlColumnDescriptor 
     /**
      * this setter creates an sql snipped to set the value
      */
-    set(value): string;
+    set(value, queryBuilder: Knex.QueryBuilder): string;
 }
 
 export interface  IReadableSqlColumnDescriptor extends IBaseSqlColumnDescriptor {
     /**
      * this getter creates an sql snipped to get the value
      */
-    get(): string;
+    get(queryBuilder: Knex.QueryBuilder): string;
 }
 
 export type ISqlColumnDescriptor = IBaseSqlColumnDescriptor & Partial<IWritableSqlColumnDescriptor> & Partial<IReadableSqlColumnDescriptor>;

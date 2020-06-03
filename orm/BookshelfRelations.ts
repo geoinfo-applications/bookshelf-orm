@@ -5,6 +5,7 @@ import StringUtils from "./StringUtils";
 import BookshelfMapping from "./BookshelfMapping";
 import { required } from "./Annotations";
 import IEntityRepositoryOptions from "./IEntityRepositoryOptions";
+import { IReadableSqlColumnDescriptor } from "./typedef/IColumnDescriptor";
 
 
 export default class BookshelfRelations {
@@ -104,9 +105,9 @@ export default class BookshelfRelations {
     }
 
     private getRawColumnSelectStatements(selectedReadableSqlColumns) {
-        return selectedReadableSqlColumns.map((sqlColumn) => {
-            const getter = _.isFunction(sqlColumn.get) ? sqlColumn.get() : sqlColumn.get;
-            return this.Mapping.dbContext.knex.raw(getter + " as \"" + sqlColumn.name + "\"");
+        return selectedReadableSqlColumns.map((sqlColumn: IReadableSqlColumnDescriptor) => {
+            const getter = _.isFunction(sqlColumn.get) ? sqlColumn.get(this.Mapping.dbContext.knex) : sqlColumn.get;
+            return this.Mapping.dbContext.knex.raw(`${getter} as "${sqlColumn.name}"`);
         });
     }
 

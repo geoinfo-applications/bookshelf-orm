@@ -43,7 +43,7 @@ export default class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
         const rawUpdates = Object.create(null);
 
         this.Mapping.writeableSqlColumns.filter((column) => item.has(column.name)).map((column) => {
-            const setter = _.isFunction(column.set) ? column.set(item.get(column.name)) : column.set;
+            const setter = _.isFunction(column.set) ? column.set(item.get(column.name), this.Mapping.dbContext.knex) : column.set;
             rawUpdates[column.name] = this.Mapping.dbContext.knex.raw(setter);
         });
 
