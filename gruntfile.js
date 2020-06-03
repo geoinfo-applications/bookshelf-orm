@@ -119,6 +119,6 @@ module.exports = function (grunt) {
     grunt.registerTask("update", ["npm-install", "clean", "david"]);
     grunt.registerTask("update-development", ["env:unit_test", "update", "env:development"]);
     grunt.registerTask("test", ["env:unit_test", "code-check", "exec:tsc", "mochaTest"]);
-    grunt.registerTask("build", ["env:build", "code-check", "exec:tsc", "mocha_istanbul", "jsdoc"]);
+    grunt.registerTask("build", ["env:build", "code-check", "exec:tsc", "mocha_istanbul"]);
 
 };
