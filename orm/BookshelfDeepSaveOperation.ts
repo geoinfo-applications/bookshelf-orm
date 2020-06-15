@@ -21,7 +21,7 @@ export default class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
         this.saveBehavior = this.Mapping.keepHistory ? new HistoryBehavior() : new DefaultBehavior();
     }
 
-    public save(item) {
+    public async save(item) {
         return this.saveWhereKeyIsOnItem(item).then(() => {
             const rawUpdates = this.prepareRawUpdates(item);
             const unsetValues = this.prepareSqlColumnsForSave(item);
@@ -29,7 +29,7 @@ export default class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
             return this.executeSaveOperation(item).then((item) => {
                 return Q.when(Object.keys(rawUpdates).length && this.Mapping.createQuery(item, this.options).update(rawUpdates)).then(() => item);
             }).then((item) => {
-                _.each(unsetValues, (value, key) => item.set(key, value));
+                _.each(unsetValues, (value, key: string) => item.set(key, value));
                 return item;
             });
         }).then((item) => this.saveWhereKeyIsOnRelated(item).then(() => item));

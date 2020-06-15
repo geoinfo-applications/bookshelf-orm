@@ -6,7 +6,6 @@ import SaveOperation from "./BookshelfDeepSaveOperation";
 import RemoveOperation from "./BookshelfDeepRemoveOperation";
 import FetchOperation from "./BookshelfDeepFetchOperation";
 import BookshelfRelations from "./BookshelfRelations";
-import { IColumnDescriptor } from "./typedef/IColumnDescriptor";
 import MappingRelationsIterator from "./MappingRelationsIterator";
 import IEntityRepositoryOptions from "./IEntityRepositoryOptions";
 import BookshelfMapping from "./BookshelfMapping";
@@ -51,7 +50,7 @@ export default class BookshelfRepository<M extends Bookshelf.Model<any>, ID = nu
 
         for (let current = generator.next(); !current.done; current = generator.next()) {
             const collection = await current.value;
-            results.push(...collection.models);
+            results.push(...(collection as any).models);
         }
 
         return this.Mapping.Collection.forge(results);
@@ -167,13 +166,13 @@ export default class BookshelfRepository<M extends Bookshelf.Model<any>, ID = nu
     public stringifyJson(item: M) {
         function stringifyJsonFields(mapping: BookshelfMapping, node) {
             if (node.attributes) {
-                _.where(mapping.columns, { type: "json" }).forEach((column: IColumnDescriptor) => {
+                for (const column of mapping.regularColumns.filter(({ type }) => type === "json")) {
                     const value = node.attributes[column.name];
 
                     if (!_.isString(value)) {
                         node.attributes[column.name] = value === null ? null : JSON.stringify(value);
                     }
-                });
+                }
             }
         }
 
@@ -185,7 +184,7 @@ export default class BookshelfRepository<M extends Bookshelf.Model<any>, ID = nu
             return this.invokeOnCollection(item, this.remove, options);
         }
 
-        const id = item instanceof this.Mapping.Model ? (item as M).get(this.idColumnName) : item;
+        const id = (item as any) instanceof this.Mapping.Model ? (item as M).get(this.idColumnName) : item;
 
         if (id === undefined) {
             return;

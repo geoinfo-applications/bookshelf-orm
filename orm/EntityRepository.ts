@@ -81,9 +81,8 @@ export default class EntityRepository<E extends object | IEntityType, ID = numbe
      * @returns {Promise<Array<Entity>>} - Returns Promise resolved with array of entities, or empty list if not found.
      */
     public async findAllWhere(q: (q: Knex.QueryInterface) => void, options: IEntityRepositoryOptions = null): Promise<E[]> {
-        return this.repository.findWhere(q, options).then((items) => {
-            return items.length ? this.wrapper.wrap(items) : [];
-        });
+        const items = await this.repository.findWhere(q, options);
+        return (items.length ? this.wrapper.wrap(items) : []) as E[];
     }
 
     /**
@@ -98,7 +97,7 @@ export default class EntityRepository<E extends object | IEntityType, ID = numbe
     public async findWhere(q: (q: Knex.QueryInterface) => void, options: IEntityRepositoryOptions = null): Promise<E | null> {
         return this.repository.findWhere(q, options).then((items) => {
             if (items.length) {
-                return this.wrapper.wrap(items.pop());
+                return this.wrapper.wrap(items.pop() as any);
             } else {
                 return null;
             }
@@ -106,9 +105,8 @@ export default class EntityRepository<E extends object | IEntityType, ID = numbe
     }
 
     public async findByConditions(conditions, options: IEntityRepositoryOptions = null): Promise<E[]> {
-        return this.repository.findByConditions(conditions, options).then((items) => {
-            return items.length ? this.wrapper.wrap(items) : [];
-        });
+        const items = await this.repository.findByConditions(conditions, options);
+        return (items.length ? this.wrapper.wrap(items) : []) as E[];
     }
 
     /**
@@ -129,8 +127,10 @@ export default class EntityRepository<E extends object | IEntityType, ID = numbe
             return Promise.all(entity.map((entity) => this.save(entity, options)));
         }
 
-        return this.executeTransactional(() => {
-            return this.repository.save(this.wrapper.unwrap(entity), options).then((item) => this.wrapper.wrap(item));
+        return this.executeTransactional(async () => {
+            const unwrapped: Bookshelf.Model<any> = this.wrapper.unwrap(entity);
+            const item: any = await this.repository.save(unwrapped, options);
+            return this.wrapper.wrap(item);
         }, options).then((entity) => {
             this.afterSave(entity[this.Mapping.identifiedBy]);
             return entity;

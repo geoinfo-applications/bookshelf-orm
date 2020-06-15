@@ -30,19 +30,22 @@ export default class BookshelfModelWrapper<E extends IEntityType> {
         return this.Mapping.columnNames;
     }
 
-    public wrap(item: Bookshelf.Model<any>) {
+    public wrap(item: Bookshelf.Model<any>): E;
+    public wrap(item: Array<Bookshelf.Model<any>> | Bookshelf.Collection<any>): E[];
+
+    public wrap(item: Bookshelf.Model<any> | Array<Bookshelf.Model<any>> | Bookshelf.Collection<any>): E | E[] {
         if (this.modelMap.has(item)) {
-            return this.modelMap.get(item);
+            return this.modelMap.get(item)!;
         }
 
         return item && (this.wrapCollectionTypes(item) || this.createWrappedInstance(item));
     }
 
-    private wrapCollectionTypes(item: object) {
+    private wrapCollectionTypes(item: Bookshelf.Model<any> | Array<Bookshelf.Model<any>> | Bookshelf.Collection<any>): E[] | undefined {
         if (Array.isArray(item)) {
-            return item.map(this.wrap, this);
+            return item.map((item) => this.wrap(item));
         } else if (item instanceof this.Mapping.Collection) {
-            return this.wrap((item as any).models);
+            return this.wrap(((item as any).models as Array<Bookshelf.Model<any>>)) as any;
         }
     }
 
@@ -140,7 +143,7 @@ export default class BookshelfModelWrapper<E extends IEntityType> {
     }
 
     public unwrap(entity: E): Bookshelf.Model<any>;
-    public unwrap(entity: E[]): Bookshelf.Model<any>[];
+    public unwrap(entity: E[]): Array<Bookshelf.Model<any>>;
 
     public unwrap(entity: E | E[]): Bookshelf.Model<any> | Bookshelf.Model<any>[] {
         if (Array.isArray(entity)) {
