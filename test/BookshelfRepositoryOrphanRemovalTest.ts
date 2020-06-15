@@ -11,7 +11,7 @@ import teardown from "./db/teardown";
 import Bookshelf = require("bookshelf");
 
 
-describe("Bookshelf Repository Orphan Removal Test", function () {
+describe("Bookshelf Repository Orphan Removal Test", () => {
     /* eslint-disable camelcase */
 
     const CarDBMapping = registry.compile("CarDBMapping");

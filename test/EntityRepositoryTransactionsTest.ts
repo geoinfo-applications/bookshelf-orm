@@ -14,7 +14,7 @@ import teardown from "./db/teardown";
 import "mocha";
 
 
-describe("Entity Repository Transactions Test", function () {
+describe("Entity Repository Transactions Test", () => {
     chai.use(sinonChai);
     const CarDBMapping = registry.compile("CarDBMapping");
 

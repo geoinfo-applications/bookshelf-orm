@@ -11,7 +11,7 @@ import * as Annotations from "./orm/Annotations";
 import EntityRepository from "./orm/EntityRepository";
 import IEntityRepositoryOptions from "./orm/IEntityRepositoryOptions";
 import MappingRelationsIterator from "./orm/MappingRelationsIterator";
-import ModelFactory from "./orm/ModelFactory";
+import ModelFactory, { ModelFactoryStatic } from "./orm/ModelFactory";
 import PostgresDBDefinition from "./orm/PostgresDBDefinition";
 
 
@@ -27,6 +27,7 @@ export {
     IEntityRepositoryOptions,
     MappingRelationsIterator,
     ModelFactory,
+    ModelFactoryStatic,
     PostgresDBDefinition,
     Annotations
 };

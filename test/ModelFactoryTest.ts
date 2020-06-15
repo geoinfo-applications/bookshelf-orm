@@ -5,7 +5,7 @@ import ModelFactory from "../orm/ModelFactory";
 import { bookshelf } from "./db/connection";
 
 
-describe("Model Factory Test", function () {
+describe("Model Factory Test", () => {
 
     describe("Context Registration", () => {
 
@@ -23,7 +23,7 @@ describe("Model Factory Test", function () {
     describe("createModel", () => {
         let factory;
 
-        beforeEach(function () {
+        beforeEach(() => {
             ModelFactory.registerContext("testContext", bookshelf as any);
             factory = ModelFactory.context.testContext;
         });

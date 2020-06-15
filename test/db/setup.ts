@@ -4,7 +4,7 @@ import Q from "q";
 import { knex } from "./connection";
 
 /* eslint max-statements: 0 */
-export default function () {
+export default () => {
 
     // car sample
     const car = knex.schema.withSchema("datadictionary").createTable("car", (table) => {

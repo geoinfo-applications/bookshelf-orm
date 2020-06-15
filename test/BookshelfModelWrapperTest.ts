@@ -15,7 +15,7 @@ import teardown from "./db/teardown";
 import Bookshelf = require("bookshelf");
 
 
-describe("Bookshelf Model Wrapper Test", function () {
+describe("Bookshelf Model Wrapper Test", () => {
     /* eslint max-statements: 0, camelcase: 0 */
 
     chai.use(sinonChai);

@@ -13,7 +13,7 @@ import setup from "./db/setup";
 import teardown from "./db/teardown";
 
 
-describe("Entity Repository Test", function () {
+describe("Entity Repository Test", () => {
     chai.use(sinonChai);
 
     const CarDBMapping = registry.compile("CarDBMapping");

@@ -2,11 +2,11 @@
 
 const path = require("path");
 
-module.exports = function (grunt) {
+module.exports = (grunt) => {
     /* eslint camelcase: 0 */
     require("time-grunt")(grunt);
 
-    const jsFiles = [
+    const srcFiles = [
         "orm/**/*.ts",
         "test/**/*.ts",
         "index.ts",
@@ -17,7 +17,7 @@ module.exports = function (grunt) {
 
         eslint: {
             options: { fix: grunt.option("fix") },
-            src: jsFiles
+            src: srcFiles
         },
 
         tslint: {
@@ -35,7 +35,7 @@ module.exports = function (grunt) {
         },
 
         todo: {
-            src: jsFiles
+            src: srcFiles
         },
 
         jsdoc: {
@@ -91,7 +91,16 @@ module.exports = function (grunt) {
             }
         },
 
-        clean: ["./mocha.json", "./coverage/clover.xml"],
+        clean: {
+            reports: ["./mocha.json", "./coverage/server/clover.xml"],
+            ts: [
+                "*.tsbuildinfo",
+                ...srcFiles
+                    .filter((s) => s.endsWith(".ts"))
+                    .map((s) => [s.replace(/\.ts$/, ".js"), s.replace(/\.ts/, ".js.map"), s.replace(/\.ts/, ".d.ts")])
+                    .reduce((a, b) => [...a, ...b])
+            ]
+        },
 
         release: {
             options: {

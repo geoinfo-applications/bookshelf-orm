@@ -9,7 +9,7 @@ import registry from "./db/registry";
 import "./db/mappings";
 
 
-describe("Entity Repository Soft Delete Test", function () {
+describe("Entity Repository Soft Delete Test", () => {
 
     beforeEach(setup);
     afterEach(teardown);

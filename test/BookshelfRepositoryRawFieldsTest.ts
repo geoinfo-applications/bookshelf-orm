@@ -11,7 +11,7 @@ import teardown from "./db/teardown";
 import Bookshelf = require("bookshelf");
 
 
-describe("Bookshelf Repository Raw Fields Test", function () {
+describe("Bookshelf Repository Raw Fields Test", () => {
     /* eslint-disable camelcase */
 
     const CarDBMapping = registry.compile("CarDBMapping");

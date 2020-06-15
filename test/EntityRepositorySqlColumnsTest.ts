@@ -10,7 +10,7 @@ import setup from "./db/setup";
 import teardown from "./db/teardown";
 
 
-describe("Entity Repository SQL Columns Test", function () {
+describe("Entity Repository SQL Columns Test", () => {
     let carRepository, car, serialNumber;
 
     beforeEach(() => {

@@ -5,7 +5,7 @@ import { expect } from "chai";
 import BookshelfRelations from "../orm/BookshelfRelations";
 
 
-describe("Bookshelf Relations Test", function () {
+describe("Bookshelf Relations Test", () => {
     let mapping, subMapping, subSubMapping, relations, tableName, identifiedBy;
 
     beforeEach(() => {

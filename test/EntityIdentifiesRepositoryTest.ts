@@ -18,7 +18,7 @@ import setup from "./db/setup";
 import teardown from "./db/teardown";
 
 
-describe("Entity Repository Test with identifies option", function () {
+describe("Entity Repository Test with identifies option", () => {
     chai.use(sinonChai);
 
     let hornRepository, unicornRepository, albumRepository, instrumentRepository, catRepository, kittenRepository, sampleCatRepository,
