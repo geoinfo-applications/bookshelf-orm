@@ -207,7 +207,7 @@ describe("Entity Repository Test", () => {
         });
 
         it("should persist related items", () => {
-            const name = "partname" + Date.now();
+            const name = `partname${Date.now()}`;
             const car = carRepository.newEntity({
                 parts: [{
                     name: name,
@@ -424,18 +424,18 @@ describe("Entity Repository Test", () => {
             const entity = carRepository.newEntity();
 
             const model = carRepository.wrapper.unwrap(entity);
-            model.set("name", "name " + Date.now());
+            model.set("name", `name ${Date.now()}`);
 
             expect(entity.name).to.be.eql(model.get("name"));
         });
 
         it("should call constructor with given arguments", () => {
-            const args = [{}, "a", 0];
-            carRepository.Entity = function () {
-                expect(args).to.be.eql([].slice.call(arguments));
+            const testArgs = [{}, "a", 0];
+            carRepository.Entity = function (...actualArgs) {
+                expect(testArgs).to.be.eql(actualArgs);
             };
 
-            carRepository.newEntity.apply(carRepository, args);
+            carRepository.newEntity(...testArgs);
         });
 
         it("should call constructor after initialization", () => {
@@ -447,13 +447,13 @@ describe("Entity Repository Test", () => {
                 }
             };
 
-            carRepository.newEntity.apply(carRepository);
+            carRepository.newEntity();
         });
 
         it("should call model.forge with given argument", () => {
             const forgeArgument = {
-                name: "thename" + Date.now(),
-                modelName: "theLabel" + Date.now()
+                name: `thename${Date.now()}`,
+                modelName: `theLabel${Date.now()}`
             };
 
             const entity = carRepository.newEntity(forgeArgument);

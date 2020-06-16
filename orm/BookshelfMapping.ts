@@ -139,7 +139,8 @@ export default class BookshelfMapping {
         };
     }
 
-    public createQuery(item, options: IEntityRepositoryOptions = required("options")) {
+    public createQuery<TRecord extends {} = any, TResult = Partial<TRecord>[]>(item, options: IEntityRepositoryOptions = required("options")):
+        Knex.QueryBuilder<TRecord, TResult> {
         /* eslint complexity: 0 */
         const query = this.dbContext.knex(this.tableName);
 
@@ -159,11 +160,11 @@ export default class BookshelfMapping {
             query.transacting(options.transacting as any);
         }
 
-        return query;
+        return query as any;
     }
 
-    public raw(arg1, ...args) {
-        return this.dbContext.knex.raw(arg1, ...args);
+    public raw<TResult = any>(arg1, ...args): Knex.Raw<TResult> {
+        return this.dbContext.knex.raw(arg1, ...args) as any;
     }
 
 }

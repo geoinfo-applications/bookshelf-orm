@@ -38,9 +38,9 @@ describe("Entity Repository SQL Columns Test", () => {
         });
 
         return promise.then((car) => {
-            expect(car).to.contain.all.keys.apply(expect(car).to.contain, allKeys);
-            expect(car.description).to.be.eql(void 0);
-            expect(car.serialNumber).to.be.eql(void 0);
+            expect(car).to.contain.all.keys(allKeys);
+            expect(car.description).to.be.eql(undefined);
+            expect(car.serialNumber).to.be.eql(undefined);
             definedKeys.forEach((key) => {
                 expect(_.isUndefined(car[key])).to.be.eql(false);
             });
@@ -63,7 +63,7 @@ describe("Entity Repository SQL Columns Test", () => {
     });
 
     it("should exclude all sql columns", () => {
-        let options = void 0;
+        let options = undefined;
 
         let definedKeys = ["id", "name", "modelName", "parts", "description", "serialNumber"];
         let undefinedKeys = ["owner", "parkingSpace"];
@@ -78,7 +78,7 @@ describe("Entity Repository SQL Columns Test", () => {
         });
 
         return promise.then((cars) => {
-            expect(cars).to.contain.all.keys.apply(expect(cars).to.contain, allKeys);
+            expect(cars).to.contain.all.keys(allKeys);
             expect(cars.description).to.be.eql("name::abc");
             expect(cars.serialNumber).to.be.eql("SERIAL555");
             definedKeys.forEach((key) => {
@@ -105,8 +105,8 @@ describe("Entity Repository SQL Columns Test", () => {
         });
 
         return promise.then((cars) => {
-            expect(cars).to.contain.all.keys.apply(expect(cars).to.contain, allKeys);
-            expect(cars.description).to.be.eql(void 0);
+            expect(cars).to.contain.all.keys(allKeys);
+            expect(cars.description).to.be.eql(undefined);
             expect(cars.serialNumber).to.be.eql("SERIAL555");
             definedKeys.forEach((key) => {
                 expect(_.isUndefined(cars[key])).to.be.eql(false);
@@ -132,9 +132,9 @@ describe("Entity Repository SQL Columns Test", () => {
         });
 
         return promise.then((cars) => {
-            expect(cars).to.contain.all.keys.apply(expect(cars).to.contain, allKeys);
+            expect(cars).to.contain.all.keys(allKeys);
             expect(cars.description).to.be.eql("name::abc");
-            expect(cars.serialNumber).to.be.eql(void 0);
+            expect(cars.serialNumber).to.be.eql(undefined);
             definedKeys.forEach((key) => {
                 expect(_.isUndefined(cars[key])).to.be.eql(false);
             });
@@ -159,10 +159,10 @@ describe("Entity Repository SQL Columns Test", () => {
         });
 
         return promise.then((cars) => {
-            expect(cars).to.contain.all.keys.apply(expect(cars).to.contain, allKeys);
+            expect(cars).to.contain.all.keys(allKeys);
             expect(cars.name).to.be.eql("name");
             expect(cars.description).to.be.eql("name::abc");
-            expect(cars.modelName).to.be.eql(void 0);
+            expect(cars.modelName).to.be.eql(undefined);
             undefinedKeys.forEach((key) => {
                 expect(_.isUndefined(cars[key]) || _.isNull(cars[key])).to.be.eql(true);
             });

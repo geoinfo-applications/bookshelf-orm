@@ -6,9 +6,13 @@ import EntityRepository from "../../orm/EntityRepository";
 
 // tslint:disable:max-classes-per-file
 
-function createRepository<E>(Entity, name) {
+interface IMockRepositoryConstructor<E> {
+    new(): EntityRepository<E>;
+}
+
+function createRepository<E>(Entity, name): IMockRepositoryConstructor<E> {
     return class extends EntityRepository<E> {
-        constructor() {
+        public constructor() {
             super(Entity, registry.compile(name + "DBMapping"));
         }
     };

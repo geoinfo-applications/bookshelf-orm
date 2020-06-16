@@ -11,8 +11,11 @@ node_modules
 
 orm/**/*.js
 orm/**/*.js.map
+orm/**/*.d.ts
 test/**/*.js
 test/**/*.js.map
+test/**/*.d.ts
 index.js
 index.js.map
+index.d.ts
 *.tsbuildinfo

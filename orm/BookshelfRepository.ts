@@ -1,6 +1,7 @@
 "use strict";
 
 import _ from "underscore";
+import Knex from "knex";
 import Bookshelf from "bookshelf";
 import SaveOperation from "./BookshelfDeepSaveOperation";
 import RemoveOperation from "./BookshelfDeepRemoveOperation";
@@ -206,7 +207,7 @@ export default class BookshelfRepository<M extends Bookshelf.Model<any>, ID = nu
         return Promise.all(Array.isArray(collection) ? collection.map(iterator) : collection.map(iterator));
     }
 
-    public updateRaw(values, where, options: IEntityRepositoryOptions = required("options")) {
+    public updateRaw<TRecord = any>(values, where, options: IEntityRepositoryOptions = required("options")): Knex.QueryBuilder<TRecord, number> {
         const query = this.Mapping.createQuery(null, options).where(where).update(values);
 
         if (options && options.transacting) {
