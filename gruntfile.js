@@ -114,9 +114,6 @@ module.exports = (grunt) => {
         exec: {
             tsc: {
                 command: `${path.resolve(__dirname, "node_modules/.bin/tsc")}`
-            },
-            tsCheck: {
-                command: `${path.resolve(__dirname, "node_modules/.bin/tsc")} --project ./server --noEmit`
             }
         }
 
