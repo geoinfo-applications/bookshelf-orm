@@ -7,8 +7,8 @@ module.exports = (grunt) => {
     require("time-grunt")(grunt);
 
     const srcFiles = [
-        "orm/**/*.ts",
-        "test/**/*.ts",
+        "orm/**/!(*.d).ts",
+        "test/**/!(*.d).ts",
         "index.ts",
         "gruntfile.js"
     ];
