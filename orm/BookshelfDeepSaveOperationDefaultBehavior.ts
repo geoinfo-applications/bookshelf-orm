@@ -7,10 +7,9 @@ import BookshelfMapping from "./BookshelfMapping";
 import IEntityRepositoryOptions from "./IEntityRepositoryOptions";
 
 
-export default class BookshelfDeepSaveOperationDefaultBehavior implements IBookshelfDeepSaveOperationBehavior {
+export default class BookshelfDeepSaveOperationDefaultBehavior<M extends Bookshelf.Model<any>> implements IBookshelfDeepSaveOperationBehavior<M> {
 
-    public async executeSaveOperation(item: Bookshelf.Model<any>, _mapping: BookshelfMapping,
-        options: IEntityRepositoryOptions = required("options")): Promise<Bookshelf.Model<any>> {
+    public async executeSaveOperation(item: M, _mapping: BookshelfMapping, options: IEntityRepositoryOptions = required("options")): Promise<M> {
         return item.save(undefined, options);
     }
 

@@ -2,6 +2,7 @@
 
 import Q from "q";
 import _ from "underscore";
+import Bookshelf from "bookshelf";
 import BookshelfRepository from "./BookshelfRepository";
 import BookshelfDeepOperation from "./BookshelfDeepOperation";
 import IBookshelfDeepSaveOperationBehavior from "./IBookshelfDeepSaveOperationBehavior";
@@ -12,30 +13,27 @@ import BookshelfMapping from "./BookshelfMapping";
 import IEntityRepositoryOptions from "./IEntityRepositoryOptions";
 
 
-export default class BookshelfDeepSaveOperation extends BookshelfDeepOperation {
+export default class BookshelfDeepSaveOperation<M extends Bookshelf.Model<any>> extends BookshelfDeepOperation {
 
-    private saveBehavior: IBookshelfDeepSaveOperationBehavior;
+    private saveBehavior: IBookshelfDeepSaveOperationBehavior<M>;
 
     constructor(mapping: BookshelfMapping, options: IEntityRepositoryOptions = required("options")) {
         super(mapping, options);
-        this.saveBehavior = this.Mapping.keepHistory ? new HistoryBehavior() : new DefaultBehavior();
+        this.saveBehavior = this.Mapping.keepHistory ? new HistoryBehavior<M>() : new DefaultBehavior<M>();
     }
 
-    public async save(item) {
-        return this.saveWhereKeyIsOnItem(item).then(() => {
-            const rawUpdates = this.prepareRawUpdates(item);
-            const unsetValues = this.prepareSqlColumnsForSave(item);
-
-            return this.executeSaveOperation(item).then((item) => {
-                return Q.when(Object.keys(rawUpdates).length && this.Mapping.createQuery(item, this.options).update(rawUpdates)).then(() => item);
-            }).then((item) => {
-                _.each(unsetValues, (value, key: string) => item.set(key, value));
-                return item;
-            });
-        }).then((item) => this.saveWhereKeyIsOnRelated(item).then(() => item));
+    public async save(item: M): Promise<M> {
+        await this.saveWhereKeyIsOnItem(item);
+        const rawUpdates = this.prepareRawUpdates(item);
+        const unsetValues = this.prepareSqlColumnsForSave(item);
+        const item_5 = await this.executeSaveOperation(item);
+        await Q.when(Object.keys(rawUpdates).length && this.Mapping.createQuery(item_5, this.options).update(rawUpdates));
+        _.each(unsetValues, (value, key: string) => item_5.set(key, value));
+        await this.saveWhereKeyIsOnRelated(item_5);
+        return item_5;
     }
 
-    private executeSaveOperation(item) {
+    private executeSaveOperation(item: M): Promise<M> {
         return this.saveBehavior.executeSaveOperation(item, this.Mapping, this.options);
     }
 

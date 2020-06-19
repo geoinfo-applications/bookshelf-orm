@@ -154,13 +154,16 @@ export default class BookshelfRepository<M extends Bookshelf.Model<any>, ID = nu
         return new FetchOperation(this.Mapping, options).fetch(model, this.relations.getFetchOptions(options));
     }
 
-    public save(item: M, options: IEntityRepositoryOptions = required("options")) {
+    public save(item: M, options?: IEntityRepositoryOptions): Promise<M>;
+    public save(item: M[] | Bookshelf.Collection<M>, options?: IEntityRepositoryOptions): Promise<M[]>;
+
+    public save(item: M | M[] | Bookshelf.Collection<M>, options: IEntityRepositoryOptions = required("options")): Promise<M[] | M> {
         if (this.isCollectionType(item)) {
-            return this.invokeOnCollection(item, this.save, options);
+            return this.invokeOnCollection(item, (item: M) => this.save(item, options));
         }
 
         this.stringifyJson(item);
-        const saveOperation = new SaveOperation(this.Mapping, options);
+        const saveOperation: SaveOperation<M> = new SaveOperation<M>(this.Mapping, options);
         return saveOperation.save(item);
     }
 
@@ -182,7 +185,7 @@ export default class BookshelfRepository<M extends Bookshelf.Model<any>, ID = nu
 
     public async remove(item: M | ID, options: IEntityRepositoryOptions = required("options")) {
         if (this.isCollectionType(item)) {
-            return this.invokeOnCollection(item, this.remove, options);
+            return this.invokeOnCollection(item, (item: M) => this.remove(item, options));
         }
 
         const id = (item as any) instanceof this.Mapping.Model ? (item as M).get(this.idColumnName) : item;
@@ -202,9 +205,8 @@ export default class BookshelfRepository<M extends Bookshelf.Model<any>, ID = nu
         return Array.isArray(item) || item instanceof this.Mapping.Collection;
     }
 
-    private invokeOnCollection(collection: M[] | Bookshelf.Collection<M>, fn, options: IEntityRepositoryOptions = required("options")) {
-        const iterator = _.partial(fn, _, options).bind(this);
-        return Promise.all(Array.isArray(collection) ? collection.map(iterator) : collection.map(iterator));
+    private invokeOnCollection(collection: M[] | Bookshelf.Collection<M>, fn: (item: M) => Promise<M>): Promise<M[]> {
+        return Promise.all(Array.isArray(collection) ? collection.map((item) => fn(item)) : collection.map((item) => fn(item)));
     }
 
     public updateRaw<TRecord = any>(values, where, options: IEntityRepositoryOptions = required("options")): Knex.QueryBuilder<TRecord, number> {

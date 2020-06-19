@@ -5,8 +5,8 @@ import BookshelfMapping from "./BookshelfMapping";
 import IEntityRepositoryOptions from "./IEntityRepositoryOptions";
 
 
-export default interface IBookshelfDeepSaveOperationBehavior {
+export default interface IBookshelfDeepSaveOperationBehavior<M extends Bookshelf.Model<any>> {
 
-    executeSaveOperation(item: Bookshelf.Model<any>, mapping: BookshelfMapping, options: IEntityRepositoryOptions): Promise<Bookshelf.Model<any>>;
+    executeSaveOperation(item: M, mapping: BookshelfMapping, options: IEntityRepositoryOptions): Promise<M>;
 
 }
