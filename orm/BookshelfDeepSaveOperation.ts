@@ -26,11 +26,11 @@ export default class BookshelfDeepSaveOperation<M extends Bookshelf.Model<any>> 
         await this.saveWhereKeyIsOnItem(item);
         const rawUpdates = this.prepareRawUpdates(item);
         const unsetValues = this.prepareSqlColumnsForSave(item);
-        const item_5 = await this.executeSaveOperation(item);
-        await Q.when(Object.keys(rawUpdates).length && this.Mapping.createQuery(item_5, this.options).update(rawUpdates));
-        _.each(unsetValues, (value, key: string) => item_5.set(key, value));
-        await this.saveWhereKeyIsOnRelated(item_5);
-        return item_5;
+        const item5 = await this.executeSaveOperation(item);
+        await Q.when(Object.keys(rawUpdates).length && this.Mapping.createQuery(item5, this.options).update(rawUpdates));
+        _.each(unsetValues, (value, key: string) => item5.set(key, value));
+        await this.saveWhereKeyIsOnRelated(item5);
+        return item5;
     }
 
     private executeSaveOperation(item: M): Promise<M> {

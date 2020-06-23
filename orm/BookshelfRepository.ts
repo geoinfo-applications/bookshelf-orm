@@ -62,7 +62,7 @@ export default class BookshelfRepository<M extends Bookshelf.Model<any>, ID = nu
             return yield this.findWhere(null, options);
         }
 
-        const chunks = _.chunk(ids, BookshelfRepository.CHUNK_SIZE) as number[][];
+        const chunks = _.chunk(ids, BookshelfRepository.CHUNK_SIZE) as ID[][];
 
         for (const chunk of chunks) {
             yield this.findWhere((q) => {
