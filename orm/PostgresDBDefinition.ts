@@ -13,7 +13,7 @@ export default class PostgresDBDefinition {
     private readonly ModelFactory: ModelFactoryStatic;
     private config: IDbConnectionConfig;
 
-    constructor(config, ModelFactory: ModelFactoryStatic) {
+    constructor(config: IDbConnectionConfig, ModelFactory: ModelFactoryStatic) {
         this.config = config;
         this.ModelFactory = ModelFactory;
     }
