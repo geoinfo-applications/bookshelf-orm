@@ -102,15 +102,6 @@ module.exports = (grunt) => {
             ]
         },
 
-        release: {
-            options: {
-                npm: true,
-                tagName: "release-<%= version %>",
-                commitMessage: "[grunt release plugin] release <%= version %>",
-                tagMessage: "[grunt release plugin] version <%= version %>"
-            }
-        },
-
         exec: {
             tsc: {
                 command: `${path.resolve(__dirname, "node_modules/.bin/tsc")}`
