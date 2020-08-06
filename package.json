@@ -33,7 +33,7 @@
     "pg-query-stream": "^3.0.2",
     "q": "^1.5.1",
     "time-grunt": "^2.0.0",
-    "underscore": "^1.9.2"
+    "underscore": "^1.10.2"
   },
   "devDependencies": {
     "@types/bookshelf": "^1.1.0",

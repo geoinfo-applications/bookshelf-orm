@@ -97,7 +97,9 @@ export default class BookshelfRelations {
             }
         ];
 
-        return _.find(readableColumnNamesAppearConditions, (condition) => condition.condition())!.execute();
+        return readableColumnNamesAppearConditions.find(
+            (condition) => condition.condition()
+        )!.execute();
     }
 
     private addSqlColumnsToFetchPropertiesColumnsAsSqlQuery(fetchProperties, selectedReadableSqlColumns) {
