@@ -1,21 +1,23 @@
 "use strict";
 
 export interface IDbConnectionProperties {
-    database: string;
-    port: number;
-    host: string;
-    user: string;
-    password: string;
-    pool?: Partial<{
-        min: number;
-        max: number;
-        idleTimeoutMillis: number;
-        reapIntervalMillis: number;
+    readonly database: string;
+    readonly port: number;
+    readonly host: string;
+    readonly user: string;
+    readonly password: string;
+    readonly schemas?: string[];
+    readonly charset?: string;
+    readonly pool?: Partial<{
+        readonly min: number;
+        readonly max: number;
+        readonly idleTimeoutMillis: number;
+        readonly reapIntervalMillis: number;
     }>;
 }
 
 export default interface IDbConnectionConfig {
     projectName: string;
-    debug: boolean;
-    db: IDbConnectionProperties;
+    debug?: boolean;
+    db: { [projectName:string]: IDbConnectionProperties };
 }

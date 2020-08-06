@@ -11,6 +11,7 @@ import HistoryBehavior from "./BookshelfDeepSaveOperationHistoryBehavior";
 import { required } from "./Annotations";
 import BookshelfMapping from "./BookshelfMapping";
 import IEntityRepositoryOptions from "./IEntityRepositoryOptions";
+import {Dictionary} from "ts-essentials";
 
 
 export default class BookshelfDeepSaveOperation<M extends Bookshelf.Model<any>> extends BookshelfDeepOperation {
@@ -28,7 +29,7 @@ export default class BookshelfDeepSaveOperation<M extends Bookshelf.Model<any>> 
         const unsetValues = this.prepareSqlColumnsForSave(item);
         const item5 = await this.executeSaveOperation(item);
         await Q.when(Object.keys(rawUpdates).length && this.Mapping.createQuery(item5, this.options).update(rawUpdates));
-        _.each(unsetValues, (value, key: string) => item5.set(key, value));
+        Object.keys(unsetValues).forEach((key) => item5.set(key, unsetValues[key]));
         await this.saveWhereKeyIsOnRelated(item5);
         return item5;
     }
@@ -48,7 +49,7 @@ export default class BookshelfDeepSaveOperation<M extends Bookshelf.Model<any>> 
         return rawUpdates;
     }
 
-    private prepareSqlColumnsForSave(item) {
+    private prepareSqlColumnsForSave(item): Dictionary<unknown> {
         const unsetValues = Object.create(null);
 
         this.Mapping.sqlColumns.forEach((column) => {
