@@ -26,7 +26,9 @@ export default () => {
         "datadictionary.album_instrument",
         "datadictionary.cat",
         "datadictionary.kitten",
-        "datadictionary.halfling"
+        "datadictionary.halfling",
+        "datadictionary.dungeon",
+        "datadictionary.kobold"
     ];
 
     return Promise.all(tables.map((table) => knex.schema.dropTable(table)));

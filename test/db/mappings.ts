@@ -331,7 +331,7 @@ registry.register("AlbumDBMapping", "test", {
         name: "instruments",
         type: "hasMany",
         references: {
-            mapping: "AlbumInstumentDBMapping",
+            mapping: "AlbumInstrumentDBMapping",
             mappedBy: "album_id",
             identifies: "revision_id",
             cascade: true,
@@ -340,7 +340,7 @@ registry.register("AlbumDBMapping", "test", {
     }]
 });
 
-registry.register("AlbumInstumentDBMapping", "test", {
+registry.register("AlbumInstrumentDBMapping", "test", {
     tableName: "datadictionary.album_instrument",
     columns: ["id", "album_id"],
     relations: [{
@@ -413,4 +413,42 @@ registry.register("HalflingDBMapping", "test", {
     columns: ["id", "name", "height", "death"],
     onDelete: { death: new Date() },
     discriminator: (q) => q.whereNull("death")
+});
+
+registry.register("KoboldDBMapping", "test", {
+    tableName: "datadictionary.kobold",
+    columns: ["id", "revision_id", "parent_id", "name", "age", "hp", "dungeon_id", "death", {
+        name: "jobs",
+        type: "json"
+    }, {
+        name: "serial_number",
+        type: "sql",
+        get: () => "kobold.serial_number",
+        set: (v, knex) => knex.raw("lower( :value)", { value: v })
+    }, {
+        name: "secret_id",
+        type: "sql",
+        get: () => "concat(kobold.name, kobold.id, kobold.age)"
+    }],
+    keepHistory: true,
+    historyChangeCheck: true,
+    onDelete: { death: new Date() },
+    discriminator: (q) => q.whereNull("death")
+});
+
+registry.register("DungeonDBMapping", "test", {
+    tableName: "datadictionary.dungeon",
+    columns: ["id", "name", "coordinates", "death"],
+    onDelete: { death: new Date() },
+    discriminator: (q) => q.whereNull("death"),
+    relations: [{
+        name: "kobolds",
+        type: "hasMany",
+        references: {
+            mapping: "KoboldDBMapping",
+            mappedBy: "dungeon_id",
+            cascade: true,
+            orphanRemoval: true
+        }
+    }]
 });

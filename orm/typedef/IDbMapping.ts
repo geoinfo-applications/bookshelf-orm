@@ -50,6 +50,15 @@ export interface IDbMapping {
     historyColumns: { revisionId: string; parentId: string };
 
     /**
+     *  Instead of creating new states it will update the entity when IDbMapping.historyChangeCheck is true
+     *  and no column has changed. Even when {@see IDbMapping.keepHistory} is activated.
+     *  This is to prevent creating new states when there are no changes,
+     *  but the entity got saved in relation to an other entity which has no history itself.
+     *  "json" columns are not supported - use "jsonb" instead.
+     */
+    historyChangeCheck?: boolean;
+
+    /**
      * Managed relations of this Entity.
      * There will be a getter and setter for n:1 relations
      * There will be a getter and modifiers ("add"/"remove" + relation.name) for m:n relations
