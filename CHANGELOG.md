@@ -13,3 +13,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Noteworthy
 
   - Added the `historyChangeCheck` option which prevents creating new states, if there are no changes in the entity.
+  - Fixed `orphanRemoval` in combination with `identifies` option.

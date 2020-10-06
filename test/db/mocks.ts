@@ -114,8 +114,10 @@ const HornRepository = createRepository<Horn>(Horn, "Horn");
 const UnicornRepository = createRepository<Unicorn>(Unicorn, "Unicorn");
 
 class Instrument {}
+class AlbumInstrument {}
 class Album {}
 const InstrumentRepository = createRepository<Instrument>(Instrument, "Instrument");
+const AlbumInstrumentRepository = createRepository<Instrument>(AlbumInstrument, "AlbumInstrument");
 const AlbumRepository = createRepository<Album>(Album, "Album");
 
 class Cat {}
@@ -179,6 +181,7 @@ export {
     InstrumentRepository,
     Album,
     AlbumRepository,
+    AlbumInstrumentRepository,
 
     Cat,
     CatRepository,

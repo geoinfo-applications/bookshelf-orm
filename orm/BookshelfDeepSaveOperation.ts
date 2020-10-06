@@ -129,13 +129,14 @@ export default class BookshelfDeepSaveOperation<M extends Bookshelf.Model<any>> 
     private async removeOneToManyOrphans(item: M, relation, value, idColumn) {
         const ids = value && (Array.isArray(value.models) ? _.pluck(value.models, idColumn) : [value[idColumn]]);
         const fkColumn = relation.references.mappedBy;
+        const identifies = relation.references.identifies || "id";
 
         const results = await relation.references.mapping.createQuery(null, this.options).where((q) => {
             if (_.isEmpty(ids)) {
-                q.where(fkColumn, item.id);
+                q.where(fkColumn, item.get(identifies));
             } else {
                 q.whereNotIn(idColumn, ids);
-                q.andWhere(fkColumn, item.id);
+                q.andWhere(fkColumn, item.get(identifies));
             }
             q.orWhereNull(fkColumn);
         }).select(idColumn);
