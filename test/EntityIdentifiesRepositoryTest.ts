@@ -4,6 +4,7 @@ import chai, { expect } from "chai";
 import sinonChai from "sinon-chai";
 import {
     AlbumRepository,
+    AlbumInstrumentRepository,
     CatRepository,
     HornRepository,
     InstrumentRepository,
@@ -22,12 +23,13 @@ describe("Entity Repository Test with identifies option", () => {
     chai.use(sinonChai);
 
     let hornRepository, unicornRepository, albumRepository, instrumentRepository, catRepository, kittenRepository, sampleCatRepository,
-        sampleKittenRepository;
+        sampleKittenRepository, albumInstrumentRepository;
 
     beforeEach(() => {
         hornRepository = new HornRepository();
         unicornRepository = new UnicornRepository();
         albumRepository = new AlbumRepository();
+        albumInstrumentRepository = new AlbumInstrumentRepository();
         instrumentRepository = new InstrumentRepository();
         catRepository = new CatRepository();
         kittenRepository = new KittenRepository();
@@ -39,6 +41,7 @@ describe("Entity Repository Test with identifies option", () => {
         expect(HornRepository).to.be.a("function");
         expect(UnicornRepository).to.be.a("function");
         expect(AlbumRepository).to.be.a("function");
+        expect(AlbumInstrumentRepository).to.be.a("function");
         expect(InstrumentRepository).to.be.a("function");
         expect(CatRepository).to.be.a("function");
         expect(KittenRepository).to.be.a("function");
@@ -94,6 +97,17 @@ describe("Entity Repository Test with identifies option", () => {
             expect(secondGuitaristOnAlbum.instrument.player).to.be.eql("Dennis Stratton");
             expect(nextGuitarist.player).to.be.eql("Adrian Smith");
         });
+
+        it("should remove the albumInstruments when the timeline got changed and the album doesn't exist anymore", async () => {
+            const instrumentIds = firstAlbum.instruments.map(({ id }) => id);
+            const instruments = await albumInstrumentRepository.findAll(instrumentIds);
+
+            await albumRepository.remove(firstAlbum.id);
+            const orphans = await albumInstrumentRepository.findAll(instrumentIds);
+
+            expect(instruments.length).to.be.eql(5);
+            expect(orphans.length).to.be.eql(0);
+        });
     });
 
     describe("hasMany relation on simple model", () => {
@@ -106,6 +120,17 @@ describe("Entity Repository Test with identifies option", () => {
         it("if the cat changes the name it should have no impact on kittens and they should have reference to mother", async () => {
             const mauCat = await catRepository.save(catRepository.newEntity({ ...meowCat, name: "mau" }));
             expect(mauCat.kittens.length).to.be.eql(1);
+        });
+
+        it("if the cat dies the kittens should get removed too", async () => {
+            const kittenIds = meowCat.kittens.map(({ id }) => id);
+            const kittens = await kittenRepository.findAll(kittenIds);
+
+            await catRepository.remove(meowCat.id);
+            const orphans = await kittenRepository.findAll(kittenIds);
+
+            expect(kittens.length).to.be.eql(1);
+            expect(orphans.length).to.be.eql(0);
         });
     });
 

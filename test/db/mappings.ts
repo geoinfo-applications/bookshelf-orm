@@ -331,7 +331,7 @@ registry.register("AlbumDBMapping", "test", {
         name: "instruments",
         type: "hasMany",
         references: {
-            mapping: "AlbumInstumentDBMapping",
+            mapping: "AlbumInstrumentDBMapping",
             mappedBy: "album_id",
             identifies: "revision_id",
             cascade: true,
@@ -340,7 +340,7 @@ registry.register("AlbumDBMapping", "test", {
     }]
 });
 
-registry.register("AlbumInstumentDBMapping", "test", {
+registry.register("AlbumInstrumentDBMapping", "test", {
     tableName: "datadictionary.album_instrument",
     columns: ["id", "album_id"],
     relations: [{
