@@ -1,6 +1,5 @@
 "use strict";
 
-import Q from "q";
 import { knex } from "./connection";
 
 /* eslint max-statements: 0 */
@@ -50,6 +49,13 @@ export default () => {
         table.increments();
         table.string("name");
         table.integer("car_id");
+    });
+
+    const carWash = knex.schema.withSchema("datadictionary").createTable("car_wash", (table) => {
+        table.uuid("id").defaultTo(knex.raw("uuid_generate_v4()")).primary();
+        table.string("name");
+        table.integer("car_id");
+        table.timestamp("created").defaultTo(knex.fn.now());
     });
 
     const outlet = knex.schema.withSchema("datadictionary").createTable("outlet", (table) => {
@@ -174,7 +180,7 @@ export default () => {
         table.specificType("death", "timestamp").defaultTo(null);
     });
 
-    return Q.all([car, part, wheel, engine, owner, make, outlet, injection, parkingSpace,
+    return Promise.all([car, part, wheel, engine, owner, make, outlet, injection, parkingSpace, carWash,
         planet, moon, atmosphere, composition, person, horn, unicorn, instrument, album, albumInstrument, cat, kitten, halfling
     ]);
-}
+};
