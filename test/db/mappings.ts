@@ -48,6 +48,14 @@ registry.register("CarDBMapping", "test", {
                 mappedBy: "car_id",
                 cascade: true
             }
+        }, {
+            name: "carWash",
+            type: "hasOne",
+            references: {
+                mapping: "CarWashDBMapping",
+                mappedBy: "car_id",
+                cascade: true
+            }
         }
     ]
 });
@@ -182,6 +190,15 @@ registry.register("VeyronPartDBMapping", "test", {
 registry.register("ParkingSpaceDBMapping", "test", {
     tableName: "datadictionary.parking_space",
     columns: ["id", "name"]
+});
+
+registry.register("CarWashDBMapping", "test", {
+    tableName: "datadictionary.car_wash",
+    columns: ["id", "name", "created"],
+
+    isNew() {
+        return !this.get("created");
+    }
 });
 
 registry.register("OutletDBMapping", "test", {

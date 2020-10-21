@@ -12,6 +12,7 @@ export default () => {
         "datadictionary.owner",
         "datadictionary.make",
         "datadictionary.parking_space",
+        "datadictionary.car_wash",
         "datadictionary.outlet",
         "datadictionary.injection",
         "datadictionary.planet",

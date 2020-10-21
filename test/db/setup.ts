@@ -51,6 +51,13 @@ export default () => {
         table.integer("car_id");
     });
 
+    const carWash = knex.schema.withSchema("datadictionary").createTable("car_wash", (table) => {
+        table.uuid("id").defaultTo(knex.raw("uuid_generate_v4()")).primary();
+        table.string("name");
+        table.integer("car_id");
+        table.timestamp("created").defaultTo(knex.fn.now());
+    });
+
     const outlet = knex.schema.withSchema("datadictionary").createTable("outlet", (table) => {
         table.increments();
         table.integer("engine_id");
@@ -203,6 +210,7 @@ export default () => {
         outlet,
         injection,
         parkingSpace,
+        carWash,
         planet,
         moon,
         atmosphere,
