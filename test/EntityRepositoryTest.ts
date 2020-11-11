@@ -11,6 +11,7 @@ import registry from "./db/registry";
 import "./db/mappings";
 import setup from "./db/setup";
 import teardown from "./db/teardown";
+import { v4 as uuid } from "uuid";
 
 
 describe("Entity Repository Test", () => {
@@ -221,6 +222,39 @@ describe("Entity Repository Test", () => {
                     expect(car.parts[0].name).to.be.eql(name);
                 });
             });
+        });
+
+        it("should insert when id is set and isNew() returns true", async () => {
+            const carWash = { id: uuid(), name: "uniqueCarWash" };
+            const item = carRepository.newEntity({ name: "car" + tableIndex++, carWash });
+
+            const savedItem = await carRepository.save(item);
+            const fetchedItem = await carRepository.findOne(savedItem.id);
+            expect(savedItem.id).to.be.eql(fetchedItem.id);
+        });
+
+        it("should update when id is set and isNew() returns false", async () => {
+            const carWash = { id: uuid(), name: "uniqueCarWash" };
+            const item = carRepository.newEntity({ name: "car" + tableIndex++, carWash });
+
+            const savedItem1 = await carRepository.save(item);
+            savedItem1.name = "uniqueCarWash 2.0";
+            const savedItem2 = await carRepository.save(savedItem1);
+
+            expect(savedItem2.name).to.be.eql("uniqueCarWash 2.0");
+        });
+
+        it("should throw error when id is set but isNew() doesn't exist on mapping", async () => {
+            try {
+                const parkingSpace = { id: 5, name: "uniqueParkingSpace" };
+                const item = carRepository.newEntity({ name: "car" + tableIndex++, parkingSpace });
+
+                await carRepository.save(item);
+
+                throw new Error("should fail");
+            } catch (error) {
+                expect(error.message).to.match(/No Rows Updated/);
+            }
         });
 
     });

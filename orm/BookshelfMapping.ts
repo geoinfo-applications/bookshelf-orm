@@ -42,6 +42,7 @@ export default class BookshelfMapping {
     public writeableSqlColumns: IWritableSqlColumnDescriptor[];
     public readableSqlColumns: IReadableSqlColumnDescriptor[];
     public qualifiedRegularColumnNames: string[];
+    public isNew?: () => boolean;
 
     public constructor(dbContext: Bookshelf, config: IDbMapping) {
         this.dbContext = dbContext;
@@ -54,6 +55,7 @@ export default class BookshelfMapping {
         this.onDelete = config.onDelete;
         this.keepHistory = BookshelfMapping.getOptionOrDefault(config.keepHistory, false);
         this.historyColumns = BookshelfMapping.getOptionOrDefault(config.historyColumns, { revisionId: "revision_id", parentId: "parent_id" });
+        this.isNew = config.isNew;
 
         this.configureHistory();
 
@@ -111,10 +113,14 @@ export default class BookshelfMapping {
     }
 
     private createModel(): typeof Bookshelf.Model {
-        const prototype = {
+        const prototype: { tableName: string; idAttribute: string; isNew?: () => boolean } = {
             tableName: this.tableName,
             idAttribute: this.identifiedBy
         };
+
+        if (this.isNew) {
+            prototype.isNew = this.isNew;
+        }
 
         this.relations.forEach(this.addRelation.bind(this, prototype));
         return this.dbContext.Model.extend(prototype) as any;
@@ -139,7 +145,7 @@ export default class BookshelfMapping {
         };
     }
 
-    public createQuery<TRecord extends {} = any, TResult = Partial<TRecord>[]>(item, options: IEntityRepositoryOptions = required("options")):
+    public createQuery<TRecord extends {} = any, TResult = Array<Partial<TRecord>>>(item, options: IEntityRepositoryOptions = required("options")):
         Knex.QueryBuilder<TRecord, TResult> {
         /* eslint complexity: 0 */
         const query = this.dbContext.knex(this.tableName);
