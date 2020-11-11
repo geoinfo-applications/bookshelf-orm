@@ -12,5 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Noteworthy
 
+  -
+
+## [4.2.0] - 2020-11-11
+
+### BREAKING CHANGES
+
+  -
+
+### Noteworthy
+
   - Fixed `orphanRemoval` in combination with `identifies` option.
-  - Added `isNew` option for saving attributes with a custom id. 
+  - Added `isNew` option for saving attributes with a custom id.
