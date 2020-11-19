@@ -29,7 +29,6 @@ export default class BookshelfMapping {
     public readonly onDelete: object | ((q: Knex.QueryBuilder) => void);
     public readonly keepHistory: boolean;
     public readonly historyColumns: { revisionId: string; parentId: string };
-    public readonly historyChangeCheck: boolean;
 
     public Model: typeof Bookshelf.Model;
     public Collection: typeof Bookshelf.Collection;
@@ -56,7 +55,6 @@ export default class BookshelfMapping {
         this.onDelete = config.onDelete;
         this.keepHistory = BookshelfMapping.getOptionOrDefault(config.keepHistory, false);
         this.historyColumns = BookshelfMapping.getOptionOrDefault(config.historyColumns, { revisionId: "revision_id", parentId: "parent_id" });
-        this.historyChangeCheck = BookshelfMapping.getOptionOrDefault(config.historyChangeCheck, false);
         this.isNew = config.isNew;
 
         this.configureHistory();
