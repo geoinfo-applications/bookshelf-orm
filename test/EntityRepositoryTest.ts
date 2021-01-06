@@ -11,7 +11,6 @@ import registry from "./db/registry";
 import "./db/mappings";
 import setup from "./db/setup";
 import teardown from "./db/teardown";
-import { v4 as uuid } from "uuid";
 
 
 describe("Entity Repository Test", () => {
@@ -225,7 +224,7 @@ describe("Entity Repository Test", () => {
         });
 
         it("should insert when id is set and isNew() returns true", async () => {
-            const carWash = { id: uuid(), name: "uniqueCarWash" };
+            const carWash = { id: "913d8505-2bda-4f72-b528-8f0603157ab7", name: "uniqueCarWash" };
             const item = carRepository.newEntity({ name: "car" + tableIndex++, carWash });
 
             const savedItem = await carRepository.save(item);
@@ -234,7 +233,7 @@ describe("Entity Repository Test", () => {
         });
 
         it("should update when id is set and isNew() returns false", async () => {
-            const carWash = { id: uuid(), name: "uniqueCarWash" };
+            const carWash = { id: "95ee518b-233a-49a3-b4cc-849ed18e6196", name: "uniqueCarWash" };
             const item = carRepository.newEntity({ name: "car" + tableIndex++, carWash });
 
             const savedItem1 = await carRepository.save(item);
