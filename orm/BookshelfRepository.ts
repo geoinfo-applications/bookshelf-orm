@@ -42,7 +42,7 @@ export default class BookshelfRepository<M extends Bookshelf.Model<any>, ID = nu
     }
 
     private idsIsOptions<ID>(ids: ID[] | IEntityRepositoryOptions | undefined): ids is IEntityRepositoryOptions {
-        return !!ids && !_.isArray(ids);
+        return !!ids && !Array.isArray(ids);
     }
 
     private async findAllChunked(ids: ID[] | null | undefined, options: IEntityRepositoryOptions) {
@@ -114,7 +114,7 @@ export default class BookshelfRepository<M extends Bookshelf.Model<any>, ID = nu
 
     private getFilteredRelations(options: IEntityRepositoryOptions = required("options")) {
         return _.reject(this.Mapping.relations, (relation) => {
-            return _.contains(options!.exclude!, relation.name);
+            return options!.exclude!.includes(relation.name);
         });
     }
 

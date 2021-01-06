@@ -180,7 +180,51 @@ export default () => {
         table.specificType("death", "timestamp").defaultTo(null);
     });
 
-    return Promise.all([car, part, wheel, engine, owner, make, outlet, injection, parkingSpace, carWash,
-        planet, moon, atmosphere, composition, person, horn, unicorn, instrument, album, albumInstrument, cat, kitten, halfling
+    const dungeon = knex.schema.withSchema("datadictionary").createTable("dungeon", (table) => {
+        table.specificType("id", "serial");
+        table.string("name");
+        table.string("coordinates");
+        table.specificType("death", "timestamp").defaultTo(null);
+    });
+
+    const kobold = knex.schema.withSchema("datadictionary").createTable("kobold", (table) => {
+        table.uuid("revision_id").defaultTo(knex.raw("uuid_generate_v4()")).primary();
+        table.uuid("id").defaultTo(knex.raw("uuid_generate_v4()"));
+        table.uuid("parent_id");
+        table.string("name");
+        table.integer("age");
+        table.integer("hp");
+        table.integer("dungeon_id");
+        table.jsonb("jobs");
+        table.string("serial_number");
+        table.specificType("death", "timestamp").defaultTo(null);
+    });
+
+    return Promise.all([
+        car,
+        part,
+        wheel,
+        engine,
+        owner,
+        make,
+        outlet,
+        injection,
+        parkingSpace,
+        carWash,
+        planet,
+        moon,
+        atmosphere,
+        composition,
+        person,
+        horn,
+        unicorn,
+        instrument,
+        album,
+        albumInstrument,
+        cat,
+        kitten,
+        halfling,
+        dungeon,
+        kobold
     ]);
 };

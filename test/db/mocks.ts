@@ -130,6 +130,10 @@ const SampleKittenRepository = createRepository<Kitten>(Kitten, "SampleKitten");
 class Halfling {}
 const HalflingRepository = createRepository<Halfling>(Halfling, "Halfling");
 
+
+class Dungeon {}
+const DungeonRepository = createRepository<Dungeon>(Dungeon, "Dungeon");
+
 export {
     Car,
     SaferCar,
@@ -188,5 +192,8 @@ export {
     SampleKittenRepository,
 
     Halfling,
-    HalflingRepository
+    HalflingRepository,
+
+    Dungeon,
+    DungeonRepository
 };

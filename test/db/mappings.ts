@@ -431,3 +431,41 @@ registry.register("HalflingDBMapping", "test", {
     onDelete: { death: new Date() },
     discriminator: (q) => q.whereNull("death")
 });
+
+registry.register("KoboldDBMapping", "test", {
+    tableName: "datadictionary.kobold",
+    columns: ["id", "revision_id", "parent_id", "name", "age", "hp", "dungeon_id", "death", {
+        name: "jobs",
+        type: "json"
+    }, {
+        name: "serial_number",
+        type: "sql",
+        get: () => "kobold.serial_number",
+        set: (v, knex) => knex.raw("lower( :value)", { value: v })
+    }, {
+        name: "secret_id",
+        type: "sql",
+        get: () => "concat(kobold.name, kobold.id, kobold.age)"
+    }],
+    keepHistory: true,
+    historyChangeCheck: true,
+    onDelete: { death: new Date() },
+    discriminator: (q) => q.whereNull("death")
+});
+
+registry.register("DungeonDBMapping", "test", {
+    tableName: "datadictionary.dungeon",
+    columns: ["id", "name", "coordinates", "death"],
+    onDelete: { death: new Date() },
+    discriminator: (q) => q.whereNull("death"),
+    relations: [{
+        name: "kobolds",
+        type: "hasMany",
+        references: {
+            mapping: "KoboldDBMapping",
+            mappedBy: "dungeon_id",
+            cascade: true,
+            orphanRemoval: true
+        }
+    }]
+});

@@ -5,7 +5,8 @@ import StringUtils from "./StringUtils";
 import BookshelfMapping from "./BookshelfMapping";
 import { required } from "./Annotations";
 import IEntityRepositoryOptions from "./IEntityRepositoryOptions";
-import { IReadableSqlColumnDescriptor } from "./typedef/IColumnDescriptor";
+import { IColumnDescriptor, IReadableSqlColumnDescriptor } from "./typedef/IColumnDescriptor";
+import IReadableColumnNamesAppearConditions from "./IReadableColumnNamesAppearConditions";
 
 
 export default class BookshelfRelations {
@@ -70,20 +71,20 @@ export default class BookshelfRelations {
         return this.addSqlColumnsToFetchPropertiesColumnsAsSqlQuery(fetchProperties, selectedReadableSqlColumns);
     }
 
-    private getSelectedReadableColumnNames(fetchProperties) {
+    private getSelectedReadableColumnNames(fetchProperties): IColumnDescriptor["name"][] {
         const defaultSqlReadableColumnNames = this.Mapping.readableSqlColumns.map((sqlColumns) => sqlColumns.name);
         const excludedSqlReadableColumnNames = _.intersection(fetchProperties.exclude, defaultSqlReadableColumnNames);
         const selectedSqlReadableColumnNames = _.intersection(fetchProperties.columns, defaultSqlReadableColumnNames);
 
-        const readableColumnNamesAppearConditions = [
+        const readableColumnNamesAppearConditions: IReadableColumnNamesAppearConditions[] = [
             {
                 condition: () => _.contains(fetchProperties.exclude, "*"),
                 execute: () => []
             }, {
-                condition: () => excludedSqlReadableColumnNames.length,
+                condition: () => !!excludedSqlReadableColumnNames.length,
                 execute: () => _.difference(defaultSqlReadableColumnNames, excludedSqlReadableColumnNames)
             }, {
-                condition: () => selectedSqlReadableColumnNames.length,
+                condition: () => !!selectedSqlReadableColumnNames.length,
                 execute: () => {
                     selectedSqlReadableColumnNames.forEach((sqlColumn) => {
                         const sqlColumnIndex = fetchProperties.columns.indexOf(sqlColumn);
@@ -97,9 +98,7 @@ export default class BookshelfRelations {
             }
         ];
 
-        return readableColumnNamesAppearConditions.find(
-            (condition) => condition.condition()
-        )!.execute();
+        return readableColumnNamesAppearConditions.find((condition) => condition.condition())!.execute();
     }
 
     private addSqlColumnsToFetchPropertiesColumnsAsSqlQuery(fetchProperties, selectedReadableSqlColumns) {
@@ -202,4 +201,3 @@ export default class BookshelfRelations {
         return lookupReference && lookupReference.references.identifies && lookupReference.references.identifies !== referencedMapping.identifiedBy;
     }
 }
-
