@@ -17,7 +17,11 @@ export default class StringUtils {
     }
 
     public static camelToSnakeCase(string: string): string {
-        return string.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase();
+        return string.replace(StringUtils.camelCaseRegex, "$1_$2").toLowerCase();
+    }
+
+    public static get camelCaseRegex(): RegExp {
+        return /([a-z])([A-Z])/g
     }
 
     public static firstLetterUp(string: string): string {
