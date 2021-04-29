@@ -1,0 +1,86 @@
+#
+####################################################################
+#         predefined YAML templates for job-settings               #
+####################################################################
+#
+.tags_template:
+  tags: &tags_configuration
+    - GeoportalRunner # temporary for test gitlab system
+    - debRunner # temporary for test gitlab system
+
+.code-quality_template: &code-quality_configuration
+  tags: *tags_configuration
+  stage: code_quality
+  needs: [ "compile" ]
+
+.code-test_template: &code-test_configuration
+  tags: *tags_configuration
+  stage: code_test
+  dependencies:
+    - compile
+  needs: ["compile", "eslint", "todo", "jsdoc"]
+  retry:
+    max: 2
+#
+#
+#
+#
+#
+#
+####################################################################
+#                     official CI/CD Settings                      #
+####################################################################
+#
+#
+stages:
+  - code_build
+  - code_quality
+  - code_test
+
+compile:
+  stage: code_build
+  tags: *tags_configuration
+  before_script:
+    - geoapp snapshot --lock
+    - geoapp install --link=false --cache=.npm -v
+  script:
+    - grunt exec:tsc
+  cache:
+    key: "$CI_PROJECT_NAME-$CI_JOB_STAGE"
+    paths:
+      - .npm/
+  artifacts:
+    paths:
+      - ./
+    exclude:
+      - .git*
+      - .git/
+      - .npm/
+    when: on_success
+    expire_in: 15 min
+
+eslint:
+  <<: *code-quality_configuration
+  script:
+    - grunt eslint
+
+tslint:
+  <<: *code-quality_configuration
+  script:
+    - grunt tslint
+  allow_failure: true
+
+todo:
+  <<: *code-quality_configuration
+  script:
+    - grunt todo
+
+jsdoc:
+  <<: *code-quality_configuration
+  script:
+    - grunt jsdoc
+
+unit-tests_mocha:
+  <<: *code-test_configuration
+  script:
+    - grunt mochaTest
