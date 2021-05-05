@@ -1,33 +1,5 @@
 #
 ####################################################################
-#         predefined YAML templates for job-settings               #
-####################################################################
-#
-.tags_template:
-  tags: &tags_configuration
-    - GeoportalRunner # temporary for test gitlab system
-    - debRunner # temporary for test gitlab system
-
-.code-quality_template: &code-quality_configuration
-  tags: *tags_configuration
-  stage: code_quality
-  needs: [ "compile" ]
-
-.code-test_template: &code-test_configuration
-  tags: *tags_configuration
-  stage: code_test
-  dependencies:
-    - compile
-  needs: ["compile", "eslint", "todo", "jsdoc"]
-  retry:
-    max: 2
-#
-#
-#
-#
-#
-#
-####################################################################
 #                     official CI/CD Settings                      #
 ####################################################################
 #
@@ -39,7 +11,8 @@ stages:
 
 compile:
   stage: code_build
-  tags: *tags_configuration
+  extends:
+    - .tags
   before_script:
     - geoapp snapshot --lock
     - geoapp install --link=false --cache=.npm -v
@@ -60,27 +33,64 @@ compile:
     expire_in: 15 min
 
 eslint:
-  <<: *code-quality_configuration
+  extends:
+    - .code_quality
   script:
     - grunt eslint
 
 tslint:
-  <<: *code-quality_configuration
+  extends:
+    - .code_quality
   script:
     - grunt tslint
   allow_failure: true
 
 todo:
-  <<: *code-quality_configuration
+  extends:
+    - .code_quality
   script:
     - grunt todo
 
 jsdoc:
-  <<: *code-quality_configuration
+  extends:
+    - .code_quality
   script:
     - grunt jsdoc
 
 unit-tests_mocha:
-  <<: *code-test_configuration
+  extends:
+    - .code_test
   script:
     - grunt mochaTest
+#
+#
+#
+#
+#
+#
+#
+#
+####################################################################
+#             predefined properties for job-settings               #
+####################################################################
+#
+.tags:
+  tags:
+    - GeoportalRunner # temporary for test gitlab system
+    - debRunner # temporary for test gitlab system
+
+.code_quality:
+  extends:
+    - .tags
+  stage: code_quality
+  needs: [ "compile" ]
+
+.code_test:
+  extends:
+    - .tags
+  stage: code_test
+  dependencies:
+    - compile
+  needs: ["compile", "eslint", "todo", "jsdoc"]
+  retry:
+    max: 2
