@@ -57,7 +57,7 @@ jsdoc:
   script:
     - grunt jsdoc
 
-unit-tests_mocha:
+unit_tests_mocha:
   extends:
     - .code_test
   script:
