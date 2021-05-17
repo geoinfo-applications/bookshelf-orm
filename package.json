@@ -12,10 +12,13 @@
     "prepublishOnly": "grunt clean:ts exec:tsc"
   },
   "files": [
-    "index.*",
+    "index.js",
+    "index.d.ts",
     "tsconfig.json",
     "docs/**/*",
-    "orm/**/*"
+    "!orm/**/*.ts",
+    "orm/**/*.d.ts",
+    "orm/**/*.js"
   ],
   "author": "Geoinfo Applications AG",
   "license": "MIT",
