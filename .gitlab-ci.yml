@@ -37,7 +37,9 @@ tslint:
     - .code_quality
   script:
     - grunt tslint
-  allow_failure: true
+  allow_failure: true # @todo remove it when tslint is fixed
+  retry: # @todo remove it when tslint is fixed
+    max: 0 # @todo remove it when tslint is fixed
 
 todo:
   extends:
