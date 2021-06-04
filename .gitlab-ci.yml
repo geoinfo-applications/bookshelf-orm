@@ -1,13 +1,7 @@
-#
-####################################################################
-#                     official CI/CD Settings                      #
-####################################################################
-#
-#
-stages:
-  - code_build
-  - code_quality
-  - code_test
+include:
+  - project: "Geosolution/gitlab-files"
+    ref: master
+    file: "/build/includes-files-tag.yml"
 
 compile:
   stage: code_build
@@ -63,34 +57,6 @@ unit_tests_mocha:
   script:
     - grunt mochaTest
 #
-#
-#
-#
-#
-#
-#
-#
-####################################################################
-#             predefined properties for job-settings               #
-####################################################################
-#
-.tags:
-  tags:
-    - GeoportalRunner # temporary for test gitlab system
-    - debRunner # temporary for test gitlab system
-
-.code_quality:
-  extends:
-    - .tags
-  stage: code_quality
-  needs: [ "compile" ]
-
+# supplements of the import templates
 .code_test:
-  extends:
-    - .tags
-  stage: code_test
-  dependencies:
-    - compile
-  needs: ["compile", "eslint", "todo", "jsdoc"]
-  retry:
-    max: 2
+  needs: [ "compile", "eslint", "todo", "jsdoc" ] # , "tslint" @todo include when tslint is fixed
