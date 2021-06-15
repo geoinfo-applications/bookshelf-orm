@@ -1,5 +1,5 @@
 include:
-  - project: "Geosolution/gitlab-files"
+  - project: "geosolutions/gitlab-files"
     ref: master
     file: "/build/includes-files-tag.yml"
 
