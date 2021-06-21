@@ -6,25 +6,12 @@ include:
 compile:
   stage: code_build
   extends:
-    - .tags
+    - .code_build
   before_script:
     - geoapp snapshot --lock
     - geoapp install --link=false --cache=.npm -v
   script:
     - grunt exec:tsc
-  cache:
-    key: "$CI_PROJECT_NAME-$CI_JOB_STAGE"
-    paths:
-      - .npm/
-  artifacts:
-    paths:
-      - ./
-    exclude:
-      - .git*
-      - .git/
-      - .npm/
-    when: on_success
-    expire_in: 15 min
 
 eslint:
   extends:
