@@ -4,7 +4,6 @@ include:
     file: "/build/includes-files-tag.yml"
 
 compile:
-  stage: code_build
   extends:
     - .code_build
   before_script:
