@@ -6,9 +6,6 @@ include:
 compile:
   extends:
     - .code_build
-  before_script:
-    - geoapp snapshot --lock
-    - geoapp install --link=false --cache=.npm -v
   script:
     - grunt exec:tsc
 
@@ -23,9 +20,6 @@ tslint:
     - .code_quality
   script:
     - grunt tslint
-  allow_failure: true # @todo remove it when tslint is fixed
-  retry: # @todo remove it when tslint is fixed
-    max: 0 # @todo remove it when tslint is fixed
 
 todo:
   extends:
@@ -41,10 +35,6 @@ jsdoc:
 
 unit_tests_mocha:
   extends:
-    - .code_test
+    - .unit_test_mocha
   script:
     - grunt mochaTest
-#
-# supplements of the import templates
-.code_test:
-  needs: [ "compile", "eslint", "todo", "jsdoc" ] # , "tslint" @todo include when tslint is fixed
