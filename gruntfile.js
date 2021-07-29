@@ -22,16 +22,8 @@ module.exports = (grunt) => {
 
         tslint: {
             options: { configuration: require("./tslint.js"), fix: grunt.option("fix") },
-            orm: ["orm/**/*.ts"],
-            test: ["test/**/*.ts"]
-        },
-
-        david: {
-            check: {
-                options: {
-                    warn404: true
-                }
-            }
+            orm: ["orm/**/!(*.d).ts"],
+            test: ["test/**/!(*.d).ts", "!test/db/mappings.ts"]
         },
 
         todo: {
@@ -105,6 +97,12 @@ module.exports = (grunt) => {
         exec: {
             tsc: {
                 command: `${path.resolve(__dirname, "node_modules/.bin/tsc")}`
+            },
+            david: {
+                command: `${path.resolve(__dirname, "node_modules/.bin/david")} --error404`
+            },
+            install: {
+                command: "npm i"
             }
         }
 
@@ -113,7 +111,7 @@ module.exports = (grunt) => {
     require("load-grunt-tasks")(grunt);
 
     grunt.registerTask("code-check", ["eslint", "todo"]);
-    grunt.registerTask("update", ["npm-install", "clean", "david"]);
+    grunt.registerTask("update", ["exec:install", "clean", "exec:david"]);
     grunt.registerTask("update-development", ["env:unit_test", "update", "env:development"]);
     grunt.registerTask("test", ["env:unit_test", "code-check", "exec:tsc", "mochaTest"]);
     grunt.registerTask("build", ["env:build", "code-check", "exec:tsc", "mochaTest", "jsdoc"]);
