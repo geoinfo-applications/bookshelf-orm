@@ -6,6 +6,7 @@ import BookshelfModelRelation from "./orm/BookshelfModelRelation";
 import BookshelfModelWrapper from "./orm/BookshelfModelWrapper";
 import BookshelfRelations from "./orm/BookshelfRelations";
 import BookshelfRepository from "./orm/BookshelfRepository";
+import EntityCaseConverter from "./orm/EntityCaseConverter";
 import DBMappingRegistry from "./orm/DBMappingRegistry";
 import * as Annotations from "./orm/Annotations";
 import EntityRepository from "./orm/EntityRepository";
@@ -22,6 +23,7 @@ export {
     BookshelfModelWrapper,
     BookshelfRelations,
     BookshelfRepository,
+    EntityCaseConverter,
     DBMappingRegistry,
     EntityRepository,
     IEntityRepositoryOptions,
