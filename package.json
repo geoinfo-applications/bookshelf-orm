@@ -5,7 +5,7 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/geoinfo-applications/bookshelf-orm.git"
+    "url": "https://gitlab.geoinfo.ch/geosolutions/libraries/bookshelf-orm.git"
   },
   "scripts": {
     "test": "grunt test",
