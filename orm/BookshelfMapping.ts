@@ -115,7 +115,7 @@ export default class BookshelfMapping {
     }
 
     private createModel(): typeof Bookshelf.Model {
-        const prototype: { tableName: string; idAttribute: string; isNew?: () => boolean } = {
+        const prototype: { tableName: string; idAttribute: string; isNew?(): boolean; } = {
             tableName: this.tableName,
             idAttribute: this.identifiedBy
         };

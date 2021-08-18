@@ -21,7 +21,7 @@ export default class StringUtils {
     }
 
     public static get camelCaseRegex(): RegExp {
-        return /([a-z])([A-Z])/g
+        return /([a-z])([A-Z])/g;
     }
 
     public static firstLetterUp(string: string): string {

@@ -3,7 +3,7 @@
 import Bookshelf from "bookshelf";
 import { required } from "./Annotations";
 import BookshelfMapping from "./BookshelfMapping";
-import { IColumnDescriptor } from "./typedef/IColumnDescriptor";
+import { IColumnDescriptor, ISqlColumnDescriptor } from "./typedef/IColumnDescriptor";
 import IEntityRepositoryOptions from "./IEntityRepositoryOptions";
 import IBookshelfDeepSaveOperationBehavior from "./IBookshelfDeepSaveOperationBehavior";
 
@@ -45,7 +45,7 @@ export default class BookshelfDeepSaveOperationHistoryBehavior<M extends Bookshe
     }
 
     private isReadonlyColumns(columnMapping: IColumnDescriptor): boolean {
-        return columnMapping.type === "sql" && !columnMapping.set;
+        return columnMapping.type === "sql" && !(columnMapping as ISqlColumnDescriptor).set;
     }
 
 }

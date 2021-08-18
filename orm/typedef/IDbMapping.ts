@@ -68,5 +68,5 @@ export interface IDbMapping {
     /**
      * When using custom ID, this method will check if the Entity is new.
      */
-    isNew?: () => boolean;
+    isNew?(): boolean;
 }

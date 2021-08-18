@@ -1,0 +1,40 @@
+include:
+  - project: "geosolutions/gitlab-files"
+    ref: master
+    file: "/build/includes-files-tag.yml"
+
+compile:
+  extends:
+    - .code_build
+  script:
+    - grunt exec:tsc
+
+eslint:
+  extends:
+    - .code_quality
+  script:
+    - grunt eslint
+
+tslint:
+  extends:
+    - .code_quality
+  script:
+    - grunt tslint
+
+todo:
+  extends:
+    - .code_quality
+  script:
+    - grunt todo
+
+jsdoc:
+  extends:
+    - .code_quality
+  script:
+    - grunt jsdoc
+
+unit_tests_mocha:
+  extends:
+    - .unit_test_mocha
+  script:
+    - grunt mochaTest
