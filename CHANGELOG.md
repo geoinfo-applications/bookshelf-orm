@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Noteworthy
 
-  -
+  - introduced `EntityRepository#paginate` method
 
 ## [4.3.0] - 2021-01-06
 

@@ -11,6 +11,7 @@ import MappingRelationsIterator from "./MappingRelationsIterator";
 import IEntityRepositoryOptions from "./IEntityRepositoryOptions";
 import BookshelfMapping from "./BookshelfMapping";
 import { required } from "./Annotations";
+import IPaginationOptions from "./typedef/IPaginationOptions";
 
 
 export default class BookshelfRepository<M extends Bookshelf.Model<any>, ID = number> {
@@ -38,15 +39,15 @@ export default class BookshelfRepository<M extends Bookshelf.Model<any>, ID = nu
             return this.Mapping.Collection.forge();
         }
 
-        return this.findAllChunked(ids, options);
+        return this.findAllChunked(ids, null, options);
     }
 
     private idsIsOptions<ID>(ids: ID[] | IEntityRepositoryOptions | undefined): ids is IEntityRepositoryOptions {
         return !!ids && !Array.isArray(ids);
     }
 
-    private async findAllChunked(ids: ID[] | null | undefined, options: IEntityRepositoryOptions) {
-        const generator = this.getNextChunk(ids, options);
+    private async findAllChunked(ids: ID[] | null | undefined, paginationOptions: IPaginationOptions | null, options: IEntityRepositoryOptions) {
+        const generator = this.getNextChunk(ids, paginationOptions, options);
         const results: M[] = [];
 
         for (let current = generator.next(); !current.done; current = generator.next()) {
@@ -57,9 +58,9 @@ export default class BookshelfRepository<M extends Bookshelf.Model<any>, ID = nu
         return this.Mapping.Collection.forge(results);
     }
 
-    private* getNextChunk(ids: ID[] | null | undefined, options: IEntityRepositoryOptions) {
+    private* getNextChunk(ids: ID[] | null | undefined, paginationOptions: IPaginationOptions | null, options: IEntityRepositoryOptions) {
         if (!Array.isArray(ids) || !ids.length) {
-            return yield this.findWhere(null, options);
+            return yield this.findWhere(null, paginationOptions, options);
         }
 
         const chunks = _.chunk(ids, BookshelfRepository.CHUNK_SIZE) as ID[][];
@@ -68,25 +69,40 @@ export default class BookshelfRepository<M extends Bookshelf.Model<any>, ID = nu
             yield this.findWhere((q) => {
                 q.whereIn(this.idColumnName, chunk);
                 chunk.forEach((id) => q.orderByRaw(`${this.idColumnName} = ? DESC`, [id]));
-            }, options);
+            }, paginationOptions, options);
         }
     }
 
-    public findWhere(condition, options: IEntityRepositoryOptions = required("options")) {
-        const collection = (this.Mapping.Collection.forge() as Bookshelf.Collection<any>).query((q) => {
+    public findWhere(condition, pageableOptions: IPaginationOptions | null, options: IEntityRepositoryOptions = required("options")) {
+        const collection = this.getCollection(condition, pageableOptions ? { ...pageableOptions, skipOffset: false } : null);
+        return this.fetchWithOptions(collection, options);
+    }
+
+    public count(condition, pageableOptions: IPaginationOptions | null, options: IEntityRepositoryOptions = required("options")) {
+        const collection = this.getCollection(condition, pageableOptions ? {...pageableOptions, skipOffset: true} : null);
+        return this.countWithOptions(collection, options);
+    }
+
+    private getCollection(condition, pageableOptions: IPaginationOptions & { skipOffset: boolean } | null) {
+        return (this.Mapping.Collection.forge() as Bookshelf.Collection<any>).query((q) => {
             if (condition) {
                 condition.call(this, q);
+            }
+
+            if (pageableOptions) {
+                q.limit(pageableOptions.limit);
+                if (!pageableOptions.skipOffset) {
+                    q.offset(pageableOptions.offset);
+                }
             }
 
             if (this.Mapping.discriminator) {
                 q.andWhere(this.Mapping.discriminator);
             }
         });
-
-        return this.fetchWithOptions(collection, options);
     }
 
-    public findByConditions(conditions, options: IEntityRepositoryOptions = required("options")) {
+    public findByConditions(conditions, paginationOptions: IPaginationOptions | null, options: IEntityRepositoryOptions = required("options")) {
         const relations = options && this.getFilteredRelations(options) || this.Mapping.relations;
 
         return this.findWhere((q) => {
@@ -109,7 +125,7 @@ export default class BookshelfRepository<M extends Bookshelf.Model<any>, ID = nu
                 });
             });
 
-        }, options);
+        }, paginationOptions, options);
     }
 
     private getFilteredRelations(options: IEntityRepositoryOptions = required("options")) {
@@ -152,6 +168,10 @@ export default class BookshelfRepository<M extends Bookshelf.Model<any>, ID = nu
 
     private fetchWithOptions(model, options: IEntityRepositoryOptions = required("options")) {
         return new FetchOperation(this.Mapping, options).fetch(model, this.relations.getFetchOptions(options));
+    }
+
+    private countWithOptions(model, options: IEntityRepositoryOptions = required("options")) {
+        return new FetchOperation(this.Mapping, options).count(model, this.relations.getFetchOptions(options));
     }
 
     public save(item: M, options?: IEntityRepositoryOptions): Promise<M>;

@@ -14,6 +14,8 @@ import IEntityRepositoryOptions from "./orm/IEntityRepositoryOptions";
 import MappingRelationsIterator from "./orm/MappingRelationsIterator";
 import ModelFactory, { ModelFactoryStatic } from "./orm/ModelFactory";
 import PostgresDBDefinition from "./orm/PostgresDBDefinition";
+import IPageableResult from "./orm/typedef/IPageableResult";
+import IPaginationOptions from "./orm/typedef/IPaginationOptions";
 
 
 export {
@@ -31,5 +33,7 @@ export {
     ModelFactory,
     ModelFactoryStatic,
     PostgresDBDefinition,
-    Annotations
+    Annotations,
+    IPageableResult,
+    IPaginationOptions
 };

@@ -768,6 +768,23 @@ describe("Entity Repository Test", () => {
                 expect(cars[0].parts.length).to.be.eql(0);
             });
         });
+
+        it("should test pagination", async () => {
+            await carRepository.save([car1Entity, car2Entity, car3Entity]);
+
+            const result = await carRepository.paginate(null, { limit: 1, offset: 0});
+            expect(result.entries.length).to.be.eql(1);
+            expect(result.count).to.be.eql("3");
+            const next1 = await carRepository.paginate(null, {limit: 1, offset: 1});
+            expect(next1.entries.length).to.be.eql(1);
+            expect(next1.count).to.be.eql("3");
+            const next2 = await carRepository.paginate(null, {limit: 1, offset: 2});
+            expect(next2.entries.length).to.be.eql(1);
+            expect(next2.count).to.be.eql("3");
+            const next3 = await carRepository.paginate(null, {limit: 1, offset: 3});
+            expect(next3.entries.length).to.be.eql(0);
+            expect(next3.count).to.be.eql("3");
+        });
     });
 
     let tableIndex = 0;
