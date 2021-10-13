@@ -26,6 +26,10 @@ export default class BookshelfDeepFetchOperation extends BookshelfDeepOperation 
         }
     }
 
+    public async count(model, fetchOptions) {
+        return model.count(fetchOptions);
+    }
+
     private stripEmptyRelations(model) {
         return this.mappingRelationsIterator(model, null, this.stripRelationIfEmpty);
     }

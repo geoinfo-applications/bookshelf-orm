@@ -12,7 +12,8 @@ import { required } from "./Annotations";
 import IEntityType from "./typedef/IEntityType";
 import { DeepPartial } from "ts-essentials";
 import Bookshelf = require("bookshelf");
-
+import IPaginationOptions from "./typedef/IPaginationOptions";
+import IPageableResult from "./typedef/IPageableResult";
 
 /**
  * Abstraction on top of BookshelfRepository, Bookshelf and Knex. Provides basic CRUD operations for a specific type.
@@ -81,8 +82,29 @@ export default class EntityRepository<E extends object | IEntityType, ID = numbe
      * @returns {Promise<Array<Entity>>} - Returns Promise resolved with array of entities, or empty list if not found.
      */
     public async findAllWhere(q: (q: Knex.QueryInterface) => void, options: IEntityRepositoryOptions = null): Promise<E[]> {
-        const items = await this.repository.findWhere(q, options);
+        const items = await this.repository.findWhere(q, null, options);
         return (items.length ? this.wrapper.wrap(items) : []) as E[];
+    }
+
+    /**
+     * Serves functionality for pagination using a query. Returns fetched entries and count
+     * @param {Function | null} q - Callback, used as Bookshelf/Knex where condition.
+     * @param {IPaginationOptions | null} [pagination] - pagination options
+     * @param {number} [pagination.offset] - offset part for pagination
+     * @param {number} [pagination.limit] - limit for certain number of entries
+     * @param {object} [options] - Bookshelf fetch options
+     * @param {Transaction} [options.transacting] - Run in given transaction
+     * @param {boolean} [options.transactional] - Run in a transaction, start new one if not already transacting
+     * @param {Array<string>} [options.exclude] - Relation names to exclude, deep relations in dot notation. Specify wildcards using "*"
+     * @returns {Promise<IPageableResult<Entity>>} - Returns a promise which contains entries as Array<Entity> and count as string
+     */
+    public async paginate(q: ((q: Knex.QueryInterface) => void) | null, pagination: IPaginationOptions | null,
+        options: IEntityRepositoryOptions = null): Promise<IPageableResult<E>> {
+        const [items, count] = await Promise.all([
+            this.repository.findWhere(q, pagination, options),
+            this.repository.count(q, pagination, options)
+        ]);
+        return { count, entries: this.wrapper.wrap(items) as E[] };
     }
 
     /**
@@ -95,7 +117,7 @@ export default class EntityRepository<E extends object | IEntityType, ID = numbe
      * @returns {Promise<Entity|null>} - Returns Promise resolved with entity, or null if not found
      */
     public async findWhere(q: (q: Knex.QueryInterface) => void, options: IEntityRepositoryOptions = null): Promise<E | null> {
-        return this.repository.findWhere(q, options).then((items) => {
+        return this.repository.findWhere(q, null, options).then((items) => {
             if (items.length) {
                 return this.wrapper.wrap(items.pop() as any);
             } else {
@@ -105,7 +127,7 @@ export default class EntityRepository<E extends object | IEntityType, ID = numbe
     }
 
     public async findByConditions(conditions, options: IEntityRepositoryOptions = null): Promise<E[]> {
-        const items = await this.repository.findByConditions(conditions, options);
+        const items = await this.repository.findByConditions(conditions, null, options);
         return (items.length ? this.wrapper.wrap(items) : []) as E[];
     }
 
