@@ -9,7 +9,7 @@
   },
   "scripts": {
     "test": "grunt test",
-    "prepack": "npm ci && grunt clean:ts exec:tsc"
+    "prepack": "npx --ignore-existing rimraf ./node_modules && npm ci && grunt clean:ts exec:tsc"
   },
   "files": [
     "tsconfig.json",
