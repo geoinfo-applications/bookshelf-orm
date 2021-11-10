@@ -20,9 +20,9 @@ export default class DBMappingRegistry {
         this.ModelFactory = ModelFactory;
     }
 
-    public static getInstance() {
+    public static getInstance(DBMappingRegistryClass = DBMappingRegistry) {
         if (!instance) {
-            instance = new DBMappingRegistry(ModelFactory);
+            instance = new DBMappingRegistryClass(ModelFactory);
         }
 
         return instance;
