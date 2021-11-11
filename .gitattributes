@@ -3,7 +3,14 @@
 
 # Declare files that will always have CRLF line endings on checkout.
 *.js text eol=crlf
+*.ts text eol=crlf
 *.json text eol=crlf
-*.jade text eol=crlf
 *.pug text eol=crlf
 *.html text eol=crlf
+*.md text eol=crlf
+*.log text eol=crlf
+*.txt text eol=crlf
+.npmrc text eol=crlf
+*.yml text eol=crlf
+.gitattributes text eol=crlf
+.gitignore text eol=crlf
