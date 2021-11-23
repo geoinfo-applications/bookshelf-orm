@@ -17,6 +17,7 @@ import "./db/connection";
 import "./db/mappings";
 import setup from "./db/setup";
 import teardown from "./db/teardown";
+import sinon, { SinonStub } from "sinon";
 
 
 describe("Entity Repository Test with identifies option", () => {
@@ -143,6 +144,39 @@ describe("Entity Repository Test with identifies option", () => {
 
             expect(fetchedCat.kitten.id).to.be.eql(cat.kitten.revisionId);
             expect(fetchedKitten).to.be.eql(null);
+        });
+    });
+
+    describe("discriminator in query", () => {
+        let consoleLog: (message?: any, ...optionalParams: any[]) => void, consoleStub: SinonStub;
+        beforeEach(async () => {
+            const savedCat = await sampleCatRepository.save(sampleCatRepository.newEntity({ name: "meow" }));
+            await sampleCatRepository.save(savedCat);
+            await sampleCatRepository.save(savedCat);
+            await sampleCatRepository.save(savedCat);
+            await sampleCatRepository.save(savedCat);
+            await sampleCatRepository.save(sampleCatRepository.newEntity({ ...savedCat, name: "bark" }));
+            consoleLog = console.log;
+            consoleStub = sinon.stub();
+            console.log = consoleStub;
+        });
+
+        afterEach(() => {
+            console.log = consoleLog;
+        });
+
+        it("should test discriminator in query", async () => {
+            await sampleCatRepository
+                .findAllWhere((q) => q.where("name", "bark"), { discriminator: (q) => q.where("name", "bark"), debug: true });
+            expect(consoleStub.firstCall.args[0]).to.contain(`select ` +
+                `"datadictionary"."cat"."id", ` +
+                `"datadictionary"."cat"."name", ` +
+                `"datadictionary"."cat"."revision_id", ` +
+                `"datadictionary"."cat"."parent_id", ` +
+                `"datadictionary"."cat"."death" ` +
+                `from "datadictionary"."cat" ` +
+                `where "name" = ? and ` +
+                `("revision_id" not in (select "parent_id" from "datadictionary"."cat" where "parent_id" is not null and ("name" = ?))`);
         });
     });
 

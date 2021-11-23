@@ -74,16 +74,16 @@ export default class BookshelfRepository<M extends Bookshelf.Model<any>, ID = nu
     }
 
     public findWhere(condition, pageableOptions: IPaginationOptions | null, options: IEntityRepositoryOptions = required("options")) {
-        const collection = this.getCollection(condition, pageableOptions ? { ...pageableOptions, skipOffset: false } : null);
+        const collection = this.getCollection(condition, pageableOptions ? { ...pageableOptions, skipOffset: false } : null, options);
         return this.fetchWithOptions(collection, options);
     }
 
     public count(condition, pageableOptions: IPaginationOptions | null, options: IEntityRepositoryOptions = required("options")) {
-        const collection = this.getCollection(condition, pageableOptions ? {...pageableOptions, skipOffset: true} : null);
+        const collection = this.getCollection(condition, pageableOptions ? {...pageableOptions, skipOffset: true} : null, options);
         return this.countWithOptions(collection, options);
     }
 
-    private getCollection(condition, pageableOptions: IPaginationOptions & { skipOffset: boolean } | null) {
+    private getCollection(condition, pageableOptions: IPaginationOptions & { skipOffset: boolean } | null, options) {
         return (this.Mapping.Collection.forge() as Bookshelf.Collection<any>).query((q) => {
             if (condition) {
                 condition.call(this, q);
@@ -97,7 +97,7 @@ export default class BookshelfRepository<M extends Bookshelf.Model<any>, ID = nu
             }
 
             if (this.Mapping.discriminator) {
-                q.andWhere(this.Mapping.discriminator);
+                q.andWhere(this.Mapping.addDiscriminator(options));
             }
         });
     }
@@ -110,7 +110,7 @@ export default class BookshelfRepository<M extends Bookshelf.Model<any>, ID = nu
                 subQuery.select(`${this.Mapping.tableName}.${this.Mapping.identifiedBy}`).from(this.Mapping.tableName);
 
                 if (this.Mapping.discriminator) {
-                    subQuery.andWhere(this.Mapping.discriminator);
+                    subQuery.andWhere(this.Mapping.addDiscriminator(options));
                 }
 
                 if (options && options.transacting) {
@@ -160,7 +160,7 @@ export default class BookshelfRepository<M extends Bookshelf.Model<any>, ID = nu
         const model = (this.Mapping.Model.forge(query) as Bookshelf.Model<any>);
 
         if (this.Mapping.discriminator) {
-            model.where(this.Mapping.discriminator);
+            model.where(this.Mapping.addDiscriminator(options));
         }
 
         return this.fetchWithOptions(model, options);

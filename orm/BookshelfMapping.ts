@@ -86,9 +86,16 @@ export default class BookshelfMapping {
         const discriminator = this.discriminator;
         const { revisionId, parentId } = this.historyColumns;
 
-        return (q) => {
-            q.whereNotIn(revisionId, (q) => q.from(this.tableName).whereNotNull(parentId).select(parentId));
-            q.andWhere(discriminator);
+        return (optionalDiscriminator, q) => {
+            const queryBuilder = q || optionalDiscriminator;
+            queryBuilder.whereNotIn(revisionId, (q) => {
+                const baseQuery = q.from(this.tableName).whereNotNull(parentId).select(parentId);
+                if (optionalDiscriminator && optionalDiscriminator !== queryBuilder) {
+                    baseQuery.where(optionalDiscriminator);
+                }
+                return baseQuery;
+            });
+            queryBuilder.andWhere(discriminator);
         };
     }
 
@@ -161,7 +168,7 @@ export default class BookshelfMapping {
         }
 
         if (this.discriminator) {
-            query.andWhere(this.discriminator);
+            query.andWhere(this.addDiscriminator(options));
         }
 
         if (options && options.transacting) {
@@ -173,6 +180,14 @@ export default class BookshelfMapping {
 
     public raw<TResult = any>(arg1, ...args): Knex.Raw<TResult> {
         return this.dbContext.knex.raw(arg1, ...args) as any;
+    }
+
+    public addDiscriminator(options: IEntityRepositoryOptions): object | ((q: Knex.QueryBuilder) => void) {
+        if (typeof this.discriminator === "function" && options?.discriminator) {
+            return this.discriminator.bind(null, options.discriminator);
+        } else {
+            return this.discriminator;
+        }
     }
 
 }
