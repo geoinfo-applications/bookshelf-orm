@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
   - added `discriminator` to `IEntityRepositoryOptions` which should allow limiting number of sequentially scanned 
     entries
+  - added return type to `DBMappingRegistry.getInstance()`
 
 ## [4.9.0] - 2021-11-10
 
