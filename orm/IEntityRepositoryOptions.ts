@@ -9,6 +9,7 @@ interface IEntityRepositoryOptions {
     withRelated?: Array<{ [prop: string]: () => void }>;
     transactional?: boolean;
     transacting?: knex.Transaction;
+    discriminator?(q: knex.QueryBuilder): void;
     debug?: boolean;
 }
 

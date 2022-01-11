@@ -22,14 +22,17 @@ export default class BookshelfRelations {
     }
 
     public getFetchOptions(options: IEntityRepositoryOptions = required("options")): IEntityRepositoryOptions {
-        const fetchProperties = this.fetchProperties;
-
+        const boundProperties = {
+            withRelated: this.withRelatedFetchOptions.map((property) => {
+                return Object.entries(property).reduce((acc, [key, value]) => ({ ...acc, [key]: value.bind(value, options) }), {});
+            })
+        };
         if (options) {
-            this.addOptionalFetchOptions(options, fetchProperties);
+            this.addOptionalFetchOptions(options, boundProperties);
         }
 
-        this.manageReadableSqlColumns(options, fetchProperties);
-        return fetchProperties;
+        this.manageReadableSqlColumns(options, boundProperties);
+        return boundProperties;
     }
 
     private addOptionalFetchOptions(options: IEntityRepositoryOptions, fetchProperties) {
@@ -161,10 +164,6 @@ export default class BookshelfRelations {
         return _.flatten(_.map(this.Mapping.relations, _.partial(extractName, "")));
     }
 
-    private get fetchProperties(): IEntityRepositoryOptions {
-        return { withRelated: this.withRelatedFetchOptions };
-    }
-
     private getWithRelatedFetchOptions(): Array<{ [prop: string]: () => void }> {
         return this.relationNamesDeep.map((relationName) => {
             const relationNamePath = relationName.split(".");
@@ -173,9 +172,9 @@ export default class BookshelfRelations {
             const mainRelationName = relationNamePath[0];
 
             const relatedQuery = Object.create(null);
-            relatedQuery[prefixedRelationName] = (query) => {
+            relatedQuery[prefixedRelationName] = (options, query) => {
                 if (mapping.discriminator && !this.skipDiscriminator(mapping, mainRelationName)) {
-                    query.where(mapping.discriminator);
+                    query.where(mapping.addDiscriminator(options));
                 }
                 const regularColumns = mapping.qualifiedRegularColumnNames;
                 const sqlColumns = this.getRawColumnSelectStatements(mapping.readableSqlColumns);
