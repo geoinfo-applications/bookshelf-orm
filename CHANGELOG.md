@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### BREAKING CHANGES
 
-  -
+  - Now the correct type (QueryBuilder) is used for the knex where condition callback parameter.
+    - e.g. `findWhere(q: (q: Knex.QueryInterface) => void ...` => `findWhere(q: (q: Knex.QueryBuilder) => void ...`
 
 ### Noteworthy
 

@@ -15,6 +15,7 @@ import Bookshelf = require("bookshelf");
 import IPaginationOptions from "./typedef/IPaginationOptions";
 import IPageableResult from "./typedef/IPageableResult";
 
+
 /**
  * Abstraction on top of BookshelfRepository, Bookshelf and Knex. Provides basic CRUD operations for a specific type.
  */
@@ -81,7 +82,7 @@ export default class EntityRepository<E extends object | IEntityType, ID = numbe
      * @param {Array<string>} [options.exclude] - Relation names to exclude, deep relations in dot notation. Specify wildcards using "*"
      * @returns {Promise<Array<Entity>>} - Returns Promise resolved with array of entities, or empty list if not found.
      */
-    public async findAllWhere(q: (q: Knex.QueryInterface) => void, options: IEntityRepositoryOptions = null): Promise<E[]> {
+    public async findAllWhere(q: (q: Knex.QueryBuilder) => void, options: IEntityRepositoryOptions = null): Promise<E[]> {
         const items = await this.repository.findWhere(q, null, options);
         return (items.length ? this.wrapper.wrap(items) : []) as E[];
     }
@@ -98,7 +99,7 @@ export default class EntityRepository<E extends object | IEntityType, ID = numbe
      * @param {Array<string>} [options.exclude] - Relation names to exclude, deep relations in dot notation. Specify wildcards using "*"
      * @returns {Promise<IPageableResult<Entity>>} - Returns a promise which contains entries as Array<Entity> and count as string
      */
-    public async paginate(q: ((q: Knex.QueryInterface) => void) | null, pagination: IPaginationOptions | null,
+    public async paginate(q: ((q: Knex.QueryBuilder) => void) | null, pagination: IPaginationOptions | null,
         options: IEntityRepositoryOptions = null): Promise<IPageableResult<E>> {
         const [items, count] = await Promise.all([
             this.repository.findWhere(q, pagination, options),
@@ -116,7 +117,7 @@ export default class EntityRepository<E extends object | IEntityType, ID = numbe
      * @param {Array<string>} [options.exclude] - Relation names to exclude, deep relations in dot notation. Specify wildcards using "*"
      * @returns {Promise<Entity|null>} - Returns Promise resolved with entity, or null if not found
      */
-    public async findWhere(q: (q: Knex.QueryInterface) => void, options: IEntityRepositoryOptions = null): Promise<E | null> {
+    public async findWhere(q: (q: Knex.QueryBuilder) => void, options: IEntityRepositoryOptions = null): Promise<E | null> {
         return this.repository.findWhere(q, null, options).then((items) => {
             if (items.length) {
                 return this.wrapper.wrap(items.pop() as any);
