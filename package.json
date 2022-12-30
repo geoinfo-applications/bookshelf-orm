@@ -60,7 +60,7 @@
     "ink-docstrap": "^1.3.2",
     "istanbul": "1.1.0-alpha.1",
     "load-grunt-tasks": "^5.1.0",
-    "mocha": "^6.2.3",
+    "mocha": "^10.2.0",
     "mocha-bamboo-reporter": "*",
     "mocha-multi": "*",
     "sinon": "^7.5.0",
